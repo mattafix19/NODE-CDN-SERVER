@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html ng-app="cdnInterface">
+
+<head>
+    <title>CDN Management</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- stylesheets -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.5/yeti/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="stylesheets/style2.css" rel="stylesheet" media="screen">
+    <!-- scripts -->
+    <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.min.js"></script>
+    <script src="javascripts/cdnInterface.js"></script>
+</head>
+
+<body ng-controller="mainController">
+    <div class="jumbotron">
+        <div class="row">
+            <div class="col-sm-offset-1">
+                <h1>CDN MANAGEMENT</h1>
+            </div>
+        </div>
+    </div>
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <li><a href="#">CDNi Interface</a></li>
+                    <li><a href="#">CDNi Interconnections</a></li>
+                    <li><a href="#">LOGS</a></li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    <li><a href="#">Logout</a></li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container-fluid -->
+    </nav>
+    <form class="form-horizontal">
+        <div class="form-group">
+            <label for="ipAddress" class="col-sm-1 control-label">IP address</label>
+            <div class="col-sm-2">
+                <input type="ipAddress" class="form-control" id="ipAddress" placeholder="IP address" ng-model="formData.ip">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="port" class="col-sm-1 control-label">Port</label>
+            <div class="col-sm-2">
+                <input type="port" class="form-control" id="port" placeholder="Port" ng-model="formData.port">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="login" class="col-sm-1 control-label">Login</label>
+            <div class="col-sm-2">
+                <input type="login" class="form-control" id="login" placeholder="Login" ng-model="formData.login">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="pass" class="col-sm-1 control-label">Password</label>
+            <div class="col-sm-2">
+                <input type="pass" class="form-control" id="pass" placeholder="Password" ng-model="formData.pass">
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-offset-1 col-sm-10">
+                <button type="submit" class="btn btn-default" ng-click="addCDN()">Add</button>
+            </div>
+        </div>
+    </form>
+    <table id="projekte" class="table">
+        <ul ng-repeat="cdn in cdnData">
+            <tr>
+                <td>
+                    <h3><input class="lead" type="checkbox"">{{ cdn.ipaddress }}</h3>          
+                </td>
+            </tr>
+        </ul>
+    </table>
+    <div class="cdn-list">
+        <ul ng-repeat="cdn in cdnData">
+            <li>
+                <h3><input class="lead" type="checkbox" ng-click="deleteUser(user.id)">{{ cdn.ipaddress }}</li></h3>
+                <hr>
+        </ul>
+    </div>
+</body>
+
+</html>
