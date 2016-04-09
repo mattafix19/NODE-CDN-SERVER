@@ -1,16 +1,36 @@
 var express = require('express');
+var session = require('express-session');
 var router = express.Router();
 var pg = require('pg');
 var path = require('path');
+
 var connectionString = process.env.DATABASE_URL || 'postgres://localhost:5432';
+
+router.use(session({
+  secret: 'secret_key'
+}));
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-    res.sendFile(path.join(__dirname, '../views', 'index.html'));
+
+    var user = req.session.login;
+    
+    if (user == undefined){
+        res.sendFile(path.join(__dirname, '../views', 'login.html'));
+    }
+    else{
+        res.sendFile(path.join(__dirname, '../views', 'cdnManagement.html'));    
+    }
 });
 
 router.get('/afterLogin', function(req, res, next) {
-    res.sendFile(path.join(__dirname, '../views', 'afterLogin.html'));
+    var user = req.session.login;
+    
+    if (user == undefined){
+        res.sendFile(path.join(__dirname, '../views', 'login.html'));
+    }
+    else
+        res.sendFile(path.join(__dirname, '../views', 'cdnManagement.html'));
 });
 
 router.get('/getCDNinterface', function(req, res) {
@@ -86,8 +106,17 @@ router.post('/addCDN', function(req, res) {
     });
 });
 
+router.get('/logoutUser', function(req, res, next) {
+    req.session.login = undefined;
+    res.send("Success");
+});
+    
+
 //login
-router.post('/api/v1/login', function(req, res) {
+router.post('/loginUser', function(req, res) {
+    
+     
+    req.session.login = req.body.login;
 
     var results = [];
     
@@ -116,11 +145,7 @@ router.post('/api/v1/login', function(req, res) {
         // After all data is returned, close connection and return results
         query.on('end', function() {
             done();
-            if (results == []){
-                return err;
-            }
-            else
-                return res.json(results);
+            return res.json(results);
         });
 
     });

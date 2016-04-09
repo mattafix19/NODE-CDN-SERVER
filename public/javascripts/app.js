@@ -1,61 +1,33 @@
-angular.module('nodeServer', [])
+var app = angular.module('Login', ['ngCookies']);
 
-    .controller('mainController', function($scope, $http ,$window) {
+app.controller('LoginController', ['$cookieStore','$scope', '$http', '$window',function($cookieStore,$scope, $http, $window){ 
 
-        $scope.formData = {};
-        $scope.userData = {};
+    $scope.formData = {};
+    $scope.userData = {};
+    $scope.error = false;
 
-        // LOGIN USER
-        $scope.loginUser = function(userID) {
-            $http.post('/api/v1/login', $scope.formData).success(function(data) {
-                    $scope.formData = {};
-                    $scope.userData = data;
-                    //console.log(data); 
-                    if (data == ""){
-                        console.log("ERROR");
-                        $scope.error = 'Incorrect login credentials !';
-                    }
-                    else{
-                        console.log(data);
-                        console.log(data.login);
-                        window.location = '/afterLogin';
-                    }
-                })
-                .error(function(error) {
-                    console.log('Error: ' + error);
-                });
-        }
-        
-        $http.get('/api/v1/users')
-            .success(function(data) {
-                $scope.userData = data;
-                console.log(data);
-            })
+    // LOGIN USER
+    $scope.loginUser = function(userID) {
+        $http.post('/loginUser', $scope.formData).success(function(data) {
+            //clear form
+            $scope.formData = {};
+            $scope.userData = data;
+            
+            //if returned data are empty login credentials does not exists 
+            if (data == "") {
+                $scope.error = true;
+            }
+            else {
+                //open after login html
+                $cookieStore.put('user', data);
+                window.location = '/afterLogin';
+            }
+        })
+            //catch error
             .error(function(error) {
                 console.log('Error: ' + error);
             });
-        // CREATE NEW USER
-        $scope.createUser = function(userID) {
-            $http.post('/api/v1/users', $scope.formData)
-                .success(function(data) {
-                    $scope.formData = {};
-                    $scope.userData = data;
-                    console.log(data);
-                })
-                .error(function(error) {
-                    console.log('Error: ' + error);
-                });
-        };
+    }
 
-        //DELETE USER
-        $scope.deleteUser = function(userID) {
-            $http.delete('/api/v1/users/' + userID)
-                .success(function(data) {
-                    $scope.userData = data;
-                    console.log(data);
-                })
-                .error(function(data) {
-                    console.log('Error: ' + data);
-                });
-        };
-    });
+}]);
+

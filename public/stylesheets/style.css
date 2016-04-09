@@ -14,11 +14,23 @@ ul {
 }
 
 .container {
-  max-width: 400px;
+  max-width: 500px;
   background-color: #eeeeee;
   border: 1px solid black;
 }
 
 .header {
   text-align: center;
+}
+
+.container2 {
+  background-color: #eeeeee;
+}
+
+.ng-invalid.ng-dirty{
+  border-color:red;
+}
+
+.ng-valid.ng-dirty{
+  border-color:green;
 }
