@@ -6,20 +6,22 @@
 
 var app = require('../app');
 var debug = require('debug')('node-postgres:server');
-var http = require('http');
+var http = require('http').Server(app);
 
+var client = require('socket.io-client');
 /**
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || '3000');
+var port = normalizePort(process.env.PORT || '8080');
 app.set('port', port);
+
 
 /**
  * Create HTTP server.
  */
 
-var server = http.createServer(app);
+var server = http;
 
 /**
  * Listen on provided port, on all network interfaces.
@@ -87,4 +89,49 @@ function onListening() {
     ? 'pipe ' + addr
     : 'port ' + addr.port;
   debug('Listening on ' + bind);
+}
+
+
+
+
+//-----------------------------
+
+exports.connection = function () {
+
+    var io = require("socket.io")(http);
+
+    var socket1 = client.connect('http://localhost:8081', {reconnect: true});
+    var socket2 = client.connect('http://localhost:8082', {reconnect: true});
+
+    io.on('connection', function (socket) {
+        console.log('Client connected.');
+
+        socket.on('message_from_browser', function (message) {
+            console.log("Message from browser broadcasted: " + message.text);
+            var updated_message = {
+                text: message.text,
+                port: PORT
+            };
+
+            socket1.emit('server_message', updated_message);
+            //socket2.emit('server_message', updated_message);
+
+        });
+
+        socket.on('disconnect', function () {
+            console.log('Client disconnected.');
+        });
+    });
+
+    io.on('connect', function (socket1) {
+        socket1.on('server_message', function (message) {
+            console.log('RECEIVED MESSAGE FROM ANOTHER SERVER ON PORT ' + message.port + ": " + message.text);
+        });
+    });
+
+    io.on('connect', function (socket2) {
+        socket1.on('server_message', function (message) {
+            console.log('RECEIVED MESSAGE FROM ANOTHER SERVER ON PORT ' + message.port + ": " + message.text);
+        });
+    });
 }
