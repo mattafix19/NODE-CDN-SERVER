@@ -76,8 +76,10 @@ router.get('/getFootprints', function(req, res, next) {
                 footprints.push(result.rows[i]);
             }
             loadedFootprints = true;
-            return res.json(footprints);
             cnn.done();
+            var temp_field = footprints;
+            footprints = [];
+            return res.json(temp_field);
         })
         .catch(function (error) {
             console.log(error);
@@ -178,9 +180,13 @@ router.get('/getData', function(req, res, next) {
             for (var i=0; i < result.rows.length ; i++){
                 interfaces.push(result.rows[i]);
             }
-            return res.json(interfaces);
-            loadedInterfaces = true;
+            
+            var temp_field = [];
+            temp_field = interfaces;
+            interfaces = [];
             cnn.done();
+            return res.json(temp_field);
+            
         })
         .catch(function (error) {
             console.log(error);
