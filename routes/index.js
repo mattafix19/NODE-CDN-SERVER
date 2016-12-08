@@ -378,7 +378,86 @@ router.get ('/getContentOrigins', function(req, res){
 
     username = "admin",
     password = "CdnLab_123",
-    url = "https://cdsm.cdn.ab.sk:8443/servlet/com.cisco.unicorn.ui.ListApiServlet?action=getDeliveryServices&param=all",
+    url = "https://cdsm.cdn.ab.sk:8443/servlet/com.cisco.unicorn.ui.ListApiServlet?action=getContentOrigins&param=all",
+    auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
+
+    request(
+        {
+            url : url,
+            headers : {
+            "Authorization" : auth
+        }
+    },
+    function (error, response, body) {
+        if (error != null || body != null){
+            //console.log(body);
+        }
+        if (response != null) {
+            var parseString = require('xml2js').parseString;
+            parseString(response.body, function (err, result) {
+                for (var i = 0, len = result.listing.record.length; i < len; i++) {
+                    var obj = result.listing.record[i];
+                    console.log(obj.$.Fqdn);
+                }
+                console.log(response);
+                return res.json(result);
+            });
+        }
+    }
+);   
+});
+
+//CREATE CONTENT ORIGIN
+router.post('/createContentOrigin', function(req, res) {
+
+    var request = require('request');
+    var request = request.defaults({
+        strictSSL: false,
+        rejectUnauthorized: false
+    });
+
+    username = "admin",
+    password = "CdnLab_123",
+    url = "https://cdsm.cdn.ab.sk:8443/servlet/com.cisco.unicorn.ui.ChannelApiServlet?action=createContentOrigin&name=" + req.body.origName + "&origin=" + req.body.origServer +"&fqdn=" + req.body.origFqdnName,
+    console.log(url);
+    auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
+
+    request(
+        {
+            url : url,
+            headers : {
+            "Authorization" : auth
+        }
+    },
+    function (error, response, body) {
+        if (error != null || body != null){
+            //console.log(body);
+        }
+        if (response != null) {
+            return res.json(response);
+        }
+    }
+);   
+});
+
+//DELETE CONTENT ORIGIN
+router.delete('/deleteContentOrigin/:originID', function(req, res) {
+
+    var results = [];
+
+    // Grab data from the URL parameters
+    var id = req.params.originID;
+
+    var request = require('request');
+    var request = request.defaults({
+        strictSSL: false,
+        rejectUnauthorized: false
+    });
+
+    username = "admin",
+    password = "CdnLab_123",
+    url = "https://cdsm.cdn.ab.sk:8443/servlet/com.cisco.unicorn.ui.ChannelApiServlet?action=deleteContentOrigins&contentOrigin=" + id,
+    console.log(url);
     auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
 
     request(
@@ -393,20 +472,22 @@ router.get ('/getContentOrigins', function(req, res){
             console.log(body);
         }
         if (response != null) {
-            var parseString = require('xml2js').parseString;
-            parseString(response.body, function (err, result) {
-                for (var i = 0, len = result.listing.record.length; i < len; i++) {
-                    var obj = result.listing.record[i];
-                    console.log(obj.$.Fqdn);
-                }
-                return res.json(result);
-            });
+            return res.json(response);
         }
     }
 );   
+
 });
 
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //isert user
 router.post('/api/v1/users', function(req, res) {
 

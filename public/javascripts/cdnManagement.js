@@ -8,6 +8,8 @@ app.controller('TabController', ['$cookieStore', '$scope', '$http', '$window', f
     $scope.formFootprintsData = {};
     $scope.footprintData = {};
     $scope.contentOriginsData = {};
+
+    $scope.formCreateContent = {};
     
     var loggedUser = $cookieStore.get('user');
     
@@ -142,6 +144,31 @@ app.controller('TabController', ['$cookieStore', '$scope', '$http', '$window', f
 //---------------------------------------------------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------------------------------------------
 
+    $scope.createContentOrigin = function() {
+        $http.post('/createContentOrigin', $scope.formCreateContent)
+            .success(function(data) {
+                $scope.formData = {};
+                $scope.cdnData = data;
+                $window.location.reload();
+            })
+            .error(function(error) {
+                console.log('Error: ' + error);
+            });
+    };
+
+    $scope.deleteContentOrigin = function(originID) {
+        waitingDialog.show();
+        $http.delete('/deleteContentOrigin/'+ originID)
+            .success(function(data) {
+                $scope.formData = {};
+                $scope.cdnData = data;
+                $window.location.reload();
+            })
+            .error(function(error) {
+                console.log('Error: ' + error);
+            });
+    };
+
     //GET ALL CONTENT ORIGINS
 
     $http.get('/getContentOrigins')
@@ -153,11 +180,13 @@ app.controller('TabController', ['$cookieStore', '$scope', '$http', '$window', f
                 console.log(obj.$.Name);
                 console.log(obj.$.Fqdn);
                 console.log(obj.$.OriginFqdn);
+                console.log(obj.$.Id);
                 
                 var contentOrigin = {
                     name: obj.$.Name,
                     originFqdn: obj.$.OriginFqdn,
-                    rfqdn: obj.$.Fqdn
+                    rfqdn: obj.$.Fqdn,
+                    id: obj.$.Id
                 }
                 arrContentOrigins.push(contentOrigin)
                 

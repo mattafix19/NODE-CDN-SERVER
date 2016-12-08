@@ -13,6 +13,8 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.min.js"></script>
     <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.0/angular-cookies.js"></script>
+    
+    <script src="javascripts/loading.js"></script>
     <script src="javascripts/cdnManagement.js"></script>
 </head>
 
@@ -44,11 +46,16 @@
                     </li>
 
 
-                    <li ng-class="{ active:tab.isSet(4) }">
-                        <a href ng-click="tab.setTab(4)">CDNi Interconnections</a>
+                    
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">CDSM Operations <span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="#" ng-class="{ active:tab.isSet(2) }" ng-click="tab.setTab(4)">Create Content Origin</a></li>
+                            <li><a href="#" ng-class="{ active:tab.isSet(1) }" ng-click="tab.setTab(5)">Modify Content Origin</a></li>
+                        </ul>
                     </li>
-                    <li ng-class="{ active:tab.isSet(5) }">
-                        <a href ng-click="tab.setTab(5)">LOGS</a>
+                    <li ng-class="{ active:tab.isSet(6) }">
+                        <a href ng-click="tab.setTab(6)">LOGS</a>
                     </li>
                 </ul>
 
@@ -237,34 +244,79 @@
                     <td>{{origin.name}}</td>
                     <td>{{origin.originFqdn}}</td>
                     <td>{{origin.rfqdn}}</td>
-                   
                 </tr>
             </tr>
         </table>
     </div>
 
-    <!--  Spec Tab's Content  -->
-    <div ng-show="tab.isSet(4)">
+    <!--  Create content Origin Tab  -->
+    <div ng-show="tab.isSet(4)" ng-click="">
         <div class='TabHeading'>
-            <h3>CDN Interconnetcions</h3>
+            <h3>Create Content Origin</h3>
+            
+            <table class="table table-bordered">
+                <h4>Actual Content Origins</h4>
+                <br>
+                <tr>
+                    <td>Name</td>
+                    <td>Origin FQDN</td>
+                    <td>FQDN</td>
+                    <td>Delete Content Origin</td>
+
+                    <tr ng-repeat="origin in contentOriginsData">
+                        <td>{{origin.name}}</td>
+                        <td>{{origin.originFqdn}}</td>
+                        <td>{{origin.rfqdn}}</td>
+                        <td><button type="button" class="btn btn-primary" ng-click="deleteContentOrigin(origin.id)">Delete</button></td>
+                    </tr>
+                </tr>
+            </table>
+                
+            <h4>Create Content Origin</h4>
+            <form class="form-horizontal">
+            <div class="form-group">
+                <label for="endpoint" class="col-sm-1 control-label">Content Origin name</label>
+                <div class="col-sm-3">
+                    <input type="text" class="form-control" id="origName" placeholder="Origin Name" ng-model="formCreateContent.origName">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="subnetNum" class="col-sm-1 control-label">Origin Server</label>
+                <div class="col-sm-3">
+                    <input class="form-control" id="origServer" placeholder="Server or IP address" ng-model="formCreateContent.origServer">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="maskNum" class="col-sm-1 control-label">FQDN Name</label>
+                <div class="col-sm-3">
+                    <input class="form-control" id="origFqdnName" placeholder="FQDN Name" ng-model="formCreateContent.origFqdnName">
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-offset-1 col-sm-10">
+                    <button type="neco" class="btn btn-default" ng-click="createContentOrigin()">Create</button>
+                </div>
+            </div>
+
+
+        </form>
+        </div>
+        <br>
+    </div>
+    <!--  Spec Tab's Content  -->
+    <div ng-show="tab.isSet(5)">
+        <div class='TabHeading'>
+            <h3>Modify Content Origin</h3>
         </div>
         <br>
     </div>
 
     <!--  Review Tab's Content  -->
-    <div ng-show="tab.isSet(5)">
+    <div ng-show="tab.isSet(6)">
         <div class='TabHeading'>
             <h3>CDN Logs</h3>
         </div>
         <br>
     </div>
-    <div class="cdn-list">
-        <ul ng-repeat="cdn in cdnData">
-            <li>
-
-            </li>
-        </ul>
-    </div>
 </body>
-
 </html>
