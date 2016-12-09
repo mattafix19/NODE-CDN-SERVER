@@ -1,0 +1,465 @@
+--
+-- PostgreSQL database dump
+--
+
+-- Dumped from database version 9.5.2
+-- Dumped by pg_dump version 9.5.2
+
+-- Started on 2016-12-03 13:16:24 CET
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SET check_function_bodies = false;
+SET client_min_messages = warning;
+SET row_security = off;
+
+--
+-- TOC entry 1 (class 3079 OID 12623)
+-- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: 
+--
+
+CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
+
+
+--
+-- TOC entry 2419 (class 0 OID 0)
+-- Dependencies: 1
+-- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: 
+--
+
+COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
+
+
+SET search_path = public, pg_catalog;
+
+SET default_tablespace = '';
+
+SET default_with_oids = false;
+
+--
+-- TOC entry 184 (class 1259 OID 16464)
+-- Name: cdn_interface; Type: TABLE; Schema: public; Owner: Martin
+--
+
+CREATE TABLE cdn_interface (
+    id integer NOT NULL,
+    name character varying(20),
+    url character varying(100),
+    url_translator character varying(100),
+    url_cdn character varying(100),
+    port_cdn integer,
+    login character varying(20),
+    pass character varying(20),
+    priority integer,
+    endpoint_type_id integer,
+    endpoint_gateway_type_id integer
+);
+
+
+ALTER TABLE cdn_interface OWNER TO "Martin";
+
+--
+-- TOC entry 183 (class 1259 OID 16462)
+-- Name: cdninterface_id_seq; Type: SEQUENCE; Schema: public; Owner: Martin
+--
+
+CREATE SEQUENCE cdninterface_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE cdninterface_id_seq OWNER TO "Martin";
+
+--
+-- TOC entry 2420 (class 0 OID 0)
+-- Dependencies: 183
+-- Name: cdninterface_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: Martin
+--
+
+ALTER SEQUENCE cdninterface_id_seq OWNED BY cdn_interface.id;
+
+
+--
+-- TOC entry 190 (class 1259 OID 16531)
+-- Name: endpoint_gateway_type; Type: TABLE; Schema: public; Owner: Martin
+--
+
+CREATE TABLE endpoint_gateway_type (
+    id_gateway integer NOT NULL,
+    endpoint_gateway_type character varying(20)
+);
+
+
+ALTER TABLE endpoint_gateway_type OWNER TO "Martin";
+
+--
+-- TOC entry 189 (class 1259 OID 16529)
+-- Name: endpoint_gateway_type_id_seq; Type: SEQUENCE; Schema: public; Owner: Martin
+--
+
+CREATE SEQUENCE endpoint_gateway_type_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE endpoint_gateway_type_id_seq OWNER TO "Martin";
+
+--
+-- TOC entry 2421 (class 0 OID 0)
+-- Dependencies: 189
+-- Name: endpoint_gateway_type_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: Martin
+--
+
+ALTER SEQUENCE endpoint_gateway_type_id_seq OWNED BY endpoint_gateway_type.id_gateway;
+
+
+--
+-- TOC entry 188 (class 1259 OID 16523)
+-- Name: endpoint_type; Type: TABLE; Schema: public; Owner: Martin
+--
+
+CREATE TABLE endpoint_type (
+    id_type integer NOT NULL,
+    endpoint_type character varying(6)
+);
+
+
+ALTER TABLE endpoint_type OWNER TO "Martin";
+
+--
+-- TOC entry 187 (class 1259 OID 16521)
+-- Name: endpoint_type_id_seq; Type: SEQUENCE; Schema: public; Owner: Martin
+--
+
+CREATE SEQUENCE endpoint_type_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE endpoint_type_id_seq OWNER TO "Martin";
+
+--
+-- TOC entry 2422 (class 0 OID 0)
+-- Dependencies: 187
+-- Name: endpoint_type_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: Martin
+--
+
+ALTER SEQUENCE endpoint_type_id_seq OWNED BY endpoint_type.id_type;
+
+
+--
+-- TOC entry 186 (class 1259 OID 16515)
+-- Name: footprint; Type: TABLE; Schema: public; Owner: Martin
+--
+
+CREATE TABLE footprint (
+    id integer NOT NULL,
+    endpoint_id integer,
+    subnet_num integer,
+    mask_num integer,
+    subnet_ip character varying(15),
+    prefix integer
+);
+
+
+ALTER TABLE footprint OWNER TO "Martin";
+
+--
+-- TOC entry 185 (class 1259 OID 16513)
+-- Name: footprint_id_seq; Type: SEQUENCE; Schema: public; Owner: Martin
+--
+
+CREATE SEQUENCE footprint_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE footprint_id_seq OWNER TO "Martin";
+
+--
+-- TOC entry 2423 (class 0 OID 0)
+-- Dependencies: 185
+-- Name: footprint_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: Martin
+--
+
+ALTER SEQUENCE footprint_id_seq OWNED BY footprint.id;
+
+
+--
+-- TOC entry 182 (class 1259 OID 16452)
+-- Name: users; Type: TABLE; Schema: public; Owner: Martin
+--
+
+CREATE TABLE users (
+    id integer NOT NULL,
+    login character varying(100) NOT NULL,
+    pass character varying(100) NOT NULL,
+    admin boolean NOT NULL
+);
+
+
+ALTER TABLE users OWNER TO "Martin";
+
+--
+-- TOC entry 181 (class 1259 OID 16450)
+-- Name: users_id_seq; Type: SEQUENCE; Schema: public; Owner: Martin
+--
+
+CREATE SEQUENCE users_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE users_id_seq OWNER TO "Martin";
+
+--
+-- TOC entry 2424 (class 0 OID 0)
+-- Dependencies: 181
+-- Name: users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: Martin
+--
+
+ALTER SEQUENCE users_id_seq OWNED BY users.id;
+
+
+--
+-- TOC entry 2272 (class 2604 OID 16467)
+-- Name: id; Type: DEFAULT; Schema: public; Owner: Martin
+--
+
+ALTER TABLE ONLY cdn_interface ALTER COLUMN id SET DEFAULT nextval('cdninterface_id_seq'::regclass);
+
+
+--
+-- TOC entry 2275 (class 2604 OID 16534)
+-- Name: id_gateway; Type: DEFAULT; Schema: public; Owner: Martin
+--
+
+ALTER TABLE ONLY endpoint_gateway_type ALTER COLUMN id_gateway SET DEFAULT nextval('endpoint_gateway_type_id_seq'::regclass);
+
+
+--
+-- TOC entry 2274 (class 2604 OID 16526)
+-- Name: id_type; Type: DEFAULT; Schema: public; Owner: Martin
+--
+
+ALTER TABLE ONLY endpoint_type ALTER COLUMN id_type SET DEFAULT nextval('endpoint_type_id_seq'::regclass);
+
+
+--
+-- TOC entry 2273 (class 2604 OID 16518)
+-- Name: id; Type: DEFAULT; Schema: public; Owner: Martin
+--
+
+ALTER TABLE ONLY footprint ALTER COLUMN id SET DEFAULT nextval('footprint_id_seq'::regclass);
+
+
+--
+-- TOC entry 2271 (class 2604 OID 16455)
+-- Name: id; Type: DEFAULT; Schema: public; Owner: Martin
+--
+
+ALTER TABLE ONLY users ALTER COLUMN id SET DEFAULT nextval('users_id_seq'::regclass);
+
+
+--
+-- TOC entry 2405 (class 0 OID 16464)
+-- Dependencies: 184
+-- Data for Name: cdn_interface; Type: TABLE DATA; Schema: public; Owner: Martin
+--
+
+COPY cdn_interface (id, name, url, url_translator, url_cdn, port_cdn, login, pass, priority, endpoint_type_id, endpoint_gateway_type_id) FROM stdin;
+2	CISCO	http://147.175.15.41/CDNi2	.	https://cdsm.cdn.ab.sk	8443	admin	admin	1	1	1
+\.
+
+
+--
+-- TOC entry 2425 (class 0 OID 0)
+-- Dependencies: 183
+-- Name: cdninterface_id_seq; Type: SEQUENCE SET; Schema: public; Owner: Martin
+--
+
+SELECT pg_catalog.setval('cdninterface_id_seq', 3, true);
+
+
+--
+-- TOC entry 2411 (class 0 OID 16531)
+-- Dependencies: 190
+-- Data for Name: endpoint_gateway_type; Type: TABLE DATA; Schema: public; Owner: Martin
+--
+
+COPY endpoint_gateway_type (id_gateway, endpoint_gateway_type) FROM stdin;
+2	CISCO CDS
+1	DUMMY
+\.
+
+
+--
+-- TOC entry 2426 (class 0 OID 0)
+-- Dependencies: 189
+-- Name: endpoint_gateway_type_id_seq; Type: SEQUENCE SET; Schema: public; Owner: Martin
+--
+
+SELECT pg_catalog.setval('endpoint_gateway_type_id_seq', 2, true);
+
+
+--
+-- TOC entry 2409 (class 0 OID 16523)
+-- Dependencies: 188
+-- Data for Name: endpoint_type; Type: TABLE DATA; Schema: public; Owner: Martin
+--
+
+COPY endpoint_type (id_type, endpoint_type) FROM stdin;
+1	local
+2	remote
+\.
+
+
+--
+-- TOC entry 2427 (class 0 OID 0)
+-- Dependencies: 187
+-- Name: endpoint_type_id_seq; Type: SEQUENCE SET; Schema: public; Owner: Martin
+--
+
+SELECT pg_catalog.setval('endpoint_type_id_seq', 2, true);
+
+
+--
+-- TOC entry 2407 (class 0 OID 16515)
+-- Dependencies: 186
+-- Data for Name: footprint; Type: TABLE DATA; Schema: public; Owner: Martin
+--
+
+COPY footprint (id, endpoint_id, subnet_num, mask_num, subnet_ip, prefix) FROM stdin;
+1	14	12412	12412	sdgsadg	214
+2	1	4	12412	146.42.24.525	24
+\.
+
+
+--
+-- TOC entry 2428 (class 0 OID 0)
+-- Dependencies: 185
+-- Name: footprint_id_seq; Type: SEQUENCE SET; Schema: public; Owner: Martin
+--
+
+SELECT pg_catalog.setval('footprint_id_seq', 2, true);
+
+
+--
+-- TOC entry 2403 (class 0 OID 16452)
+-- Dependencies: 182
+-- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: Martin
+--
+
+COPY users (id, login, pass, admin) FROM stdin;
+2	admin	admin	t
+3	user	user	f
+\.
+
+
+--
+-- TOC entry 2429 (class 0 OID 0)
+-- Dependencies: 181
+-- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: Martin
+--
+
+SELECT pg_catalog.setval('users_id_seq', 3, true);
+
+
+--
+-- TOC entry 2279 (class 2606 OID 16469)
+-- Name: cdninterface_pkey; Type: CONSTRAINT; Schema: public; Owner: Martin
+--
+
+ALTER TABLE ONLY cdn_interface
+    ADD CONSTRAINT cdninterface_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 2285 (class 2606 OID 16536)
+-- Name: endpoint_gateway_type_pkey; Type: CONSTRAINT; Schema: public; Owner: Martin
+--
+
+ALTER TABLE ONLY endpoint_gateway_type
+    ADD CONSTRAINT endpoint_gateway_type_pkey PRIMARY KEY (id_gateway);
+
+
+--
+-- TOC entry 2283 (class 2606 OID 16528)
+-- Name: endpoint_type_pkey; Type: CONSTRAINT; Schema: public; Owner: Martin
+--
+
+ALTER TABLE ONLY endpoint_type
+    ADD CONSTRAINT endpoint_type_pkey PRIMARY KEY (id_type);
+
+
+--
+-- TOC entry 2281 (class 2606 OID 16520)
+-- Name: footprint_pkey; Type: CONSTRAINT; Schema: public; Owner: Martin
+--
+
+ALTER TABLE ONLY footprint
+    ADD CONSTRAINT footprint_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 2277 (class 2606 OID 16457)
+-- Name: users_pkey; Type: CONSTRAINT; Schema: public; Owner: Martin
+--
+
+ALTER TABLE ONLY users
+    ADD CONSTRAINT users_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 2286 (class 2606 OID 16538)
+-- Name: cdn_interface_endpoint_gateway_type_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: Martin
+--
+
+ALTER TABLE ONLY cdn_interface
+    ADD CONSTRAINT cdn_interface_endpoint_gateway_type_id_fkey FOREIGN KEY (endpoint_gateway_type_id) REFERENCES endpoint_gateway_type(id_gateway);
+
+
+--
+-- TOC entry 2287 (class 2606 OID 16543)
+-- Name: cdn_interface_endpoint_type_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: Martin
+--
+
+ALTER TABLE ONLY cdn_interface
+    ADD CONSTRAINT cdn_interface_endpoint_type_id_fkey FOREIGN KEY (endpoint_type_id) REFERENCES endpoint_type(id_type);
+
+
+--
+-- TOC entry 2418 (class 0 OID 0)
+-- Dependencies: 6
+-- Name: public; Type: ACL; Schema: -; Owner: postgres
+--
+
+REVOKE ALL ON SCHEMA public FROM PUBLIC;
+REVOKE ALL ON SCHEMA public FROM postgres;
+GRANT ALL ON SCHEMA public TO postgres;
+GRANT ALL ON SCHEMA public TO PUBLIC;
+
+
+-- Completed on 2016-12-03 13:16:24 CET
+
+--
+-- PostgreSQL database dump complete
+--
+
