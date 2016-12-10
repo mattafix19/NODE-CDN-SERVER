@@ -1,6 +1,6 @@
 var app = angular.module('cdnManagement', ['ngCookies']);
 
-app.controller('TabController', ['$cookieStore', '$scope', '$http', '$window', function($cookieStore, $scope, $http, $window) {
+app.controller('TabController', ['$cookieStore', '$scope', '$http', '$window', function ($cookieStore, $scope, $http, $window) {
 
     $scope.formData = {};
     $scope.cdnData = {};
@@ -8,58 +8,72 @@ app.controller('TabController', ['$cookieStore', '$scope', '$http', '$window', f
     $scope.formFootprintsData = {};
     $scope.footprintData = {};
     $scope.contentOriginsData = {};
+    $scope.contentOriginsDataBackup = {};
 
     $scope.formCreateContent = {};
-    
+
+
+
     var loggedUser = $cookieStore.get('user');
-    
+
     $scope.user = loggedUser[0].login;
-   
+
     this.tab = 2;
-    this.isSet = function(checkTab) {
+    this.isSet = function (checkTab) {
         return this.tab === checkTab;
     };
-    this.setTab = function(setTab) {
+    this.setTab = function (setTab) {
         this.tab = setTab;
     };
 
     var callbackCounter = 0;
 
-//---------------------------------------------------------------------------------------------------------------------------------------------------
-//---------------------------------------------------------------------------------------------------------------------------------------------------
-//CDN INTERFACE FUNCTIONS
-//---------------------------------------------------------------------------------------------------------------------------------------------------
-//---------------------------------------------------------------------------------------------------------------------------------------------------
+    $scope.logout = function () {
+        $http.get('/logoutUser')
+            .success(function (data) {
+                console.log(data);
+                window.location = '/'
+            })
+            .error(function (error) {
+                console.log('Error: ' + error);
+            });
+    }
 
-    $scope.addCDN = function() {
+    //---------------------------------------------------------------------------------------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------------------------------------------------------------------
+    //CDN INTERFACE FUNCTIONS
+    //---------------------------------------------------------------------------------------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------------------------------------------------------------------
+
+    $scope.addCDN = function () {
         $http.post('/addCDN', $scope.formData)
-            .success(function(data) {
+            .success(function (data) {
                 $scope.formData = {};
                 $scope.cdnData = data;
                 console.log(data);
             })
-            .error(function(error) {
+            .error(function (error) {
                 console.log('Error: ' + error);
             });
     };
 
     function connectCDN() {
         $http.get('/connectCDN')
-            .success(function(data) {
+            .success(function (data) {
                 //$scope.cdnData = data;
                 console.log(data);
             })
-            .error(function(error) {
+            .error(function (error) {
                 console.log('Error: ' + error);
             });
     }
-    
+
     //GET ALL CDN
     $http.get('/getData')
-        .success(function(data) {
+        .success(function (data) {
             $scope.cdnData = data;
             callbackCounter++;
-            if (callbackCounter == 2){
+            if (callbackCounter == 2) {
                 connectCDN();
                 callbackCounter = 0;
             }
@@ -73,29 +87,29 @@ app.controller('TabController', ['$cookieStore', '$scope', '$http', '$window', f
             $scope.formData.priority = data[0].priority;
             $scope.formData.endpoint_gateway_type = data[0].endpoint_gateway_type;
             $scope.formData.endpoint_type = data[0].endpoint_type;*/
-            
+
             console.log(data);
         })
-        .error(function(error) {
+        .error(function (error) {
             console.log('Error: ' + error);
         });
-        
+
     //DELETE CDN
-    $scope.deleteCDNinterface = function(cdnID) {
+    $scope.deleteCDNinterface = function (cdnID) {
         $http.delete('/deleteCDNinterface/' + cdnID)
-            .success(function(data) {
+            .success(function (data) {
                 $scope.cdnData = data;
                 console.log(data);
             })
-            .error(function(data) {
+            .error(function (data) {
                 console.log('Error: ' + data);
             });
     };
-//---------------------------------------------------------------------------------------------------------------------------------------------------
-//---------------------------------------------------------------------------------------------------------------------------------------------------
-//FOOTPRINT FUNCTIONS
-//---------------------------------------------------------------------------------------------------------------------------------------------------
-//---------------------------------------------------------------------------------------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------------------------------------------------------------------
+    //FOOTPRINT FUNCTIONS
+    //---------------------------------------------------------------------------------------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------------------------------------------------------------------
 
     //GET ALL FOOTPRINTS
 
@@ -103,7 +117,7 @@ app.controller('TabController', ['$cookieStore', '$scope', '$http', '$window', f
         .success(function (data) {
             $scope.footprintData = data;
             callbackCounter++;
-            if (callbackCounter == 2){
+            if (callbackCounter == 2) {
                 connectCDN();
                 callbackCounter = 0;
             }
@@ -114,57 +128,87 @@ app.controller('TabController', ['$cookieStore', '$scope', '$http', '$window', f
         });
 
     //CREATE NEW FOOTPRINT
-    $scope.addFootprint = function() {
+    $scope.addFootprint = function () {
         $http.post('/addFootprints', $scope.formFootprintsData)
-            .success(function(data) {
+            .success(function (data) {
                 $scope.formFootprintsData = {};
                 $scope.footprintData = data;
                 console.log(data);
             })
-            .error(function(error) {
+            .error(function (error) {
                 console.log('Error: ' + error);
             });
     };
-        
-    $scope.logout = function() {
-        $http.get('/logoutUser')
-            .success(function(data) {
-                console.log(data);
-                window.location = '/'
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------------------------------------------------------------------
+    //DELIVERY SERVICES EDITATION
+    //---------------------------------------------------------------------------------------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------------------------------------------------------------------
+    //CONTENT ORIGINS EDITATION
+    //---------------------------------------------------------------------------------------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+    //CREATE CONTENT ORIGIN
+    $scope.createContentOrigin = function () {
+        waitingDialog.show();
+        $http.post('/createContentOrigin', $scope.formCreateContent)
+            .success(function (data) {
+                $scope.formData = {};
+                $scope.cdnData = data;
+                $window.location.reload();
             })
-            .error(function(error) {
+            .error(function (error) {
                 console.log('Error: ' + error);
             });
+    };
+
+    $scope.editingData = {};
+
+    for (var i = 0, length = $scope.contentOriginsData.length; i < length; i++) {
+        $scope.editingData[$scope.contentOriginsData[i].id] = false;
     }
 
-          
-//---------------------------------------------------------------------------------------------------------------------------------------------------
-//---------------------------------------------------------------------------------------------------------------------------------------------------
-//OTHER FUNCTIONS NOW NOT USED
-//---------------------------------------------------------------------------------------------------------------------------------------------------
-//---------------------------------------------------------------------------------------------------------------------------------------------------
+    $scope.modify = function (tableData) {
+        $scope.editingData[tableData.id] = true;
+    };
 
-    $scope.createContentOrigin = function() {
-        $http.post('/createContentOrigin', $scope.formCreateContent)
-            .success(function(data) {
+    //UPDATE CONTENT ORIGIN
+    $scope.updateContentOrigin = function (tableData) {
+        $scope.editingData[tableData.id] = false;
+        waitingDialog.show();
+        $http.post('/updateContentOrigin/' + tableData.id, tableData)
+            .success(function (data) {
                 $scope.formData = {};
                 $scope.cdnData = data;
                 $window.location.reload();
             })
-            .error(function(error) {
+            .error(function (error) {
                 console.log('Error: ' + error);
             });
     };
 
-    $scope.deleteContentOrigin = function(originID) {
+    $scope.cancel = function (tableData) {
+        $scope.editingData[tableData.id] = false
+    }
+
+    //DELETE CONTENT ORIGIN
+    $scope.deleteContentOrigin = function (originID) {
         waitingDialog.show();
-        $http.delete('/deleteContentOrigin/'+ originID)
-            .success(function(data) {
+        $http.delete('/deleteContentOrigin/' + originID)
+            .success(function (data) {
                 $scope.formData = {};
                 $scope.cdnData = data;
                 $window.location.reload();
             })
-            .error(function(error) {
+            .error(function (error) {
                 console.log('Error: ' + error);
             });
     };
@@ -173,15 +217,15 @@ app.controller('TabController', ['$cookieStore', '$scope', '$http', '$window', f
 
     $http.get('/getContentOrigins')
         .success(function (data) {
-            var arrContentOrigins = []; 
-            
+            var arrContentOrigins = [];
+
             for (var i = 0, len = data.listing.record.length; i < len; i++) {
                 var obj = data.listing.record[i];
                 console.log(obj.$.Name);
                 console.log(obj.$.Fqdn);
                 console.log(obj.$.OriginFqdn);
                 console.log(obj.$.Id);
-                
+
                 var contentOrigin = {
                     name: obj.$.Name,
                     originFqdn: obj.$.OriginFqdn,
@@ -189,15 +233,11 @@ app.controller('TabController', ['$cookieStore', '$scope', '$http', '$window', f
                     id: obj.$.Id
                 }
                 arrContentOrigins.push(contentOrigin)
-                
+
             }
+            $scope.contentOriginsDataBackup = arrContentOrigins;
             $scope.contentOriginsData = arrContentOrigins;
-            callbackCounter++;
-            if (callbackCounter == 2){
-                connectCDN();
-                callbackCounter = 0;
-            }
-            console.log(data);
+            arrContentOrigins = [];
         })
         .error(function (error) {
             console.log('Error: ' + error);

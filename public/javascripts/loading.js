@@ -32,7 +32,7 @@ var waitingDialog = waitingDialog || (function ($) {
 				options = {};
 			}
 			if (typeof message === 'undefined') {
-				message = 'Loading';
+				message = 'Applying changes';
 			}
 			var settings = $.extend({
 				dialogSize: 'm',

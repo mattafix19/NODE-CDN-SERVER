@@ -367,6 +367,7 @@ router.post('/loginUser', function(req, res) {
 //---------------------------------------------------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------------------------------------------
 
+//GET CONTENT ORIGINS
 router.get ('/getContentOrigins', function(req, res){
 
     
@@ -438,6 +439,45 @@ router.post('/createContentOrigin', function(req, res) {
         }
     }
 );   
+});
+
+//UPDATE CONTENT ORIGIN
+router.post('/updateContentOrigin/:originID', function(req, res) {
+
+    var results = [];
+
+    // Grab data from the URL parameters
+    var id = req.params.originID;
+
+    var request = require('request');
+    var request = request.defaults({
+        strictSSL: false,
+        rejectUnauthorized: false
+    });
+
+    username = "admin",
+    password = "CdnLab_123",
+    url = "https://cdsm.cdn.ab.sk:8443/servlet/com.cisco.unicorn.ui.ChannelApiServlet?action=modifyContentOrigin&contentOrigin=" + id + "&name=" + req.body.name + "&origin=" + req.body.originFqdn + "&fqdn=" + req.body.rfqdn,
+    console.log(url);
+    auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
+
+    request(
+        {
+            url : url,
+            headers : {
+            "Authorization" : auth
+        }
+    },
+    function (error, response, body) {
+        if (error != null || body != null){
+            console.log(body);
+        }
+        if (response != null) {
+            return res.json(response);
+        }
+    }
+);   
+
 });
 
 //DELETE CONTENT ORIGIN
