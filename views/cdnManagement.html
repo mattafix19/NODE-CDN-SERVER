@@ -250,11 +250,11 @@
         </table>
     </div>
 
-    <!--  Create content Origin Tab  -->
+    <!--  Content Origins Tab  -->
     <div ng-show="tab.isSet(4)" ng-click="">
         <div class='TabHeading'>
             <div>
-                <h3>Create Content Origin</h3>
+                <h3>Content Origins Editation</h3>
 
                 <table class="table table-bordered table-striped">
                     <h4>Actual Content Origins</h4>
@@ -329,7 +329,79 @@
     <!--  Spec Tab's Content  -->
     <div ng-show="tab.isSet(5)">
         <div class='TabHeading'>
-            <h3>Delivery service</h3>
+            <h3>Delivery services Editation</h3>
+            <div>
+
+                <table class="table table-bordered table-striped">
+                    <h4>Actual Delivery Services</h4>
+                    <thead>
+                        <tr>
+                            <th class="">Name</th>
+                            <th class="">Origin FQDN</th>
+                            <th class="">FQDN</th>
+                            <th class="">Service Engine</th>
+                            <th class="">Options</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="service in deliveryServicesAll">
+
+                            <td>
+                                <div ng-hide="editingData[service.id]">{{service.name}}</div>
+                                <div ng-show="editingData[service.id]"><input type="text" ng-model="service.name" /></div>
+                            </td>
+
+                            <td>
+                                <div ng-hide="editingData[service.id]">{{service.originFqdn}}</div>
+                                <div ng-show="editingData[service.id]"><input type="text" ng-model="service.originFqdn" /></div>
+                            </td>
+
+                            <td>
+                                <div ng-hide="editingData[service.id]">{{service.rfqdn}}</div>
+                                <div ng-show="editingData[service.id]"><input type="text" ng-model="service.rfqdn" /></div>
+                            </td>
+
+                            <td>
+                                <div ng-hide="editingData[service.id]">{{service.seName}}</div>
+                                <div ng-show="editingData[service.id]"><input type="text" ng-model="service.seName" /></div>
+                            </td>
+
+                            <td>
+                                <button class="btn btn-danger btn-xs" ng-click="deleteContentOrigin(service.id)">Delete</button>
+                                <button class="btn btn-success btn-xs" ng-hide="editingData[service.id]" ng-click="modify(service)">Modify</button>
+                                <button class="btn btn-success btn-xs" ng-show="editingData[service.id]" ng-click="updateContentOrigin(service)">Update</button>
+                                <button class="btn btn btn-warning btn-xs" ng-show="editingData[service.id]" ng-click="cancel(service)">Cancel</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div>
+                <form class="form-horizontal">
+                    <div class="form-group">
+                        <label for="endpoint" class="col-sm-1 control-label">Delivery Service Name</label>
+                        <div class="col-sm-3">
+                            <input type="text" class="form-control" id="serviceName" placeholder="Service Name" ng-model="formCreateDelSer.serName">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="subnetNum" class="col-sm-1 control-label">Content Origin</label>
+                        <div class="col-sm-3">
+                            <select ng-model="formCreateDelSer.contentOrigin">
+                                <option ng-repeat="x in contentOriginsData">{{x.name}}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-offset-1 col-sm-10">
+                            <button type="neco" class="btn btn-default" ng-click="createDeliveryService()">Create</button>
+                        </div>
+                    </div>
+
+
+                </form>
+            </div>
+
         </div>
         <br>
     </div>

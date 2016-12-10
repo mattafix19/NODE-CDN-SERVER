@@ -14,7 +14,7 @@ var pgb = new Pgb();
 var connectionString = process.env.DATABASE_URL || 'postgres://localhost:5432';
 
 router.use(session({
-  secret: 'secret_key'
+    secret: 'secret_key'
 }));
 
 
@@ -27,29 +27,29 @@ var footprints = [];
 //---------------------------------------------------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------------------------------------------
 /* GET home page. */
-router.get('/', function(req, res, next) {
+router.get('/', function (req, res, next) {
 
     var user = req.session.login;
-    
-    if (user == undefined){
+
+    if (user == undefined) {
         res.sendFile(path.join(__dirname, '../views', 'login.html'));
     }
-    else{
-        res.sendFile(path.join(__dirname, '../views', 'cdnManagement.html'));    
+    else {
+        res.sendFile(path.join(__dirname, '../views', 'cdnManagement.html'));
     }
 });
 
-router.get('/afterLogin', function(req, res, next) {
+router.get('/afterLogin', function (req, res, next) {
     var user = req.session.login;
-    
-    if (user == undefined){
+
+    if (user == undefined) {
         res.sendFile(path.join(__dirname, '../views', 'login.html'));
     }
     else
         res.sendFile(path.join(__dirname, '../views', 'cdnManagement.html'));
 });
 
-router.get('/connectCDN', function(req, res) {
+router.get('/connectCDN', function (req, res) {
     console.log("Neco");
     www.connection();
 });
@@ -60,7 +60,7 @@ router.get('/connectCDN', function(req, res) {
 //---------------------------------------------------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------------------------------------------
 
-router.get('/getFootprints', function(req, res, next) {
+router.get('/getFootprints', function (req, res, next) {
 
     var cnn;
 
@@ -72,7 +72,7 @@ router.get('/getFootprints', function(req, res, next) {
         .then(function (result) {
             console.log(result.rows);
 
-            for (var i=0; i < result.rows.length ; i++){
+            for (var i = 0; i < result.rows.length; i++) {
                 footprints.push(result.rows[i]);
             }
             loadedFootprints = true;
@@ -116,13 +116,13 @@ router.get('/getFootprints', function(req, res, next) {
 });
 
 //ADD FOOTPRINT
-router.post('/addFootprints', function(req, res) {
+router.post('/addFootprints', function (req, res) {
 
     var results = [];
 
     // Grab data from http request
     var data = {
-        endpoint: req.body.endpoint, 
+        endpoint: req.body.endpoint,
         subnetNum: req.body.subnetNum,
         maskNum: req.body.maskNum,
         subnetIp: req.body.subnetIp,
@@ -130,12 +130,12 @@ router.post('/addFootprints', function(req, res) {
     };
 
     // Get a Postgres client from the connection pool
-    pg.connect(connectionString, function(err, client, done) {
+    pg.connect(connectionString, function (err, client, done) {
         // Handle connection errors
-        if(err) {
-          done();
-          console.log(err);
-          return res.status(500).json({ success: false, data: err});
+        if (err) {
+            done();
+            console.log(err);
+            return res.status(500).json({ success: false, data: err });
         }
 
         // SQL Query > Insert Data
@@ -145,12 +145,12 @@ router.post('/addFootprints', function(req, res) {
         var query = client.query("SELECT * FROM footprint ORDER BY id ASC");
 
         // Stream results back one row at a time
-        query.on('row', function(row) {
+        query.on('row', function (row) {
             results.push(row);
         });
 
         // After all data is returned, close connection and return results
-        query.on('end', function() {
+        query.on('end', function () {
             done();
             return res.json(results);
         });
@@ -165,7 +165,7 @@ router.post('/addFootprints', function(req, res) {
 //---------------------------------------------------------------------------------------------------------------------------------------------------
 
 //GET ALL CDN INTERFACES
-router.get('/getData', function(req, res, next) {
+router.get('/getData', function (req, res, next) {
 
     var cnn;
 
@@ -177,16 +177,16 @@ router.get('/getData', function(req, res, next) {
         .then(function (result) {
             console.log(result.rows);
 
-            for (var i=0; i < result.rows.length ; i++){
+            for (var i = 0; i < result.rows.length; i++) {
                 interfaces.push(result.rows[i]);
             }
-            
+
             var temp_field = [];
             temp_field = interfaces;
             interfaces = [];
             cnn.done();
             return res.json(temp_field);
-            
+
         })
         .catch(function (error) {
             console.log(error);
@@ -224,13 +224,13 @@ router.get('/getData', function(req, res, next) {
 });
 
 //INSERT CDN interface
-router.post('/addCDN', function(req, res) {
+router.post('/addCDN', function (req, res) {
 
     var results = [];
 
     // Grab data from http request
     var data = {
-        name: req.body.name, 
+        name: req.body.name,
         url: req.body.url,
         url_translator: req.body.url_translator,
         url_cdn: req.body.url_cdn,
@@ -243,12 +243,12 @@ router.post('/addCDN', function(req, res) {
     };
 
     // Get a Postgres client from the connection pool
-    pg.connect(connectionString, function(err, client, done) {
+    pg.connect(connectionString, function (err, client, done) {
         // Handle connection errors
-        if(err) {
-          done();
-          console.log(err);
-          return res.status(500).json({ success: false, data: err});
+        if (err) {
+            done();
+            console.log(err);
+            return res.status(500).json({ success: false, data: err });
         }
 
         // SQL Query > Insert Data
@@ -258,12 +258,12 @@ router.post('/addCDN', function(req, res) {
         var query = client.query("SELECT * FROM cdn_interface ORDER BY id ASC");
 
         // Stream results back one row at a time
-        query.on('row', function(row) {
+        query.on('row', function (row) {
             results.push(row);
         });
 
         // After all data is returned, close connection and return results
-        query.on('end', function() {
+        query.on('end', function () {
             done();
             return res.json(results);
         });
@@ -272,7 +272,7 @@ router.post('/addCDN', function(req, res) {
 });
 
 //DELETE CDN INTERFACE
-router.delete('/deleteCDNinterface/:cdnId', function(req, res) {
+router.delete('/deleteCDNinterface/:cdnId', function (req, res) {
 
     var results = [];
 
@@ -280,12 +280,12 @@ router.delete('/deleteCDNinterface/:cdnId', function(req, res) {
     var id = req.params.cdnId;
 
     // Get a Postgres client from the connection pool
-    pg.connect(connectionString, function(err, client, done) {
+    pg.connect(connectionString, function (err, client, done) {
         // Handle connection errors
-        if(err) {
-          done();
-          console.log(err);
-          return res.status(500).json({ success: false, data: err});
+        if (err) {
+            done();
+            console.log(err);
+            return res.status(500).json({ success: false, data: err });
         }
 
         // SQL Query > Delete Data
@@ -295,12 +295,12 @@ router.delete('/deleteCDNinterface/:cdnId', function(req, res) {
         var query = client.query("SELECT * FROM cdn_interface cdn JOIN endpoint_gateway_type endp ON cdn.endpoint_gateway_type_id = endp.id_gateway JOIN endpoint_type endpt ON cdn.endpoint_type_id = endpt.id_type");
 
         // Stream results back one row at a time
-        query.on('row', function(row) {
+        query.on('row', function (row) {
             results.push(row);
         });
 
         // After all data is returned, close connection and return results
-        query.on('end', function() {
+        query.on('end', function () {
             done();
             return res.json(results);
         });
@@ -315,44 +315,44 @@ router.delete('/deleteCDNinterface/:cdnId', function(req, res) {
 //---------------------------------------------------------------------------------------------------------------------------------------------------
 
 //LOGOUT
-router.get('/logoutUser', function(req, res, next) {
+router.get('/logoutUser', function (req, res, next) {
     req.session.login = undefined;
     res.send("Success");
 });
-    
+
 
 //LOGIN
-router.post('/loginUser', function(req, res) {
-    
-     
+router.post('/loginUser', function (req, res) {
+
+
     req.session.login = req.body.login;
 
     var results = [];
-    
+
     var data = {
-        login: req.body.login, 
+        login: req.body.login,
         pass: req.body.pass
-    }; 
-   
+    };
+
     // Get a Postgres client from the connection pool
-    pg.connect(connectionString, function(err, client, done) {
+    pg.connect(connectionString, function (err, client, done) {
         // Handle connection errors
-        if(err) {
-          done();
-          console.log(err);
-          return res.status(500).json({ success: false, data: err});
+        if (err) {
+            done();
+            console.log(err);
+            return res.status(500).json({ success: false, data: err });
         }
 
         // SQL Query > Select Data
         var query = client.query("SELECT * FROM users WHERE login=($1) AND pass=($2) AND admin='t';", [data.login, data.pass]);
 
         // Stream results back one row at a time
-        query.on('row', function(row) {
+        query.on('row', function (row) {
             results.push(row);
         });
 
         // After all data is returned, close connection and return results
-        query.on('end', function() {
+        query.on('end', function () {
             done();
             return res.json(results);
         });
@@ -363,14 +363,14 @@ router.post('/loginUser', function(req, res) {
 
 //---------------------------------------------------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------------------------------------------
-//OTHERS FOR TESTING PURPOSES APIs
+//CONTENT ORIGINS ROUTES
 //---------------------------------------------------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------------------------------------------
 
 //GET CONTENT ORIGINS
-router.get ('/getContentOrigins', function(req, res){
+router.get('/getContentOrigins', function (req, res) {
 
-    
+
     var request = require('request');
     var request = request.defaults({
         strictSSL: false,
@@ -378,38 +378,38 @@ router.get ('/getContentOrigins', function(req, res){
     });
 
     username = "admin",
-    password = "CdnLab_123",
-    url = "https://cdsm.cdn.ab.sk:8443/servlet/com.cisco.unicorn.ui.ListApiServlet?action=getContentOrigins&param=all",
-    auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
+        password = "CdnLab_123",
+        url = "https://cdsm.cdn.ab.sk:8443/servlet/com.cisco.unicorn.ui.ListApiServlet?action=getContentOrigins&param=all",
+        auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
 
     request(
         {
-            url : url,
-            headers : {
-            "Authorization" : auth
+            url: url,
+            headers: {
+                "Authorization": auth
+            }
+        },
+        function (error, response, body) {
+            if (error != null || body != null) {
+                //console.log(body);
+            }
+            if (response != null) {
+                var parseString = require('xml2js').parseString;
+                parseString(response.body, function (err, result) {
+                    for (var i = 0, len = result.listing.record.length; i < len; i++) {
+                        var obj = result.listing.record[i];
+                        console.log(obj.$.Fqdn);
+                    }
+                    console.log(response);
+                    return res.json(result);
+                });
+            }
         }
-    },
-    function (error, response, body) {
-        if (error != null || body != null){
-            //console.log(body);
-        }
-        if (response != null) {
-            var parseString = require('xml2js').parseString;
-            parseString(response.body, function (err, result) {
-                for (var i = 0, len = result.listing.record.length; i < len; i++) {
-                    var obj = result.listing.record[i];
-                    console.log(obj.$.Fqdn);
-                }
-                console.log(response);
-                return res.json(result);
-            });
-        }
-    }
-);   
+    );
 });
 
 //CREATE CONTENT ORIGIN
-router.post('/createContentOrigin', function(req, res) {
+router.post('/createContentOrigin', function (req, res) {
 
     var request = require('request');
     var request = request.defaults({
@@ -418,31 +418,31 @@ router.post('/createContentOrigin', function(req, res) {
     });
 
     username = "admin",
-    password = "CdnLab_123",
-    url = "https://cdsm.cdn.ab.sk:8443/servlet/com.cisco.unicorn.ui.ChannelApiServlet?action=createContentOrigin&name=" + req.body.origName + "&origin=" + req.body.origServer +"&fqdn=" + req.body.origFqdnName,
-    console.log(url);
+        password = "CdnLab_123",
+        url = "https://cdsm.cdn.ab.sk:8443/servlet/com.cisco.unicorn.ui.ChannelApiServlet?action=createContentOrigin&name=" + req.body.origName + "&origin=" + req.body.origServer + "&fqdn=" + req.body.origFqdnName,
+        console.log(url);
     auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
 
     request(
         {
-            url : url,
-            headers : {
-            "Authorization" : auth
+            url: url,
+            headers: {
+                "Authorization": auth
+            }
+        },
+        function (error, response, body) {
+            if (error != null || body != null) {
+                //console.log(body);
+            }
+            if (response != null) {
+                return res.json(response);
+            }
         }
-    },
-    function (error, response, body) {
-        if (error != null || body != null){
-            //console.log(body);
-        }
-        if (response != null) {
-            return res.json(response);
-        }
-    }
-);   
+    );
 });
 
 //UPDATE CONTENT ORIGIN
-router.post('/updateContentOrigin/:originID', function(req, res) {
+router.post('/updateContentOrigin/:originID', function (req, res) {
 
     var results = [];
 
@@ -456,32 +456,32 @@ router.post('/updateContentOrigin/:originID', function(req, res) {
     });
 
     username = "admin",
-    password = "CdnLab_123",
-    url = "https://cdsm.cdn.ab.sk:8443/servlet/com.cisco.unicorn.ui.ChannelApiServlet?action=modifyContentOrigin&contentOrigin=" + id + "&name=" + req.body.name + "&origin=" + req.body.originFqdn + "&fqdn=" + req.body.rfqdn,
-    console.log(url);
+        password = "CdnLab_123",
+        url = "https://cdsm.cdn.ab.sk:8443/servlet/com.cisco.unicorn.ui.ChannelApiServlet?action=modifyContentOrigin&contentOrigin=" + id + "&name=" + req.body.name + "&origin=" + req.body.originFqdn + "&fqdn=" + req.body.rfqdn,
+        console.log(url);
     auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
 
     request(
         {
-            url : url,
-            headers : {
-            "Authorization" : auth
+            url: url,
+            headers: {
+                "Authorization": auth
+            }
+        },
+        function (error, response, body) {
+            if (error != null || body != null) {
+                console.log(body);
+            }
+            if (response != null) {
+                return res.json(response);
+            }
         }
-    },
-    function (error, response, body) {
-        if (error != null || body != null){
-            console.log(body);
-        }
-        if (response != null) {
-            return res.json(response);
-        }
-    }
-);   
+    );
 
 });
 
 //DELETE CONTENT ORIGIN
-router.delete('/deleteContentOrigin/:originID', function(req, res) {
+router.delete('/deleteContentOrigin/:originID', function (req, res) {
 
     var results = [];
 
@@ -495,29 +495,117 @@ router.delete('/deleteContentOrigin/:originID', function(req, res) {
     });
 
     username = "admin",
-    password = "CdnLab_123",
-    url = "https://cdsm.cdn.ab.sk:8443/servlet/com.cisco.unicorn.ui.ChannelApiServlet?action=deleteContentOrigins&contentOrigin=" + id,
-    console.log(url);
+        password = "CdnLab_123",
+        url = "https://cdsm.cdn.ab.sk:8443/servlet/com.cisco.unicorn.ui.ChannelApiServlet?action=deleteContentOrigins&contentOrigin=" + id,
+        console.log(url);
     auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
 
     request(
         {
-            url : url,
-            headers : {
-            "Authorization" : auth
+            url: url,
+            headers: {
+                "Authorization": auth
+            }
+        },
+        function (error, response, body) {
+            if (error != null || body != null) {
+                console.log(body);
+            }
+            if (response != null) {
+                return res.json(response);
+            }
         }
-    },
-    function (error, response, body) {
-        if (error != null || body != null){
-            console.log(body);
-        }
-        if (response != null) {
-            return res.json(response);
-        }
-    }
-);   
+    );
 
 });
+
+
+//---------------------------------------------------------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------------------------------------------------------
+//DELIVERY SERVICES ROUTES
+//---------------------------------------------------------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------------------------------------------------------
+
+//GET DELIVERY SERVICES
+router.get('/getDeliveryServices', function (req, res) {
+
+    var request = require('request');
+    var request = request.defaults({
+        strictSSL: false,
+        rejectUnauthorized: false
+    });
+
+    username = "admin",
+        password = "CdnLab_123",
+        url = "https://cdsm.cdn.ab.sk:8443/servlet/com.cisco.unicorn.ui.ListApiServlet?action=getDeliveryServices&param=all",
+        auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
+
+    request(
+        {
+            url: url,
+            headers: {
+                "Authorization": auth
+            }
+        },
+        function (error, response, body) {
+            if (error != null || body != null) {
+                //console.log(body);
+            }
+            if (response != null) {
+                var parseString = require('xml2js').parseString;
+                parseString(response.body, function (err, result) {
+                    for (var i = 0, len = result.listing.record.length; i < len; i++) {
+                        var obj = result.listing.record[i];
+                        console.log(obj.$.Fqdn);
+                    }
+                    console.log(response);
+                    return res.json(result);
+                });
+            }
+        }
+    );
+});
+
+//GET SE SERVICES
+router.get('/getSE', function (req, res) {
+
+    var request = require('request');
+    var request = request.defaults({
+        strictSSL: false,
+        rejectUnauthorized: false
+    });
+
+    username = "admin",
+        password = "CdnLab_123",
+        url = "https://cdsm.cdn.ab.sk:8443/servlet/com.cisco.unicorn.ui.ListApiServlet?action=getSEs&param=all",
+        auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
+
+    request(
+        {
+            url: url,
+            headers: {
+                "Authorization": auth
+            }
+        },
+        function (error, response, body) {
+            if (error != null || body != null) {
+                //console.log(body);
+            }
+            if (response != null) {
+                var parseString = require('xml2js').parseString;
+                parseString(response.body, function (err, result) {
+                    for (var i = 0, len = result.listing.record.length; i < len; i++) {
+                        var obj = result.listing.record[i];
+                        console.log(obj.$.Fqdn);
+                    }
+                    console.log(response);
+                    return res.json(result);
+                });
+            }
+        }
+    );
+});
+
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -529,24 +617,24 @@ router.delete('/deleteContentOrigin/:originID', function(req, res) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //isert user
-router.post('/api/v1/users', function(req, res) {
+router.post('/api/v1/users', function (req, res) {
 
     var results = [];
 
     // Grab data from http request
     var data = {
-        login: req.body.login, 
+        login: req.body.login,
         pass: req.body.pass,
         admin: false
     };
 
     // Get a Postgres client from the connection pool
-    pg.connect(connectionString, function(err, client, done) {
+    pg.connect(connectionString, function (err, client, done) {
         // Handle connection errors
-        if(err) {
-          done();
-          console.log(err);
-          return res.status(500).json({ success: false, data: err});
+        if (err) {
+            done();
+            console.log(err);
+            return res.status(500).json({ success: false, data: err });
         }
 
         // SQL Query > Insert Data
@@ -556,12 +644,12 @@ router.post('/api/v1/users', function(req, res) {
         var query = client.query("SELECT * FROM users ORDER BY id ASC");
 
         // Stream results back one row at a time
-        query.on('row', function(row) {
+        query.on('row', function (row) {
             results.push(row);
         });
 
         // After all data is returned, close connection and return results
-        query.on('end', function() {
+        query.on('end', function () {
             done();
             return res.json(results);
         });
@@ -571,7 +659,7 @@ router.post('/api/v1/users', function(req, res) {
 });
 
 //update user
-router.put('/api/v1/users/:users_id', function(req, res) {
+router.put('/api/v1/users/:users_id', function (req, res) {
 
     var results = [];
 
@@ -580,33 +668,33 @@ router.put('/api/v1/users/:users_id', function(req, res) {
 
     // Grab data from http request
     var data = {
-        login: req.body.login, 
+        login: req.body.login,
         pass: req.body.pass,
         admin: false
     };
 
     // Get a Postgres client from the connection pool
-    pg.connect(connectionString, function(err, client, done) {
+    pg.connect(connectionString, function (err, client, done) {
         // Handle connection errors
-        if(err) {
-          done();
-          console.log(err);
-          return res.status(500).send(json({ success: false, data: err}));
+        if (err) {
+            done();
+            console.log(err);
+            return res.status(500).send(json({ success: false, data: err }));
         }
 
         // SQL Query > Update Data
-        client.query("UPDATE users SET login=($1), pass=($2), admin=($3) WHERE id=($4)", [data.login, data.pass, data.admin,id]);
+        client.query("UPDATE users SET login=($1), pass=($2), admin=($3) WHERE id=($4)", [data.login, data.pass, data.admin, id]);
 
         // SQL Query > Select Data
         var query = client.query("SELECT * FROM users ORDER BY id ASC");
 
         // Stream results back one row at a time
-        query.on('row', function(row) {
+        query.on('row', function (row) {
             results.push(row);
         });
 
         // After all data is returned, close connection and return results
-        query.on('end', function() {
+        query.on('end', function () {
             done();
             return res.json(results);
         });
@@ -615,7 +703,7 @@ router.put('/api/v1/users/:users_id', function(req, res) {
 });
 
 //delete user
-router.delete('/api/v1/users/:users_id', function(req, res) {
+router.delete('/api/v1/users/:users_id', function (req, res) {
 
     var results = [];
 
@@ -623,12 +711,12 @@ router.delete('/api/v1/users/:users_id', function(req, res) {
     var id = req.params.users_id;
 
     // Get a Postgres client from the connection pool
-    pg.connect(connectionString, function(err, client, done) {
+    pg.connect(connectionString, function (err, client, done) {
         // Handle connection errors
-        if(err) {
-          done();
-          console.log(err);
-          return res.status(500).json({ success: false, data: err});
+        if (err) {
+            done();
+            console.log(err);
+            return res.status(500).json({ success: false, data: err });
         }
 
         // SQL Query > Delete Data
@@ -638,12 +726,12 @@ router.delete('/api/v1/users/:users_id', function(req, res) {
         var query = client.query("SELECT * FROM users ORDER BY id ASC");
 
         // Stream results back one row at a time
-        query.on('row', function(row) {
+        query.on('row', function (row) {
             results.push(row);
         });
 
         // After all data is returned, close connection and return results
-        query.on('end', function() {
+        query.on('end', function () {
             done();
             return res.json(results);
         });

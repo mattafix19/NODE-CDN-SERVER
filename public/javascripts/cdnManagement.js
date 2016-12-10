@@ -7,12 +7,18 @@ app.controller('TabController', ['$cookieStore', '$scope', '$http', '$window', f
 
     $scope.formFootprintsData = {};
     $scope.footprintData = {};
+
     $scope.contentOriginsData = {};
-    $scope.contentOriginsDataBackup = {};
+    $scope.serviceEnginesData = {};
+    $scope.deliveryServicesData = {};
+    $scope.deliveryServicesAll = {};
+
 
     $scope.formCreateContent = {};
+    $scope.formCreateDelSer = {};
 
-
+    var deliveryServicesReceived = 0;
+    var serviceEnginesReceived = 0;
 
     var loggedUser = $cookieStore.get('user');
 
@@ -140,14 +146,6 @@ app.controller('TabController', ['$cookieStore', '$scope', '$http', '$window', f
             });
     };
 
-    //---------------------------------------------------------------------------------------------------------------------------------------------------
-    //---------------------------------------------------------------------------------------------------------------------------------------------------
-    //DELIVERY SERVICES EDITATION
-    //---------------------------------------------------------------------------------------------------------------------------------------------------
-    //---------------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------
     //---------------------------------------------------------------------------------------------------------------------------------------------------
@@ -221,10 +219,6 @@ app.controller('TabController', ['$cookieStore', '$scope', '$http', '$window', f
 
             for (var i = 0, len = data.listing.record.length; i < len; i++) {
                 var obj = data.listing.record[i];
-                console.log(obj.$.Name);
-                console.log(obj.$.Fqdn);
-                console.log(obj.$.OriginFqdn);
-                console.log(obj.$.Id);
 
                 var contentOrigin = {
                     name: obj.$.Name,
@@ -235,13 +229,129 @@ app.controller('TabController', ['$cookieStore', '$scope', '$http', '$window', f
                 arrContentOrigins.push(contentOrigin)
 
             }
-            $scope.contentOriginsDataBackup = arrContentOrigins;
+
             $scope.contentOriginsData = arrContentOrigins;
             arrContentOrigins = [];
         })
         .error(function (error) {
             console.log('Error: ' + error);
         });
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------------------------------------------------------------------
+    //DELIVERY SERVICES EDITATION
+    //---------------------------------------------------------------------------------------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------------------------------------------------------------------
+
+    //GET ALL CONTENT ORIGINS
+
+    $scope.addSeName = function () {
+        var arrDeliveryServices = [];
+        for (var i = 0, length = $scope.deliveryServicesData.length; i < length; i++) {
+            for (var j = 0, length = $scope.serviceEnginesData.length; j < length; j++) {
+                if ($scope.deliveryServicesData[i].seID === $scope.serviceEnginesData[j].id) {
+                    var deliveryService = {
+                        name: $scope.deliveryServicesData[i].name,
+                        originFqdn: $scope.deliveryServicesData[i].originFqdn,
+                        rfqdn: $scope.deliveryServicesData[i].rfqdn,
+                        id: $scope.deliveryServicesData[i].id,
+                        originID: $scope.deliveryServicesData[i].originID,
+                        seID: $scope.deliveryServicesData[i].seID,
+                        seName: $scope.serviceEnginesData[j].name
+                    }
+                    console.log(deliveryService);
+                    arrDeliveryServices.push(deliveryService);
+                }
+            }
+        }
+        $scope.deliveryServicesAll = arrDeliveryServices;
+        serviceEnginesReceived = 0;
+        deliveryServicesReceived = 0;
+    };
+
+    $http.get('/getDeliveryServices')
+        .success(function (data) {
+            var arrContentOrigins = [];
+
+            for (var i = 0, len = data.listing.record.length; i < len; i++) {
+                var obj = data.listing.record[i];
+
+
+                var contentOrigin = {
+                    name: obj.$.Name,
+                    originFqdn: obj.$.OriginFqdn,
+                    rfqdn: obj.$.Fqdn,
+                    id: obj.$.Id,
+                    originID: obj.$.ContentOriginId,
+                    seID: obj.$.ContentAcquirer
+                }
+                arrContentOrigins.push(contentOrigin)
+
+            }
+            $scope.deliveryServicesData = arrContentOrigins;
+            var arrDeliveryServices = [];
+            deliveryServicesReceived = 1;
+            if (serviceEnginesReceived == 1) {
+                $scope.addSeName();
+            }
+            arrContentOrigins = [];
+        })
+        .error(function (error) {
+            console.log('Error: ' + error);
+        });
+
+    //GET SERVICE ENGINES
+    $http.get('/getSE')
+        .success(function (data) {
+            var arrContentOrigins = [];
+
+            for (var i = 0, len = data.listing.record.length; i < len; i++) {
+                var obj = data.listing.record[i];
+                var contentOrigin = {
+                    name: obj.$.Name,
+                    id: obj.$.Id
+                }
+                arrContentOrigins.push(contentOrigin)
+
+            }
+            $scope.serviceEnginesData = arrContentOrigins;
+
+            serviceEnginesReceived = 1;
+            var arrDeliveryServices = [];
+            if (deliveryServicesReceived == 1) {
+                $scope.addSeName();
+            }
+            arrContentOrigins = [];
+        })
+        .error(function (error) {
+            console.log('Error: ' + error);
+        });
+
+    //CREATE DELIVERY SERVICE
+    $scope.createDeliveryService = function () {
+        console.log($scope.formCreateDelSer);
+        
+        $http.post('/createContentOrigin', $scope.formCreateContent)
+            .success(function (data) {
+                $scope.formData = {};
+                $scope.cdnData = data;
+                $window.location.reload();
+            })
+            .error(function (error) {
+                console.log('Error: ' + error);
+            });
+    };
+
+    $scope.editingData = {};
+
+    for (var i = 0, length = $scope.contentOriginsData.length; i < length; i++) {
+        $scope.editingData[$scope.contentOriginsData[i].id] = false;
+    }
+
+    $scope.modify = function (tableData) {
+        $scope.editingData[tableData.id] = true;
+    };
+
 
     /*
     $http.get('/api/v1/users')
