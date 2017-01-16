@@ -266,6 +266,8 @@
                             <th class="">Options</th>
                         </tr>
                     </thead>
+                    <h5>NOTE: check if there is no active delivery service assigned to content origin if so, delete will not
+                        be applied</h5>
                     <tbody>
                         <tr ng-repeat="origin in contentOriginsData">
 
@@ -347,30 +349,30 @@
                         <tr ng-repeat="service in deliveryServicesAll">
 
                             <td>
-                                <div ng-hide="editingData[service.id]">{{service.name}}</div>
-                                <div ng-show="editingData[service.id]"><input type="text" ng-model="service.name" /></div>
+                                <div ng-hide="editingDataDelivery[service.id]">{{service.name}}</div>
+                                <div ng-show="editingDataDelivery[service.id]"><input type="text" ng-model="service.name" /></div>
                             </td>
 
                             <td>
-                                <div ng-hide="editingData[service.id]">{{service.originFqdn}}</div>
-                                <div ng-show="editingData[service.id]"><input type="text" ng-model="service.originFqdn" /></div>
+                                <div ng-hide="editingDataDelivery[service.id]">{{service.originFqdn}}</div>
+                                <div ng-show="editingDataDelivery[service.id]"><input type="text" ng-model="service.originFqdn" /></div>
                             </td>
 
                             <td>
-                                <div ng-hide="editingData[service.id]">{{service.rfqdn}}</div>
-                                <div ng-show="editingData[service.id]"><input type="text" ng-model="service.rfqdn" /></div>
+                                <div ng-hide="editingDataDelivery[service.id]">{{service.rfqdn}}</div>
+                                <div ng-show="editingDataDelivery[service.id]"><input type="text" ng-model="service.rfqdn" /></div>
                             </td>
 
                             <td>
-                                <div ng-hide="editingData[service.id]">{{service.seName}}</div>
-                                <div ng-show="editingData[service.id]"><input type="text" ng-model="service.seName" /></div>
+                                <div ng-hide="editingDataDelivery[service.id]">{{service.seName}}</div>
+                                <div ng-show="editingDataDelivery[service.id]"><input type="text" ng-model="service.seName" /></div>
                             </td>
 
                             <td>
-                                <button class="btn btn-danger btn-xs" ng-click="deleteContentOrigin(service.id)">Delete</button>
-                                <button class="btn btn-success btn-xs" ng-hide="editingData[service.id]" ng-click="modify(service)">Modify</button>
-                                <button class="btn btn-success btn-xs" ng-show="editingData[service.id]" ng-click="updateContentOrigin(service)">Update</button>
-                                <button class="btn btn btn-warning btn-xs" ng-show="editingData[service.id]" ng-click="cancel(service)">Cancel</button>
+                                <button class="btn btn-danger btn-xs" ng-click="deleteDeliveryService(service.id)">Delete</button>
+                                <button class="btn btn-success btn-xs" ng-hide="editingDataDelivery[service.id]" ng-click="modifyDelivery(service)">Modify</button>
+                                <button class="btn btn-success btn-xs" ng-show="editingDataDelivery[service.id]" ng-click="updateDeliveryService(service)">Update</button>
+                                <button class="btn btn btn-warning btn-xs" ng-show="editingDataDelivery[service.id]" ng-click="cancelDelivery(service)">Cancel</button>
                             </td>
                         </tr>
                     </tbody>
@@ -400,6 +402,43 @@
 
 
                 </form>
+            </div>
+
+            <div>
+
+                <table class="table table-bordered table-striped">
+                    <h4>Assing Service Engine</h4>
+                    <thead>
+                        <tr>
+                            <th class="">Delivery Service</th>
+                            <th class="">Assigned Service Engine</th>
+                            <th class="">Service Engine</th>
+                            <th class="">Assign Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="service in deliveryServicesAll">
+                            <td>
+                               {{service.name}}
+                            </td>
+
+                            <td>
+                                {{service.seName}}
+                            </td>
+
+                            <td>
+                                <select ng-model="formAssignDelSer.seName">
+                                    <option ng-repeat="x in serviceEnginesData">{{x.name}}</option>
+                                </select>
+                            </td>
+
+                            <td>
+                                <button class="btn btn-success btn-xs" ng-click="assignSE(service.name,1)">Assing</button>
+                                <button class="btn btn-danger btn-xs" ng-click="assignSE(service.name,0)">Unassign</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
 
         </div>
