@@ -21,6 +21,13 @@ router.use(session({
 var interfaces = [];
 var footprints = [];
 
+var mainRoutes = require('./routes/index');
+var cdnAdminRoutes = require('./routes/cdnAdmin');
+var cdnApiRoutes = require('./routes/cdnApi');
+
+app.use('/', mainRoutes);
+app.use('/cdn-admin', cdnAdminRoutes);
+app.use('/cdn-api', cdnApiRoutes);
 
 
 //---------------------------------------------------------------------------------------------------------------------------------------------------
