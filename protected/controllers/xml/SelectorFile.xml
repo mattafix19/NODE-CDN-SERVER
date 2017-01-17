@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CDNSelector xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="CDNSelector.xsd"><Revision>1.0</Revision><CDNList><CDN name="cdsis" translatorUrl="cdn1-nwk.com/1234/video"/></CDNList><CDNGroup grpName="CDNGroup1"><CDNName>cdsis</CDNName><SelectionPolicyGroup><SelectionPolicy><ContentType><Extension>html</Extension></ContentType><GeoLoc><Country name="China"/></GeoLoc></SelectionPolicy></SelectionPolicyGroup></CDNGroup><Order>CDNGroup1</Order><Default>cdsis</Default></CDNSelector>
