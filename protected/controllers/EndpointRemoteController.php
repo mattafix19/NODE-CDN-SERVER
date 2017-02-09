@@ -212,6 +212,7 @@ class EndpointRemoteController extends GxController {
 			
 			$arrayFootprints = array();
 			$arrayFootprints = Footprint::model()->findAllByAttributes( array('endpoint_id' => $modelLocal->id ));
+
 			foreach ($arrayFootprints as $key => $value) {
 				$client->setFootprints($modelLocal->name, $modelLocal->url, $value->subnet_num, $value->mask_num, $value->subnet_ip, $value->prefix);
 				$client->logging('Receive footprint ' . $value->subnet_ip . '/' . $value->prefix . ' from ' . $modelLocal->name . ':' . $modelLocal->url);
