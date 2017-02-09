@@ -1,7 +1,7 @@
 var app = angular.module('cdnManagement', ['ngCookies']);
 
-app.controller('TabController', ['$cookieStore', '$scope', '$http', '$window', function ($cookieStore, $scope, $http, $window) {
-
+app.controller('TabController', ['$location','$cookieStore', '$scope', '$http', '$window', function ($location,$cookieStore, $scope, $http, $window) {
+    console.log($location);
     $scope.formData = {};
     $scope.cdnData = {};
 

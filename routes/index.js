@@ -3,6 +3,7 @@ var session = require('express-session');
 var router = express.Router();
 var pg = require('pg');
 var path = require('path');
+var cdniManager = require('CdniManager');
 
 var soap = require('soap');
 
@@ -10,6 +11,8 @@ var www = require('../bin/www');
 
 var Pgb = require("pg-bluebird");
 var pgb = new Pgb();
+
+var cdniMan = new cdniManager(pgb);
 
 var connectionString = process.env.DATABASE_URL || 'postgres://localhost:5432';
 
@@ -21,13 +24,13 @@ router.use(session({
 var interfaces = [];
 var footprints = [];
 
-var mainRoutes = require('./routes/index');
-var cdnAdminRoutes = require('./routes/cdnAdmin');
-var cdnApiRoutes = require('./routes/cdnApi');
+//var mainRoutes = require('./routes/index');
+//var cdnAdminRoutes = require('./routes/cdnAdmin');
+//var cdnApiRoutes = require('./routes/cdnApi');
 
-app.use('/', mainRoutes);
-app.use('/cdn-admin', cdnAdminRoutes);
-app.use('/cdn-api', cdnApiRoutes);
+//app.use('/', mainRoutes);
+//app.use('/cdn-admin', cdnAdminRoutes);
+//app.use('/cdn-api', cdnApiRoutes);
 
 
 //---------------------------------------------------------------------------------------------------------------------------------------------------
