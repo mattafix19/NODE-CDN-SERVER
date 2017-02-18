@@ -25,7 +25,7 @@ app.controller('TabController', ['$location','$cookieStore', '$scope', '$http', 
 
     $scope.user = loggedUser[0].login;
 
-    this.tab = 2;
+    this.tab = 1;
     this.isSet = function (checkTab) {
         return this.tab === checkTab;
     };
@@ -40,6 +40,17 @@ app.controller('TabController', ['$location','$cookieStore', '$scope', '$http', 
             .success(function (data) {
                 console.log(data);
                 window.location = '/'
+            })
+            .error(function (error) {
+                console.log('Error: ' + error);
+            });
+    }
+
+    $scope.createOffer = function(){
+        $http.get('http://localhost:8080/cdniApi/createOfferAdmin')
+            .success(function (data) {
+                console.log(data);
+                //window.location = '/'
             })
             .error(function (error) {
                 console.log('Error: ' + error);
@@ -158,7 +169,7 @@ app.controller('TabController', ['$location','$cookieStore', '$scope', '$http', 
     //CREATE CONTENT ORIGIN
     $scope.createContentOrigin = function () {
         waitingDialog.show();
-        $http.post('/createContentOrigin', $scope.formCreateContent)
+        $http.post('/cdsmApi/createContentOrigin', $scope.formCreateContent)
             .success(function (data) {
                 $scope.formData = {};
                 $scope.cdnData = data;
@@ -183,7 +194,7 @@ app.controller('TabController', ['$location','$cookieStore', '$scope', '$http', 
     $scope.updateContentOrigin = function (tableData) {
         $scope.editingData[tableData.id] = false;
         waitingDialog.show();
-        $http.post('/updateContentOrigin/' + tableData.id, tableData)
+        $http.post('/cdsmApi/updateContentOrigin/' + tableData.id, tableData)
             .success(function (data) {
                 $scope.formData = {};
                 $scope.cdnData = data;
@@ -201,7 +212,7 @@ app.controller('TabController', ['$location','$cookieStore', '$scope', '$http', 
     //DELETE CONTENT ORIGIN
     $scope.deleteContentOrigin = function (originID) {
         waitingDialog.show();
-        $http.delete('/deleteContentOrigin/' + originID)
+        $http.delete('/cdsmApi/deleteContentOrigin/' + originID)
             .success(function (data) {
                 $scope.formData = {};
                 $scope.cdnData = data;
@@ -214,7 +225,7 @@ app.controller('TabController', ['$location','$cookieStore', '$scope', '$http', 
 
     //GET ALL CONTENT ORIGINS
 
-    $http.get('/getContentOrigins')
+    $http.get('/cdsmApi/getContentOrigins')
         .success(function (data) {
             var arrContentOrigins = [];
 
@@ -293,7 +304,7 @@ app.controller('TabController', ['$location','$cookieStore', '$scope', '$http', 
     };
 
     // GET ALL DELIVERY SERVICES
-    $http.get('/getDeliveryServices')
+    $http.get('/cdsmApi/getDeliveryServices')
         .success(function (data) {
             var arrContentOrigins = [];
 
@@ -327,7 +338,7 @@ app.controller('TabController', ['$location','$cookieStore', '$scope', '$http', 
         });
 
     //GET SERVICE ENGINES
-    $http.get('/getSE')
+    $http.get('/cdsmApi/getSE')
         .success(function (data) {
             var arrContentOrigins = [];
 
@@ -373,7 +384,7 @@ app.controller('TabController', ['$location','$cookieStore', '$scope', '$http', 
         }
 
         console.log(tempObj)
-        $http.post('/createDeliveryService', tempObj)
+        $http.post('/cdsmApi/createDeliveryService', tempObj)
             .success(function (data) {
                 $scope.formData = {};
                 $scope.cdnData = data;
@@ -387,7 +398,7 @@ app.controller('TabController', ['$location','$cookieStore', '$scope', '$http', 
     //DELETE DELIVERY SERVICE
     $scope.deleteDeliveryService = function (ID) {
         waitingDialog.show();
-        $http.delete('/deleteDeliveryService/' + ID)
+        $http.delete('/cdsmApi/deleteDeliveryService/' + ID)
             .success(function (data) {
                 $scope.formData = {};
                 $scope.cdnData = data;
@@ -427,7 +438,7 @@ app.controller('TabController', ['$location','$cookieStore', '$scope', '$http', 
 
         console.log(delSerID + "   " + seID);
         if (swtch === 1) {
-            $http.post('/assignSE', tempObj)
+            $http.post('/cdsmApi/assignSE', tempObj)
                 .success(function (data) {
                     $scope.formData = {};
                     $scope.cdnData = data;
@@ -438,7 +449,7 @@ app.controller('TabController', ['$location','$cookieStore', '$scope', '$http', 
                 });
         }
         else{
-            $http.post('/unAssignSE', tempObj)
+            $http.post('/cdsmApi/unAssignSE', tempObj)
                 .success(function (data) {
                     $scope.formData = {};
                     $scope.cdnData = data;

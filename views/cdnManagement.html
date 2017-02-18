@@ -7,15 +7,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- stylesheets -->
     <link href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.5/yeti/bootstrap.min.css" rel="stylesheet" media="screen">
-    <link href="stylesheets/style2.css" rel="stylesheet" media="screen">
+    <link href="stylesheets/styleCdnManagement.css" rel="stylesheet" media="screen">
     <!-- scripts -->
     <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.min.js"></script>
     <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.0/angular-cookies.js"></script>
 
-    <script src="javascripts/loading.js"></script>
-    <script src="javascripts/cdnManagement.js"></script>
+    <!-- local scripts -->
+    <script src="javascript/external/loading.js"></script>
+    <script src="javascript/cdnManagement.js"></script>
 </head>
 
 <body ng-controller="TabController as tab">
@@ -39,8 +40,8 @@
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">CDN Interface <span class="caret"></span></a>
                         <ul class="dropdown-menu">
-                            <li><a href="#" ng-class="{ active:tab.isSet(2) }" ng-click="tab.setTab(2)">CDN Interface Overview</a></li>
-                            <li><a href="#" ng-class="{ active:tab.isSet(1) }" ng-click="tab.setTab(1)">Edit CDN Interface</a></li>
+                            <li><a href="#" ng-class="{ active:tab.isSet(1) }" ng-click="tab.setTab(1)">CDN Interface Overview</a></li>
+                            <li><a href="#" ng-class="{ active:tab.isSet(2) }" ng-click="tab.setTab(2)">Edit CDN Interface</a></li>
                             <li><a href="#" ng-class="{ active:tab.isSet(3) }" ng-click="tab.setTab(3)">Add Footprints</a></li>
                         </ul>
                     </li>
@@ -71,6 +72,78 @@
     </nav>
     <!--  Description Tab's Content  -->
     <div class="container" ng-show="tab.isSet(1)">
+
+        <div>
+            <h2>Cdn Interconnection Establishment</h2>
+            <div>
+                <form class="form-horizontal">
+                    <div class="form-group">
+                        <label for="endpoint" class="col-sm-1 control-label">CDNI URL</label>
+                        <div class="col-sm-3">
+                            <input type="text" class="form-control" id="origName" placeholder="Origin Name" ng-model="formDataCdnIUrl">
+                            
+                        </div>
+                        <button class="btn btn-default" ng-click="createOffer()">Create</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <table class="table table-bordered">
+            <h2>CDN Overview</h2>
+            <br>
+            <tr>
+                <td>ID</td>
+                <td>Name</td>
+                <td>URL</td>
+                <td>URL Translator</td>
+                <td>URL CDN</td>
+                <td>Port CDN</td>
+                <td>Login</td>
+                <td>Priority</td>
+                <td>Endpoint gateway type</td>
+                <td>Endpoint Type</td>
+                <td>Delete CDN</td>
+
+                <tr ng-repeat="cdn in cdnData">
+                    <td>{{cdn.id}}</td>
+                    <td>{{cdn.name}}</td>
+                    <td>{{cdn.url}}</td>
+                    <td>{{cdn.url_translator}}</td>
+                    <td>{{cdn.url_cdn}}</td>
+                    <td>{{cdn.port_cdn}}</td>
+                    <td>{{cdn.login}}</td>
+                    <td>{{cdn.priority}}</td>
+                    <td>{{cdn.endpoint_gateway_type}}</td>
+                    <td>{{cdn.endpoint_type}}</td>
+                    <td><input class="lead" type="checkbox" ng-click="deleteCDNinterface(cdn.id)"></li>
+                    </td>
+                </tr>
+            </tr>
+        </table>
+        <h2>Footprints</h2>
+
+        <div ng-repeat="foot in footprintData">
+            <li>
+                {{foot.subnet_ip}}
+            </li>
+        </div>
+        <table class="table table-bordered">
+            <h2>Content Origins</h2>
+            <br>
+            <tr>
+                <td>Name</td>
+                <td>Origin FQDN</td>
+                <td>FQDN</td>
+
+                <tr ng-repeat="origin in contentOriginsData">
+                    <td>{{origin.name}}</td>
+                    <td>{{origin.originFqdn}}</td>
+                    <td>{{origin.rfqdn}}</td>
+                </tr>
+            </tr>
+        </table>
+    </div>
+    <div class="container" ng-show="tab.isSet(2)">
         <div class='TabHeading'>
         </div>
         <h2>Edit CDN Interface</h2>
@@ -146,6 +219,7 @@
         </form>
 
     </div>
+
     <div class="container" ng-show="tab.isSet(3)">
         <div class='TabHeading'>
         </div>
@@ -193,63 +267,6 @@
         </form>
 
     </div>
-    <div class="container" ng-show="tab.isSet(2)">
-        <table class="table table-bordered">
-            <h2>CDN Overview</h2>
-            <br>
-            <tr>
-                <td>ID</td>
-                <td>Name</td>
-                <td>URL</td>
-                <td>URL Translator</td>
-                <td>URL CDN</td>
-                <td>Port CDN</td>
-                <td>Login</td>
-                <td>Priority</td>
-                <td>Endpoint gateway type</td>
-                <td>Endpoint Type</td>
-                <td>Delete CDN</td>
-
-                <tr ng-repeat="cdn in cdnData">
-                    <td>{{cdn.id}}</td>
-                    <td>{{cdn.name}}</td>
-                    <td>{{cdn.url}}</td>
-                    <td>{{cdn.url_translator}}</td>
-                    <td>{{cdn.url_cdn}}</td>
-                    <td>{{cdn.port_cdn}}</td>
-                    <td>{{cdn.login}}</td>
-                    <td>{{cdn.priority}}</td>
-                    <td>{{cdn.endpoint_gateway_type}}</td>
-                    <td>{{cdn.endpoint_type}}</td>
-                    <td><input class="lead" type="checkbox" ng-click="deleteCDNinterface(cdn.id)"></li>
-                    </td>
-                </tr>
-            </tr>
-        </table>
-        <h2>Footprints</h2>
-
-        <div ng-repeat="foot in footprintData">
-            <li>
-                {{foot.subnet_ip}}
-            </li>
-        </div>
-        <table class="table table-bordered">
-            <h2>Content Origins</h2>
-            <br>
-            <tr>
-                <td>Name</td>
-                <td>Origin FQDN</td>
-                <td>FQDN</td>
-
-                <tr ng-repeat="origin in contentOriginsData">
-                    <td>{{origin.name}}</td>
-                    <td>{{origin.originFqdn}}</td>
-                    <td>{{origin.rfqdn}}</td>
-                </tr>
-            </tr>
-        </table>
-    </div>
-
     <!--  Content Origins Tab  -->
     <div ng-show="tab.isSet(4)" ng-click="">
         <div class='TabHeading'>
@@ -298,33 +315,7 @@
             </div>
 
             <h4>Create Content Origin</h4>
-            <form class="form-horizontal">
-                <div class="form-group">
-                    <label for="endpoint" class="col-sm-1 control-label">Content Origin name</label>
-                    <div class="col-sm-3">
-                        <input type="text" class="form-control" id="origName" placeholder="Origin Name" ng-model="formCreateContent.origName">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="subnetNum" class="col-sm-1 control-label">Origin Server</label>
-                    <div class="col-sm-3">
-                        <input class="form-control" id="origServer" placeholder="Server or IP address" ng-model="formCreateContent.origServer">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="maskNum" class="col-sm-1 control-label">FQDN Name</label>
-                    <div class="col-sm-3">
-                        <input class="form-control" id="origFqdnName" placeholder="FQDN Name" ng-model="formCreateContent.origFqdnName">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <div class="col-sm-offset-1 col-sm-10">
-                        <button type="neco" class="btn btn-default" ng-click="createContentOrigin()">Create</button>
-                    </div>
-                </div>
 
-
-            </form>
         </div>
         <br>
     </div>
@@ -419,7 +410,7 @@
                     <tbody>
                         <tr ng-repeat="service in deliveryServicesAll">
                             <td>
-                               {{service.name}}
+                                {{service.name}}
                             </td>
 
                             <td>

@@ -34,3 +34,12 @@ ul {
 .ng-valid.ng-dirty{
   border-color:green;
 }
+
+.user-form{
+  border-radius: 10px;
+}
+
+.col-md-4.custom{
+   float: none;
+    margin: 0 auto;
+}
