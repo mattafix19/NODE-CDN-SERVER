@@ -30,8 +30,10 @@ router.use(function(req, res, next) {
 var interfaces = [];
 var footprints = [];
 
-router.get('/createOfferAdmin', function (req, res, next) {
+router.post('/initialOffer', function (req, res, next) {
     
+    console.log(req);
+
     console.log("received");
 
     var request = require('request');

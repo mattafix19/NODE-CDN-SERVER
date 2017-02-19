@@ -62,9 +62,9 @@ router.get('/getContentOrigins', function (req, res) {
                 parseString(response.body, function (err, result) {
                     for (var i = 0, len = result.listing.record.length; i < len; i++) {
                         var obj = result.listing.record[i];
-                        console.log(obj.$.Fqdn);
+                        //console.log(obj.$.Fqdn);
                     }
-                    console.log(response);
+                    //console.log(response);
                     return res.json(result);
                 });
             }
@@ -84,7 +84,7 @@ router.post('/createContentOrigin', function (req, res) {
     username = "admin",
         password = "CdnLab_123",
         url = "https://cdsm.cdn.ab.sk:8443/servlet/com.cisco.unicorn.ui.ChannelApiServlet?action=createContentOrigin&name=" + req.body.origName + "&origin=" + req.body.origServer + "&fqdn=" + req.body.origFqdnName,
-        console.log(url);
+        //console.log(url);
     auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
 
     request(
@@ -122,7 +122,7 @@ router.post('/updateContentOrigin/:originID', function (req, res) {
     username = "admin",
         password = "CdnLab_123",
         url = "https://cdsm.cdn.ab.sk:8443/servlet/com.cisco.unicorn.ui.ChannelApiServlet?action=modifyContentOrigin&contentOrigin=" + id + "&name=" + req.body.name + "&origin=" + req.body.originFqdn + "&fqdn=" + req.body.rfqdn,
-        console.log(url);
+        //console.log(url);
     auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
 
     request(
@@ -134,7 +134,7 @@ router.post('/updateContentOrigin/:originID', function (req, res) {
         },
         function (error, response, body) {
             if (error != null || body != null) {
-                console.log(body);
+                //console.log(body);
             }
             if (response != null) {
                 return res.json(response);
@@ -161,7 +161,7 @@ router.delete('/deleteContentOrigin/:originID', function (req, res) {
     username = "admin",
         password = "CdnLab_123",
         url = "https://cdsm.cdn.ab.sk:8443/servlet/com.cisco.unicorn.ui.ChannelApiServlet?action=deleteContentOrigins&contentOrigin=" + id,
-        console.log(url);
+        //console.log(url);
     auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
 
     request(
@@ -173,7 +173,7 @@ router.delete('/deleteContentOrigin/:originID', function (req, res) {
         },
         function (error, response, body) {
             if (error != null || body != null) {
-                console.log(body);
+                //console.log(body);
             }
             if (response != null) {
                 return res.json(response);
@@ -220,9 +220,9 @@ router.get('/getDeliveryServices', function (req, res) {
                 parseString(response.body, function (err, result) {
                     for (var i = 0, len = result.listing.record.length; i < len; i++) {
                         var obj = result.listing.record[i];
-                        console.log(obj.$.Fqdn);
+                        //console.log(obj.$.Fqdn);
                     }
-                    console.log(response);
+                    //console.log(response);
                     return res.json(result);
                 });
             }
@@ -260,9 +260,9 @@ router.get('/getSE', function (req, res) {
                 parseString(response.body, function (err, result) {
                     for (var i = 0, len = result.listing.record.length; i < len; i++) {
                         var obj = result.listing.record[i];
-                        console.log(obj.$.Fqdn);
+                        //console.log(obj.$.Fqdn);
                     }
-                    console.log(response);
+                    //console.log(response);
                     return res.json(result);
                 });
             }
@@ -282,7 +282,7 @@ router.post('/createDeliveryService', function (req, res) {
     username = "admin",
         password = "CdnLab_123",
         url = "https://cdsm.cdn.ab.sk:8443/servlet/com.cisco.unicorn.ui.ChannelApiServlet?action=createDeliveryService&deliveryService=" + req.body.serName + "&contentOrigin=" + req.body.idOrigin,
-        console.log(url);
+        //console.log(url);
     auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
 
     request(
@@ -320,7 +320,7 @@ router.delete('/deleteDeliveryService/:ID', function (req, res) {
     username = "admin",
         password = "CdnLab_123",
         url = "https://cdsm.cdn.ab.sk:8443/servlet/com.cisco.unicorn.ui.ChannelApiServlet?action=deleteDeliveryServices&deliveryService=" + id,
-        console.log(url);
+        //console.log(url);
     auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
 
     request(
@@ -332,7 +332,7 @@ router.delete('/deleteDeliveryService/:ID', function (req, res) {
         },
         function (error, response, body) {
             if (error != null || body != null) {
-                console.log(body);
+                //console.log(body);
             }
             if (response != null) {
                 return res.json(response);
@@ -354,7 +354,7 @@ router.post('/assignSE', function (req, res) {
     username = "admin",
         password = "CdnLab_123",
         url = "https://cdsm.cdn.ab.sk:8443/servlet/com.cisco.unicorn.ui.ChannelApiServlet?action=assignSEs&deliveryService=" + req.body.delSerID + "&contentAcquirer=" + req.body.seID + "&se=" + req.body.seID,
-        console.log(url);
+        //console.log(url);
     auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
 
     request(
@@ -387,7 +387,7 @@ router.post('/unAssignSE', function (req, res) {
     username = "admin",
         password = "CdnLab_123",
         url = "https://cdsm.cdn.ab.sk:8443/servlet/com.cisco.unicorn.ui.ChannelApiServlet?action=unassignSEs&deliveryService=" + req.body.delSerID + "&se=all",
-        console.log(url);
+        //console.log(url);
     auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
 
     request(

@@ -96,7 +96,7 @@ function onListening() {
 
 //-----------------------------
 
-exports.connection = function () {
+
 
     var io = require("socket.io")(http);
 
@@ -106,14 +106,16 @@ exports.connection = function () {
     io.on('connection', function (socket) {
         console.log('Client connected.');
 
-        socket.on('message_from_browser', function (message) {
+        
+
+        socket.on('add-customer', function (message) {
             console.log("Message from browser broadcasted: " + message.text);
             var updated_message = {
                 text: message.text,
                 port: PORT
             };
 
-            socket1.emit('server_message', updated_message);
+            io.emit('notification', updated_message);
             //socket2.emit('server_message', updated_message);
 
         });
@@ -134,4 +136,3 @@ exports.connection = function () {
             console.log('RECEIVED MESSAGE FROM ANOTHER SERVER ON PORT ' + message.port + ": " + message.text);
         });
     });
-}

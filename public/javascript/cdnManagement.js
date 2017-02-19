@@ -1,9 +1,11 @@
 var app = angular.module('cdnManagement', ['ngCookies']);
 
-app.controller('TabController', ['$location','$cookieStore', '$scope', '$http', '$window', function ($location,$cookieStore, $scope, $http, $window) {
-    console.log($location);
-    $scope.formData = {};
-    $scope.cdnData = {};
+
+app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http', '$window', function ($location, $cookieStore, $scope, $http, $window) {
+
+    $scope.formDataCdni = {};
+    $scope.cdniData = {};
+    $scope.cdniDataCopy = {};
 
     $scope.formFootprintsData = {};
     $scope.footprintData = {};
@@ -22,18 +24,26 @@ app.controller('TabController', ['$location','$cookieStore', '$scope', '$http', 
     var serviceEnginesReceived = 0;
 
     var loggedUser = $cookieStore.get('user');
+    var socket = null;
 
     $scope.user = loggedUser[0].login;
 
-    this.tab = 1;
-    this.isSet = function (checkTab) {
-        return this.tab === checkTab;
-    };
-    this.setTab = function (setTab) {
-        this.tab = setTab;
-    };
+
 
     var callbackCounter = 0;
+
+    $scope.init = function () {
+        var socket = io.connect('http://localhost:8080');
+        /*$scope.join = function () {
+            socket.emit('add-customer', $scope.currentCustomer);
+        };
+
+        socket.on('notification', function (data) {
+            $scope.$apply(function () {
+                $scope.newCustomers.push(data.customer);
+            });
+        });*/
+    }
 
     $scope.logout = function () {
         $http.get('/logoutUser')
@@ -46,8 +56,8 @@ app.controller('TabController', ['$location','$cookieStore', '$scope', '$http', 
             });
     }
 
-    $scope.createOffer = function(){
-        $http.get('http://localhost:8080/cdniApi/createOfferAdmin')
+    $scope.createOffer = function (cdni) {
+        $http.post('http://localhost:8080/cdniApi/initialOffer', cdni)
             .success(function (data) {
                 console.log(data);
                 //window.location = '/'
@@ -64,10 +74,11 @@ app.controller('TabController', ['$location','$cookieStore', '$scope', '$http', 
     //---------------------------------------------------------------------------------------------------------------------------------------------------
 
     $scope.addCDN = function () {
-        $http.post('/addCDN', $scope.formData)
+
+        $http.post('/addCDN', $scope.formDataCdni)
             .success(function (data) {
-                $scope.formData = {};
-                $scope.cdnData = data;
+                $scope.formDataCdni = {};
+                $scope.cdniData = data;
                 console.log(data);
             })
             .error(function (error) {
@@ -75,36 +86,14 @@ app.controller('TabController', ['$location','$cookieStore', '$scope', '$http', 
             });
     };
 
-    function connectCDN() {
-        $http.get('/connectCDN')
-            .success(function (data) {
-                //$scope.cdnData = data;
-                console.log(data);
-            })
-            .error(function (error) {
-                console.log('Error: ' + error);
-            });
-    }
 
     //GET ALL CDN
     $http.get('/getData')
+
         .success(function (data) {
-            $scope.cdnData = data;
-            callbackCounter++;
-            if (callbackCounter == 2) {
-                connectCDN();
-                callbackCounter = 0;
-            }
-            /*
-            $scope.formData.name = data[0].name;
-            $scope.formData.url = data[0].url;
-            $scope.formData.url_translator = data[0].url_translator;
-            $scope.formData.url_cdn = data[0].url_cdn;
-            $scope.formData.port_cdn = data[0].port_cdn;
-            $scope.formData.login = data[0].login;
-            $scope.formData.priority = data[0].priority;
-            $scope.formData.endpoint_gateway_type = data[0].endpoint_gateway_type;
-            $scope.formData.endpoint_type = data[0].endpoint_type;*/
+            $scope.cdniData = data;
+            $scope.
+                callbackCounter++;
 
             console.log(data);
         })
@@ -116,7 +105,8 @@ app.controller('TabController', ['$location','$cookieStore', '$scope', '$http', 
     $scope.deleteCDNinterface = function (cdnID) {
         $http.delete('/deleteCDNinterface/' + cdnID)
             .success(function (data) {
-                $scope.cdnData = data;
+                $scope.cdniData = data;
+                console.log(data);
                 console.log(data);
             })
             .error(function (data) {
@@ -135,10 +125,7 @@ app.controller('TabController', ['$location','$cookieStore', '$scope', '$http', 
         .success(function (data) {
             $scope.footprintData = data;
             callbackCounter++;
-            if (callbackCounter == 2) {
-                connectCDN();
-                callbackCounter = 0;
-            }
+
             console.log(data);
         })
         .error(function (error) {
@@ -171,8 +158,6 @@ app.controller('TabController', ['$location','$cookieStore', '$scope', '$http', 
         waitingDialog.show();
         $http.post('/cdsmApi/createContentOrigin', $scope.formCreateContent)
             .success(function (data) {
-                $scope.formData = {};
-                $scope.cdnData = data;
                 $window.location.reload();
             })
             .error(function (error) {
@@ -196,8 +181,6 @@ app.controller('TabController', ['$location','$cookieStore', '$scope', '$http', 
         waitingDialog.show();
         $http.post('/cdsmApi/updateContentOrigin/' + tableData.id, tableData)
             .success(function (data) {
-                $scope.formData = {};
-                $scope.cdnData = data;
                 $window.location.reload();
             })
             .error(function (error) {
@@ -214,8 +197,6 @@ app.controller('TabController', ['$location','$cookieStore', '$scope', '$http', 
         waitingDialog.show();
         $http.delete('/cdsmApi/deleteContentOrigin/' + originID)
             .success(function (data) {
-                $scope.formData = {};
-                $scope.cdnData = data;
                 $window.location.reload();
             })
             .error(function (error) {
@@ -386,8 +367,6 @@ app.controller('TabController', ['$location','$cookieStore', '$scope', '$http', 
         console.log(tempObj)
         $http.post('/cdsmApi/createDeliveryService', tempObj)
             .success(function (data) {
-                $scope.formData = {};
-                $scope.cdnData = data;
                 $window.location.reload();
             })
             .error(function (error) {
@@ -400,8 +379,6 @@ app.controller('TabController', ['$location','$cookieStore', '$scope', '$http', 
         waitingDialog.show();
         $http.delete('/cdsmApi/deleteDeliveryService/' + ID)
             .success(function (data) {
-                $scope.formData = {};
-                $scope.cdnData = data;
                 $window.location.reload();
             })
             .error(function (error) {
@@ -440,19 +417,15 @@ app.controller('TabController', ['$location','$cookieStore', '$scope', '$http', 
         if (swtch === 1) {
             $http.post('/cdsmApi/assignSE', tempObj)
                 .success(function (data) {
-                    $scope.formData = {};
-                    $scope.cdnData = data;
                     $window.location.reload();
                 })
                 .error(function (error) {
                     console.log('Error: ' + error);
                 });
         }
-        else{
+        else {
             $http.post('/cdsmApi/unAssignSE', tempObj)
                 .success(function (data) {
-                    $scope.formData = {};
-                    $scope.cdnData = data;
                     $window.location.reload();
                 })
                 .error(function (error) {
@@ -477,38 +450,16 @@ app.controller('TabController', ['$location','$cookieStore', '$scope', '$http', 
         $scope.editingDataDelivery[tableData.id] = false
     }
 
+}]);
 
-    /*
-    $http.get('/api/v1/users')
-        .success(function(data) {
-            $scope.userData = data;
-            console.log(data);
-        })
-        .error(function(error) {
-            console.log('Error: ' + error);
-        });
-    // CREATE NEW USER
-    $scope.createUser = function() {
-        $http.post('/api/v1/users', $scope.formData)
-            .success(function(data) {
-                $scope.formData = {};
-                $scope.userData = data;
-                console.log(data);
-            })
-            .error(function(error) {
-                console.log('Error: ' + error);
-            });
+app.controller('TabController', ['$scope', function ($scope) {
+
+    this.tab = 1;
+    this.isSet = function (checkTab) {
+        return this.tab === checkTab;
     };
- 
-    //DELETE USER
-    $scope.deleteUser = function() {
-        $http.delete('/api/v1/users/' + userID)
-            .success(function(data) {
-                $scope.userData = data;
-                console.log(data);
-            })
-            .error(function(data) {
-                console.log('Error: ' + data);
-            });
-    };*/
+    this.setTab = function (setTab) {
+        this.tab = setTab;
+    };
+
 }]);

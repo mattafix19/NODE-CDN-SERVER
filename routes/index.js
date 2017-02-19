@@ -3,7 +3,6 @@ var session = require('express-session');
 var router = express.Router();
 var pg = require('pg');
 var path = require('path');
-//var cdniManager = require('CdniManager');
 
 var soap = require('soap');
 
@@ -12,9 +11,7 @@ var www = require('../bin/www');
 var Pgb = require("pg-bluebird");
 var pgb = new Pgb();
 
-//var cdniMan = new cdniManager(pgb);
 
-//var connectionString = process.env.DATABASE_URL || 'postgres://localhost:5432';
 var connectionString = 'postgres://localhost:5432/Martin'
 
 router.use(session({
@@ -32,7 +29,6 @@ var footprints = [];
 //app.use('/', mainRoutes);
 //app.use('/cdn-admin', cdnAdminRoutes);
 //app.use('/cdn-api', cdnApiRoutes);
-
 
 //---------------------------------------------------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------------------------------------------
@@ -60,10 +56,6 @@ router.get('/afterLogin', function (req, res, next) {
         res.sendFile(path.join(__dirname, '../views', 'cdnManagement.html'));
 });
 
-router.get('/connectCDN', function (req, res) {
-    console.log("Neco");
-    www.connection();
-});
 
 //---------------------------------------------------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------------------------------------------
@@ -81,7 +73,7 @@ router.get('/getFootprints', function (req, res, next) {
             return cnn.client.query("SELECT * FROM footprint");
         })
         .then(function (result) {
-            console.log(result.rows);
+            //console.log(result.rows);
 
             for (var i = 0; i < result.rows.length; i++) {
                 footprints.push(result.rows[i]);
@@ -183,10 +175,10 @@ router.get('/getData', function (req, res, next) {
     pgb.connect(connectionString)
         .then(function (connection) {
             cnn = connection;
-            return cnn.client.query("SELECT * FROM cdn_interface cdn JOIN endpoint_gateway_type endp ON cdn.endpoint_gateway_type_id = endp.id_gateway JOIN endpoint_type endpt ON cdn.endpoint_type_id = endpt.id_type");
+            return cnn.client.query("SELECT cdn.id,cdn.name,cdn.url,cdn.url_translator,cdn.url_cdn,cdn.port_cdn,cdn.login,cdn.priority,endp.endpoint_gateway_type,endpt.endpoint_type,offStat.status FROM cdn_interface cdn JOIN endpoint_gateway_type endp ON cdn.endpoint_gateway_type_id = endp.id_gateway JOIN endpoint_type endpt ON cdn.endpoint_type_id = endpt.id_type JOIN offer_status offStat ON cdn.offer_status = offStat.id_type");
         })
         .then(function (result) {
-            console.log(result.rows);
+            //console.log(result.rows);
 
             for (var i = 0; i < result.rows.length; i++) {
                 interfaces.push(result.rows[i]);
