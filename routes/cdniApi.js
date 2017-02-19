@@ -21,42 +21,44 @@ router.use(session({
     secret: 'secret_key'
 }));
 
-router.use(function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-  next();
+router.use(function (req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
 });
 
-var interfaces = [];
-var footprints = [];
-
 router.post('/initialOffer', function (req, res, next) {
-    
-    console.log(req);
 
-    console.log("received");
+    //console.log(req);
+    var senderReq = req.body.sender;
+    var target = req.body.target;
+
+    var urlReq = target.url;
 
     var request = require('request');
-    var request = request.defaults({
-        strictSSL: false,
-        rejectUnauthorized: false
-    });
-        url = "http://localhost:8081/createOffer"
-    
-    request(
-        {
-            url: url,
-        },
+
+    urlSend = "http://" + urlReq + "/createOffer"
+
+    request.post(
+        urlSend,
+        { json: { sender: senderReq } },
         function (error, response, body) {
-            if (error != null || body != null) {
-                console.log(body);
-            }
-            if (response != null) {
-                return res.json(response);
+            if (!error && response.statusCode == 200) {
+                console.log(body)
             }
         }
     );
+});
 
+
+router.post('/createOffer', function (req, res, next) {
+
+    var sender = req.body.sender;
+    
+
+
+
+    res.send("OK");
 });
 
 module.exports = router;

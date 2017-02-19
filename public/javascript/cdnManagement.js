@@ -15,6 +15,7 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
     $scope.deliveryServicesData = {};
     $scope.deliveryServicesAll = {};
 
+    $scope.ownInterface = {};
 
     $scope.formCreateContent = {};
     $scope.formCreateDelSer = {};
@@ -27,10 +28,6 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
     var socket = null;
 
     $scope.user = loggedUser[0].login;
-
-
-
-    var callbackCounter = 0;
 
     $scope.init = function () {
         var socket = io.connect('http://localhost:8080');
@@ -57,7 +54,11 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
     }
 
     $scope.createOffer = function (cdni) {
-        $http.post('http://localhost:8080/cdniApi/initialOffer', cdni)
+        var req = {
+            sender: $scope.ownInterface,
+            target: cdni
+        }
+        $http.post('http://localhost:8080/cdniApi/initialOffer', req)
             .success(function (data) {
                 console.log(data);
                 //window.location = '/'
@@ -92,9 +93,11 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
 
         .success(function (data) {
             $scope.cdniData = data;
-            $scope.
-                callbackCounter++;
-
+            for (var i = 0; i < data.length; i++){
+                if (data[i].id === 1){
+                    $scope.ownInterface = data[i];
+                }
+            }
             console.log(data);
         })
         .error(function (error) {
@@ -124,7 +127,6 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
     $http.get('/getFootprints')
         .success(function (data) {
             $scope.footprintData = data;
-            callbackCounter++;
 
             console.log(data);
         })
