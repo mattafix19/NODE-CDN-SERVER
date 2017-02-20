@@ -13,6 +13,8 @@ var pgb = new Pgb();
 
 var db = require('../services/databaseService.js');
 
+
+
 var connectionString = 'postgres://localhost:5432/Martin'
 
 router.use(session({
@@ -30,6 +32,8 @@ var footprints = [];
 //app.use('/', mainRoutes);
 //app.use('/cdn-admin', cdnAdminRoutes);
 //app.use('/cdn-api', cdnApiRoutes);
+
+
 
 //---------------------------------------------------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------------------------------------------
@@ -63,169 +67,17 @@ router.get('/afterLogin', function (req, res, next) {
 //MANAGING FOOTPRINTS FOR SPECIFIC CDN Interface APIs
 //---------------------------------------------------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------------------------------------------
-
-router.get('/getFootprints', function (req, res, next) {
-
-    var cnn;
-
-    pgb.connect(connectionString)
-        .then(function (connection) {
-            cnn = connection;
-            return cnn.client.query("SELECT * FROM footprint");
-        })
-        .then(function (result) {
-            //console.log(result.rows);
-
-            for (var i = 0; i < result.rows.length; i++) {
-                footprints.push(result.rows[i]);
-            }
-            loadedFootprints = true;
-            cnn.done();
-            var temp_field = footprints;
-            footprints = [];
-            return res.json(temp_field);
-        })
-        .catch(function (error) {
-            console.log(error);
-        });
+router.get('/getData', db.getData);
+router.get('/getFootprints', db.getFootprints);
+router.post('/addFootprints', db.addFootprints);
 
 
-    // Get a Postgres client from the connection pool
-    /*pg.connect(connectionString, function(err, client, done) {
-        // Handle connection errors
-        if(err) {
-          done();
-          console.log(err);
-          return res.status(500).json({ success: false, data: err});
-        }
-        
-        // SQL Query > Select Data
-        //var query = client.query("SELECT * FROM cdn_interface ORDER BY id ASC;");
-        var query = client.query("SELECT * FROM footprint");
-           //SELECT value FROM cdn_interface cdn JOIN endpoint_gateway_type endp ON cdn.endpoint_gateway_type_id = endp.id JOIN endpoint_type endpt ON cdn.endpoint_type_id = endpt.id
-
-        // Stream results back one row at a time
-        query.on('row', function(row) {
-            results.push(row);
-        });
-
-        // After all data is returned, close connection and return results
-        query.on('end', function() {
-            done();
-            return res.json(results);
-        });
-
-    });*/
-
-});
-
-//ADD FOOTPRINT
-router.post('/addFootprints', function (req, res) {
-
-    var results = [];
-
-    // Grab data from http request
-    var data = {
-        endpoint: req.body.endpoint,
-        subnetNum: req.body.subnetNum,
-        maskNum: req.body.maskNum,
-        subnetIp: req.body.subnetIp,
-        prefix: req.body.prefix
-    };
-
-    // Get a Postgres client from the connection pool
-    pg.connect(connectionString, function (err, client, done) {
-        // Handle connection errors
-        if (err) {
-            done();
-            console.log(err);
-            return res.status(500).json({ success: false, data: err });
-        }
-
-        // SQL Query > Insert Data
-        client.query("INSERT INTO footprint (endpoint_id,subnet_num,mask_num,subnet_ip,prefix) VALUES ($1,$2,$3,$4,$5)", [data.endpoint, data.subnetNum, data.maskNum, data.subnetIp, data.prefix]);
-
-        // SQL Query > Select Data
-        var query = client.query("SELECT * FROM footprint ORDER BY id ASC");
-
-        // Stream results back one row at a time
-        query.on('row', function (row) {
-            results.push(row);
-        });
-
-        // After all data is returned, close connection and return results
-        query.on('end', function () {
-            done();
-            return res.json(results);
-        });
-
-    });
-});
 
 //---------------------------------------------------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------------------------------------------
 //CDN INTERFACE APIs
 //---------------------------------------------------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------------------------------------------
-
-//GET ALL CDN INTERFACES
-/*router.get('/getData', function (req, res, next) {
-
-    var cnn;
-
-    pgb.connect(connectionString)
-        .then(function (connection) {
-            cnn = connection;
-            return cnn.client.query("SELECT * FROM cdn_interface cdn JOIN endpoint_gateway_type endp ON cdn.endpoint_gateway_type_id = endp.id_gateway JOIN endpoint_type endpt ON cdn.endpoint_type_id = endpt.id_type JOIN offer_status offStat ON cdn.offer_status = offStat.id_offer_status");
-        })
-        .then(function (result) {
-            //console.log(result.rows);
-
-            for (var i = 0; i < result.rows.length; i++) {
-                interfaces.push(result.rows[i]);
-            }
-
-            var temp_field = [];
-            temp_field = interfaces;
-            interfaces = [];
-            cnn.done();
-            return res.json(temp_field);
-
-        })
-        .catch(function (error) {
-            console.log(error);
-        });
-
-
-    /*
-    var results = [];
-    // Get a Postgres client from the connection pool
-    pg.connect(connectionString, function(err, client, done) {
-        // Handle connection errors
-        if(err) {
-          done();
-          console.log(err);
-          return res.status(500).json({ success: false, data: err});
-        }
-
-        // SQL Query > Select Data
-        //var query = client.query("SELECT * FROM cdn_interface ORDER BY id ASC;");
-        var query = client.query("SELECT * FROM cdn_interface cdn JOIN endpoint_gateway_type endp ON cdn.endpoint_gateway_type_id = endp.id_gateway JOIN endpoint_type endpt ON cdn.endpoint_type_id = endpt.id_type");
-           //SELECT value FROM cdn_interface cdn JOIN endpoint_gateway_type endp ON cdn.endpoint_gateway_type_id = endp.id JOIN endpoint_type endpt ON cdn.endpoint_type_id = endpt.id
-
-        // Stream results back one row at a time
-        query.on('row', function(row) {
-            results.push(row);
-        });
-
-        // After all data is returned, close connection and return results
-        query.on('end', function() {
-            done();
-            return res.json(results);
-        });
-
-    });
-});*/
 
 //INSERT CDN interface
 router.post('/addCDN', function (req, res) {

@@ -93,13 +93,13 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
     $http.get('/getData')
 
         .success(function (data) {
-            $scope.cdniData = data;
-            for (var i = 0; i < data.length; i++){
-                if (data[i].id === 1){
-                    $scope.ownInterface = data[i];
+            console.log(data);
+            $scope.cdniData = data.data;
+            for (var i = 0; i < data.data.length; i++){
+                if (data.data[i].id === 1){
+                    $scope.ownInterface = data.data[i];
                 }
             }
-            console.log(data);
         })
         .error(function (error) {
             console.log('Error: ' + error);
@@ -127,9 +127,8 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
 
     $http.get('/getFootprints')
         .success(function (data) {
-            $scope.footprintData = data;
-
             console.log(data);
+            $scope.footprintData = data.data;
         })
         .error(function (error) {
             console.log('Error: ' + error);
@@ -140,7 +139,7 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
         $http.post('/addFootprints', $scope.formFootprintsData)
             .success(function (data) {
                 $scope.formFootprintsData = {};
-                $scope.footprintData = data;
+                $scope.footprintData = data.data;
                 console.log(data);
             })
             .error(function (error) {
