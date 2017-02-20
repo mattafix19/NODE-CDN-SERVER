@@ -7,18 +7,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- stylesheets -->
     <link href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.5/yeti/bootstrap.min.css" rel="stylesheet" media="screen">
-    <link href="stylesheets/style2.css" rel="stylesheet" media="screen">
+    <link href="stylesheets/styleCdnManagement.css" rel="stylesheet" media="screen">
     <!-- scripts -->
     <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.min.js"></script>
     <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.0/angular-cookies.js"></script>
+    <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
 
-    <script src="javascripts/loading.js"></script>
-    <script src="javascripts/cdnManagement.js"></script>
+    <!-- local scripts -->
+    <script src="javascript/external/loading.js"></script>
+    <script src="javascript/cdnManagement.js"></script>
 </head>
 
-<body ng-controller="TabController as tab">
+<body ng-controller="MainController as tab">
     <div class="jumbotron">
         <div class="row">
             <div class="col-sm-offset-1">
@@ -27,430 +29,540 @@
             </div>
         </div>
     </div>
-    <nav class="navbar navbar-default">
-        <div class="container-fluid">
+    <div ng-controller="TabController as tab" ng-init="init()">
+        <nav class="navbar navbar-default">
+            <div class="container-fluid">
 
-            <!-- Collect the nav links, forms, and other content for toggling -->
-            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-                <ul class="nav navbar-nav">
-
-
-
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">CDN Interface <span class="caret"></span></a>
-                        <ul class="dropdown-menu">
-                            <li><a href="#" ng-class="{ active:tab.isSet(2) }" ng-click="tab.setTab(2)">CDN Interface Overview</a></li>
-                            <li><a href="#" ng-class="{ active:tab.isSet(1) }" ng-click="tab.setTab(1)">Edit CDN Interface</a></li>
-                            <li><a href="#" ng-class="{ active:tab.isSet(3) }" ng-click="tab.setTab(3)">Add Footprints</a></li>
-                        </ul>
-                    </li>
+                <!-- Collect the nav links, forms, and other content for toggling -->
+                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                    <ul class="nav navbar-nav">
 
 
 
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">CDSM Operations <span class="caret"></span></a>
-                        <ul class="dropdown-menu">
-                            <li><a href="#" ng-class="{ active:tab.isSet(2) }" ng-click="tab.setTab(4)">Content Origins</a></li>
-                            <li><a href="#" ng-class="{ active:tab.isSet(1) }" ng-click="tab.setTab(5)">Delivery Services</a></li>
-                        </ul>
-                    </li>
-                    <li ng-class="{ active:tab.isSet(6) }">
-                        <a href ng-click="tab.setTab(6)">LOGS</a>
-                    </li>
-                </ul>
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">CDN Interface <span class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="#" ng-class="{ active:tab.isSet(1) }" ng-click="tab.setTab(1)">CDN Interface Overview</a></li>
+                                <li><a href="#" ng-class="{ active:tab.isSet(2) }" ng-click="tab.setTab(2)">Edit CDN Interface</a></li>
+                                <li><a href="#" ng-class="{ active:tab.isSet(3) }" ng-click="tab.setTab(3)">Add Footprints</a></li>
+                                <li><a href="#" ng-class="{ active:tab.isSet(4) }" ng-click="tab.setTab(6)">CDNi Interconnection</a></li>
+                            </ul>
+                        </li>
 
-                <ul class="nav navbar-nav navbar-right">
-                    <li>
-                        <a href ng-click="logout()">Logout</a>
-                    </li>
-                </ul>
-            </div>
-            <!-- /.navbar-collapse -->
-        </div>
-        <!-- /.container-fluid -->
-    </nav>
-    <!--  Description Tab's Content  -->
-    <div class="container" ng-show="tab.isSet(1)">
-        <div class='TabHeading'>
-        </div>
-        <h2>Edit CDN Interface</h2>
-        <br>
-        <form class="form-horizontal">
-            <div class="form-group">
-                <label for="name" class="col-sm-1 control-label">Name</label>
-                <div class="col-sm-3">
-                    <input type="text" class="form-control" id="name" placeholder="Name" ng-model="formData.name">
+
+
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">CDSM Operations <span class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="#" ng-class="{ active:tab.isSet(2) }" ng-click="tab.setTab(4)">Content Origins</a></li>
+                                <li><a href="#" ng-class="{ active:tab.isSet(1) }" ng-click="tab.setTab(5)">Delivery Services</a></li>
+                            </ul>
+                        </li>
+                        <li ng-class="{ active:tab.isSet(6) }">
+                            <a href ng-click="tab.setTab(6)">LOGS</a>
+                        </li>
+                    </ul>
+
+                    <ul class="nav navbar-nav navbar-right">
+                        <li>
+                            <a href ng-click="logout()">Logout</a>
+                        </li>
+                    </ul>
                 </div>
+                <!-- /.navbar-collapse -->
             </div>
-            <div class="form-group">
-                <label for="url" class="col-sm-1 control-label">URL</label>
-                <div class="col-sm-3">
-                    <input class="form-control" id="url" placeholder="URL" ng-model="formData.url">
-                </div>
-            </div>
-            <div class="form-group">
-                <label for="url_translator" class="col-sm-1 control-label">URL Translator</label>
-                <div class="col-sm-3">
-                    <input class="form-control" id="url_translator" placeholder="URL Translator" ng-model="formData.url_translator">
-                </div>
-            </div>
-            <div class="form-group">
-                <label for="url_cdn" class="col-sm-1 control-label">URL CDN</label>
-                <div class="col-sm-3">
-                    <input class="form-control" id="url_cdn" placeholder="URL CDN" ng-model="formData.url_cdn">
-                </div>
-            </div>
-            <div class="form-group">
-                <label for="port_cdn" class="col-sm-1 control-label">Port CDN</label>
-                <div class="col-sm-3">
-                    <input class="form-control" id="port_cdn" placeholder="Port CDN" ng-model="formData.port_cdn">
-                </div>
-            </div>
-            <div class="form-group">
-                <label for="login" class="col-sm-1 control-label">Login</label>
-                <div class="col-sm-3">
-                    <input class="form-control" id="login" placeholder="Login" ng-model="formData.login">
-                </div>
-            </div>
-            <div class="form-group">
-                <label for="pass" class="col-sm-1 control-label">Password</label>
-                <div class="col-sm-3">
-                    <input type="password" class="form-control" id="pass" placeholder="Password" ng-model="formData.pass">
-                </div>
-            </div>
-            <div class="form-group">
-                <label for="priority" class="col-sm-1 control-label">Priority</label>
-                <div class="col-sm-3">
-                    <input class="form-control" id="priority" placeholder="Priority" ng-model="formData.priority">
-                </div>
-            </div>
-            <div class="form-group">
-                <label for="endpoint_gateway_type" class="col-sm-1 control-label">Endpoint gateway type</label>
-                <div class="col-sm-3">
-                    <input class="form-control" id="endpoint_gateway_type" ng-model="formData.endpoint_gateway_type">
-                </div>
-            </div>
-            <div class="form-group">
-                <label for="endpoint_type" class="col-sm-1 control-label">Endpoint Type</label>
-                <div class="col-sm-3">
-                    <input class="form-control" id="endpoint_type" ng-model="formData.endpoint_type">
-                </div>
-            </div>
-            <div class="form-group">
-                <div class="col-sm-offset-1 col-sm-10">
-                    <button type="submit" class="btn btn-default" ng-click="addCDN()">EDIT</button>
-                </div>
-            </div>
+            <!-- /.container-fluid -->
+        </nav>
+        <!--  Description Tab's Content  -->
+        <div class="container" ng-show="tab.isSet(1)">
 
-
-        </form>
-
-    </div>
-    <div class="container" ng-show="tab.isSet(3)">
-        <div class='TabHeading'>
-        </div>
-        <h2>Add Footprints</h2>
-        <br>
-        <form class="form-horizontal">
-            <div class="form-group">
-                <label for="endpoint" class="col-sm-1 control-label">Endpoint</label>
-                <div class="col-sm-3">
-                    <input type="text" class="form-control" id="Endpoint" placeholder="Endpoint" ng-model="formFootprintsData.endpoint">
-                </div>
-            </div>
-            <div class="form-group">
-                <label for="subnetNum" class="col-sm-1 control-label">Subnet num</label>
-                <div class="col-sm-3">
-                    <input class="form-control" id="subnetNum" placeholder="Subnet Num" ng-model="formFootprintsData.subnetNum">
-                </div>
-            </div>
-            <div class="form-group">
-                <label for="maskNum" class="col-sm-1 control-label">Mask num</label>
-                <div class="col-sm-3">
-                    <input class="form-control" id="maskNum" placeholder="Mask num" ng-model="formFootprintsData.maskNum">
-                </div>
-            </div>
-            <div class="form-group">
-                <label for="subnetIp" class="col-sm-1 control-label">Subnet IP</label>
-                <div class="col-sm-3">
-                    <input class="form-control" id="subnetIP" placeholder="Subnet IP" ng-model="formFootprintsData.subnetIp">
-                </div>
-            </div>
-            <div class="form-group">
-                <label for="prefix" class="col-sm-1 control-label">Prefix</label>
-                <div class="col-sm-3">
-                    <input class="form-control" id="prefix" placeholder="Prefix" ng-model="formFootprintsData.prefix">
-                </div>
-            </div>
-
-            <div class="form-group">
-                <div class="col-sm-offset-1 col-sm-10">
-                    <button type="neco" class="btn btn-default" ng-click="addFootprint()">ADD</button>
-                </div>
-            </div>
-
-
-        </form>
-
-    </div>
-    <div class="container" ng-show="tab.isSet(2)">
-        <table class="table table-bordered">
-            <h2>CDN Overview</h2>
-            <br>
-            <tr>
-                <td>ID</td>
-                <td>Name</td>
-                <td>URL</td>
-                <td>URL Translator</td>
-                <td>URL CDN</td>
-                <td>Port CDN</td>
-                <td>Login</td>
-                <td>Priority</td>
-                <td>Endpoint gateway type</td>
-                <td>Endpoint Type</td>
-                <td>Delete CDN</td>
-
-                <tr ng-repeat="cdn in cdnData">
-                    <td>{{cdn.id}}</td>
-                    <td>{{cdn.name}}</td>
-                    <td>{{cdn.url}}</td>
-                    <td>{{cdn.url_translator}}</td>
-                    <td>{{cdn.url_cdn}}</td>
-                    <td>{{cdn.port_cdn}}</td>
-                    <td>{{cdn.login}}</td>
-                    <td>{{cdn.priority}}</td>
-                    <td>{{cdn.endpoint_gateway_type}}</td>
-                    <td>{{cdn.endpoint_type}}</td>
-                    <td><input class="lead" type="checkbox" ng-click="deleteCDNinterface(cdn.id)"></li>
-                    </td>
-                </tr>
-            </tr>
-        </table>
-        <h2>Footprints</h2>
-
-        <div ng-repeat="foot in footprintData">
-            <li>
-                {{foot.subnet_ip}}
-            </li>
-        </div>
-        <table class="table table-bordered">
-            <h2>Content Origins</h2>
-            <br>
-            <tr>
-                <td>Name</td>
-                <td>Origin FQDN</td>
-                <td>FQDN</td>
-
-                <tr ng-repeat="origin in contentOriginsData">
-                    <td>{{origin.name}}</td>
-                    <td>{{origin.originFqdn}}</td>
-                    <td>{{origin.rfqdn}}</td>
-                </tr>
-            </tr>
-        </table>
-    </div>
-
-    <!--  Content Origins Tab  -->
-    <div ng-show="tab.isSet(4)" ng-click="">
-        <div class='TabHeading'>
             <div>
-                <h3>Content Origins Editation</h3>
+                <h2>Cdn Interconnection Establishment</h2>
+                <div>
+                    <form class="form-horizontal">
+                        <div class="form-group">
+                            <label for="endpoint" class="col-sm-1 control-label">CDNI URL</label>
+                            <div class="col-sm-3">
+                                <input type="text" class="form-control" id="origName" placeholder="Origin Name" ng-model="formDataCdnIUrl">
 
-                <table class="table table-bordered table-striped">
-                    <h4>Actual Content Origins</h4>
-                    <thead>
-                        <tr>
-                            <th class="">Name</th>
-                            <th class="">Origin FQDN</th>
-                            <th class="">FQDN</th>
-                            <th class="">Options</th>
-                        </tr>
-                    </thead>
-                    <h5>NOTE: check if there is no active delivery service assigned to content origin if so, delete will not
-                        be applied</h5>
-                    <tbody>
-                        <tr ng-repeat="origin in contentOriginsData">
-
-                            <td>
-                                <div ng-hide="editingData[origin.id]">{{origin.name}}</div>
-                                <div ng-show="editingData[origin.id]"><input type="text" ng-model="origin.name" /></div>
-                            </td>
-
-                            <td>
-                                <div ng-hide="editingData[origin.id]">{{origin.originFqdn}}</div>
-                                <div ng-show="editingData[origin.id]"><input type="text" ng-model="origin.originFqdn" /></div>
-                            </td>
-
-                            <td>
-                                <div ng-hide="editingData[origin.id]">{{origin.rfqdn}}</div>
-                                <div ng-show="editingData[origin.id]"><input type="text" ng-model="origin.rfqdn" /></div>
-                            </td>
-
-                            <td>
-                                <button class="btn btn-danger btn-xs" ng-click="deleteContentOrigin(origin.id)">Delete</button>
-                                <button class="btn btn-success btn-xs" ng-hide="editingData[origin.id]" ng-click="modify(origin)">Modify</button>
-                                <button class="btn btn-success btn-xs" ng-show="editingData[origin.id]" ng-click="updateContentOrigin(origin)">Update</button>
-                                <button class="btn btn btn-warning btn-xs" ng-show="editingData[origin.id]" ng-click="cancel(origin)">Cancel</button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                            </div>
+                            <button class="btn btn-default" ng-click="createOffer()">Create</button>
+                        </div>
+                    </form>
+                </div>
             </div>
+            <table class="table table-bordered">
+                <h2>CDN Overview</h2>
+                <br>
+                <tr>
+                    <td>ID</td>
+                    <td>Name</td>
+                    <td>URL</td>
+                    <td>URL Translator</td>
+                    <td>URL CDN</td>
+                    <td>Port CDN</td>
+                    <td>Login</td>
+                    <td>Priority</td>
+                    <td>Endpoint gateway type</td>
+                    <td>Endpoint Type</td>
 
-            <h4>Create Content Origin</h4>
+                    <tr ng-repeat="cdni in cdniData" ng-if="cdni.id === 1">
+                        <td>{{cdni.id}}</td>
+                        <td>{{cdni.name}}</td>
+                        <td>{{cdni.url}}</td>
+                        <td>{{cdni.url_translator}}</td>
+                        <td>{{cdni.url_cdn}}</td>
+                        <td>{{cdni.port_cdn}}</td>
+                        <td>{{cdni.login}}</td>
+                        <td>{{cdni.priority}}</td>
+                        <td>{{cdni.endpoint_gateway_type}}</td>
+                        <td>{{cdni.endpoint_type}}</td>
+                    </tr>
+                </tr>
+            </table>
+            <h2>Footprints</h2>
+
+            <div ng-repeat="foot in footprintData">
+                <li>
+                    {{foot.subnet_ip}}
+                </li>
+            </div>
+            <table class="table table-bordered">
+                <h2>Content Origins</h2>
+                <br>
+                <tr>
+                    <td>Name</td>
+                    <td>Origin FQDN</td>
+                    <td>FQDN</td>
+
+                    <tr ng-repeat="origin in contentOriginsData">
+                        <td>{{origin.name}}</td>
+                        <td>{{origin.originFqdn}}</td>
+                        <td>{{origin.rfqdn}}</td>
+                    </tr>
+                </tr>
+            </table>
+        </div>
+        <div class="container" ng-show="tab.isSet(2)">
+            <div class='TabHeading'>
+            </div>
+            <h2>Edit CDN Interface</h2>
+            <br>
             <form class="form-horizontal">
                 <div class="form-group">
-                    <label for="endpoint" class="col-sm-1 control-label">Content Origin name</label>
+                    <label for="name" class="col-sm-1 control-label">Name</label>
                     <div class="col-sm-3">
-                        <input type="text" class="form-control" id="origName" placeholder="Origin Name" ng-model="formCreateContent.origName">
+                        <input type="text" class="form-control" id="name" placeholder="Name" ng-model="formDataCdni.name">
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="subnetNum" class="col-sm-1 control-label">Origin Server</label>
+                    <label for="url" class="col-sm-1 control-label">URL</label>
                     <div class="col-sm-3">
-                        <input class="form-control" id="origServer" placeholder="Server or IP address" ng-model="formCreateContent.origServer">
+                        <input class="form-control" id="url" placeholder="URL" ng-model="formDataCdni.url">
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="maskNum" class="col-sm-1 control-label">FQDN Name</label>
+                    <label for="url_translator" class="col-sm-1 control-label">URL Translator</label>
                     <div class="col-sm-3">
-                        <input class="form-control" id="origFqdnName" placeholder="FQDN Name" ng-model="formCreateContent.origFqdnName">
+                        <input class="form-control" id="url_translator" placeholder="URL Translator" ng-model="formDataCdni.url_translator">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="url_cdn" class="col-sm-1 control-label">URL CDN</label>
+                    <div class="col-sm-3">
+                        <input class="form-control" id="url_cdn" placeholder="URL CDN" ng-model="formDataCdni.url_cdn">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="port_cdn" class="col-sm-1 control-label">Port CDN</label>
+                    <div class="col-sm-3">
+                        <input class="form-control" id="port_cdn" placeholder="Port CDN" ng-model="formDataCdni.port_cdn">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="login" class="col-sm-1 control-label">Login</label>
+                    <div class="col-sm-3">
+                        <input class="form-control" id="login" placeholder="Login" ng-model="formDataCdni.login">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="pass" class="col-sm-1 control-label">Password</label>
+                    <div class="col-sm-3">
+                        <input type="password" class="form-control" id="pass" placeholder="Password" ng-model="formDataCdni.pass">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="priority" class="col-sm-1 control-label">Priority</label>
+                    <div class="col-sm-3">
+                        <input class="form-control" id="priority" placeholder="Priority" ng-model="formDataCdni.priority">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="endpoint_gateway_type" class="col-sm-1 control-label">Endpoint gateway type</label>
+                    <div class="col-sm-3">
+                        <input class="form-control" id="endpoint_gateway_type" ng-model="formDataCdni.endpoint_gateway_type">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="endpoint_type" class="col-sm-1 control-label">Endpoint Type</label>
+                    <div class="col-sm-3">
+                        <input class="form-control" id="endpoint_type" ng-model="formDataCdni.endpoint_type">
                     </div>
                 </div>
                 <div class="form-group">
                     <div class="col-sm-offset-1 col-sm-10">
-                        <button type="neco" class="btn btn-default" ng-click="createContentOrigin()">Create</button>
+                        <button type="submit" class="btn btn-default" ng-click="addCDN()">EDIT</button>
                     </div>
                 </div>
 
 
             </form>
+
         </div>
-        <br>
-    </div>
-    <!--  Spec Tab's Content  -->
-    <div ng-show="tab.isSet(5)">
-        <div class='TabHeading'>
-            <h3>Delivery services Editation</h3>
-            <div>
 
-                <table class="table table-bordered table-striped">
-                    <h4>Actual Delivery Services</h4>
-                    <thead>
-                        <tr>
-                            <th class="">Name</th>
-                            <th class="">Origin FQDN</th>
-                            <th class="">FQDN</th>
-                            <th class="">Service Engine</th>
-                            <th class="">Options</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr ng-repeat="service in deliveryServicesAll">
-
-                            <td>
-                                <div ng-hide="editingDataDelivery[service.id]">{{service.name}}</div>
-                                <div ng-show="editingDataDelivery[service.id]"><input type="text" ng-model="service.name" /></div>
-                            </td>
-
-                            <td>
-                                <div ng-hide="editingDataDelivery[service.id]">{{service.originFqdn}}</div>
-                                <div ng-show="editingDataDelivery[service.id]"><input type="text" ng-model="service.originFqdn" /></div>
-                            </td>
-
-                            <td>
-                                <div ng-hide="editingDataDelivery[service.id]">{{service.rfqdn}}</div>
-                                <div ng-show="editingDataDelivery[service.id]"><input type="text" ng-model="service.rfqdn" /></div>
-                            </td>
-
-                            <td>
-                                <div ng-hide="editingDataDelivery[service.id]">{{service.seName}}</div>
-                                <div ng-show="editingDataDelivery[service.id]"><input type="text" ng-model="service.seName" /></div>
-                            </td>
-
-                            <td>
-                                <button class="btn btn-danger btn-xs" ng-click="deleteDeliveryService(service.id)">Delete</button>
-                                <button class="btn btn-success btn-xs" ng-hide="editingDataDelivery[service.id]" ng-click="modifyDelivery(service)">Modify</button>
-                                <button class="btn btn-success btn-xs" ng-show="editingDataDelivery[service.id]" ng-click="updateDeliveryService(service)">Update</button>
-                                <button class="btn btn btn-warning btn-xs" ng-show="editingDataDelivery[service.id]" ng-click="cancelDelivery(service)">Cancel</button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+        <div class="container" ng-show="tab.isSet(3)">
+            <div class='TabHeading'>
             </div>
-            <div>
+            <h2>Add Footprints</h2>
+            <br>
+            <form class="form-horizontal">
+                <div class="form-group">
+                    <label for="endpoint" class="col-sm-1 control-label">Endpoint</label>
+                    <div class="col-sm-3">
+                        <input type="text" class="form-control" id="Endpoint" placeholder="Endpoint" ng-model="formFootprintsData.endpoint">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="subnetNum" class="col-sm-1 control-label">Subnet num</label>
+                    <div class="col-sm-3">
+                        <input class="form-control" id="subnetNum" placeholder="Subnet Num" ng-model="formFootprintsData.subnetNum">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="maskNum" class="col-sm-1 control-label">Mask num</label>
+                    <div class="col-sm-3">
+                        <input class="form-control" id="maskNum" placeholder="Mask num" ng-model="formFootprintsData.maskNum">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="subnetIp" class="col-sm-1 control-label">Subnet IP</label>
+                    <div class="col-sm-3">
+                        <input class="form-control" id="subnetIP" placeholder="Subnet IP" ng-model="formFootprintsData.subnetIp">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="prefix" class="col-sm-1 control-label">Prefix</label>
+                    <div class="col-sm-3">
+                        <input class="form-control" id="prefix" placeholder="Prefix" ng-model="formFootprintsData.prefix">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-sm-offset-1 col-sm-10">
+                        <button type="neco" class="btn btn-default" ng-click="addFootprint()">ADD</button>
+                    </div>
+                </div>
+
+
+            </form>
+
+        </div>
+        <div class="container" ng-show="tab.isSet(6)">
+            <div class='TabHeading'>
+            </div>
+            <h2>CDNi Interconnections</h2>
+            <br>
+            <table class="table table-bordered">
+                <h3>Accepted Offers</h3>
+                <tr>
+                    <td>ID</td>
+                    <td>Name</td>
+                    <td>URL</td>
+                    <td>URL Translator</td>
+                    <td>URL CDN</td>
+                    <td>Port CDN</td>
+                    <td>Login</td>
+                    <td>Priority</td>
+                    <td>Endpoint gateway type</td>
+                    <td>Endpoint Type</td>
+                    <td>Offer Status</td>
+
+                    <tr ng-repeat="cdni in cdniData" ng-if="cdni.id_offer_status === 1">
+                        <td>{{cdni.id}}</td>
+                        <td>{{cdni.name}}</td>
+                        <td>{{cdni.url}}</td>
+                        <td>{{cdni.url_translator}}</td>
+                        <td>{{cdni.url_cdn}}</td>
+                        <td>{{cdni.port_cdn}}</td>
+                        <td>{{cdni.login}}</td>
+                        <td>{{cdni.priority}}</td>
+                        <td>{{cdni.endpoint_gateway_type}}</td>
+                        <td>{{cdni.endpoint_type}}</td>
+                        <td>{{cdni.status}}</td>
+                    </tr>
+                </tr>
+            </table>
+
+            <table class="table table-bordered">
+                <h3>Awaiting offers</h3>
+                <tr>
+                    <td>ID</td>
+                    <td>Name</td>
+                    <td>URL</td>
+                    <td>URL Translator</td>
+                    <td>URL CDN</td>
+                    <td>Port CDN</td>
+                    <td>Login</td>
+                    <td>Priority</td>
+                    <td>Endpoint gateway type</td>
+                    <td>Endpoint Type</td>
+                    <td>Offer Status</td>
+
+                    <tr ng-repeat="cdni in cdniData" ng-if="cdni.id_offer_status === 2">
+                        <td>{{cdni.id}}</td>
+                        <td>{{cdni.name}}</td>
+                        <td>{{cdni.url}}</td>
+                        <td>{{cdni.url_translator}}</td>
+                        <td>{{cdni.url_cdn}}</td>
+                        <td>{{cdni.port_cdn}}</td>
+                        <td>{{cdni.login}}</td>
+                        <td>{{cdni.priority}}</td>
+                        <td>{{cdni.endpoint_gateway_type}}</td>
+                        <td>{{cdni.endpoint_type}}</td>
+                        <td>{{cdni.status}}</td>
+                    </tr>
+                </tr>
+            </table>
+            <table class="table table-bordered">
+                <h3>Not offered</h3>
+                <tr>
+                    <td>ID</td>
+                    <td>Name</td>
+                    <td>URL</td>
+                    <td>URL Translator</td>
+                    <td>URL CDN</td>
+                    <td>Port CDN</td>
+                    <td>Login</td>
+                    <td>Priority</td>
+                    <td>Endpoint gateway type</td>
+                    <td>Endpoint Type</td>
+                    <td>Offer Status</td>
+                    <td>Offer</td>
+
+                    <tr ng-repeat="cdni in cdniData" ng-if="(cdni.id_offer_status != 2) && (cdni.id != 1)">
+                        <td>{{cdni.id}}</td>
+                        <td>{{cdni.name}}</td>
+                        <td>{{cdni.url}}</td>
+                        <td>{{cdni.url_translator}}</td>
+                        <td>{{cdni.url_cdn}}</td>
+                        <td>{{cdni.port_cdn}}</td>
+                        <td>{{cdni.login}}</td>
+                        <td>{{cdni.priority}}</td>
+                        <td>{{cdni.endpoint_gateway_type}}</td>
+                        <td>{{cdni.endpoint_type}}</td>
+                        <td>{{cdni.status}}</td>
+                        <td>
+                            <button type="neco" class="btn btn-success" ng-click="createOffer(cdni)">Offer</button>
+                        </td>
+                    </tr>
+                </tr>
+            </table>
+
+        </div>
+        <!--  Content Origins Tab  -->
+        <div ng-show="tab.isSet(4)" ng-click="">
+            <div class='TabHeading'>
+                <div>
+                    <h3>Content Origins Editation</h3>
+
+                    <table class="table table-bordered table-striped">
+                        <h4>Actual Content Origins</h4>
+                        <thead>
+                            <tr>
+                                <th class="">Name</th>
+                                <th class="">Origin FQDN</th>
+                                <th class="">FQDN</th>
+                                <th class="">Options</th>
+                            </tr>
+                        </thead>
+                        <h5>NOTE: check if there is no active delivery service assigned to content origin if so, delete will
+                            not be applied</h5>
+                        <tbody>
+                            <tr ng-repeat="origin in contentOriginsData">
+
+                                <td>
+                                    <div ng-hide="editingData[origin.id]">{{origin.name}}</div>
+                                    <div ng-show="editingData[origin.id]"><input type="text" ng-model="origin.name" /></div>
+                                </td>
+
+                                <td>
+                                    <div ng-hide="editingData[origin.id]">{{origin.originFqdn}}</div>
+                                    <div ng-show="editingData[origin.id]"><input type="text" ng-model="origin.originFqdn" /></div>
+                                </td>
+
+                                <td>
+                                    <div ng-hide="editingData[origin.id]">{{origin.rfqdn}}</div>
+                                    <div ng-show="editingData[origin.id]"><input type="text" ng-model="origin.rfqdn" /></div>
+                                </td>
+
+                                <td>
+                                    <button class="btn btn-danger btn-xs" ng-click="deleteContentOrigin(origin.id)">Delete</button>
+                                    <button class="btn btn-success btn-xs" ng-hide="editingData[origin.id]" ng-click="modify(origin)">Modify</button>
+                                    <button class="btn btn-success btn-xs" ng-show="editingData[origin.id]" ng-click="updateContentOrigin(origin)">Update</button>
+                                    <button class="btn btn btn-warning btn-xs" ng-show="editingData[origin.id]" ng-click="cancel(origin)">Cancel</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h4>Create Content Origin</h4>
                 <form class="form-horizontal">
                     <div class="form-group">
-                        <label for="endpoint" class="col-sm-1 control-label">Delivery Service Name</label>
+                        <label for="endpoint" class="col-sm-1 control-label">Content Origin name</label>
                         <div class="col-sm-3">
-                            <input type="text" class="form-control" id="serviceName" placeholder="Service Name" ng-model="formCreateDelSer.serName">
+                            <input type="text" class="form-control" id="origName" placeholder="Origin Name" ng-model="formCreateContent.origName">
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="subnetNum" class="col-sm-1 control-label">Content Origin</label>
+                        <label for="subnetNum" class="col-sm-1 control-label">Origin Server</label>
                         <div class="col-sm-3">
-                            <select ng-model="formCreateDelSer.contentOrigin">
-                                <option ng-repeat="x in contentOriginsData">{{x.name}}</option>
-                            </select>
+                            <input class="form-control" id="origServer" placeholder="Server or IP address" ng-model="formCreateContent.origServer">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="maskNum" class="col-sm-1 control-label">FQDN Name</label>
+                        <div class="col-sm-3">
+                            <input class="form-control" id="origFqdnName" placeholder="FQDN Name" ng-model="formCreateContent.origFqdnName">
                         </div>
                     </div>
                     <div class="form-group">
                         <div class="col-sm-offset-1 col-sm-10">
-                            <button type="neco" class="btn btn-default" ng-click="createDeliveryService()">Create</button>
+                            <button type="neco" class="btn btn-default" ng-click="createContentOrigin()">Create</button>
                         </div>
                     </div>
 
 
                 </form>
             </div>
+            <br>
+        </div>
+        <!--  Spec Tab's Content  -->
+        <div ng-show="tab.isSet(5)">
+            <div class='TabHeading'>
+                <h3>Delivery services Editation</h3>
+                <div>
 
-            <div>
+                    <table class="table table-bordered table-striped">
+                        <h4>Actual Delivery Services</h4>
+                        <thead>
+                            <tr>
+                                <th class="">Name</th>
+                                <th class="">Origin FQDN</th>
+                                <th class="">FQDN</th>
+                                <th class="">Service Engine</th>
+                                <th class="">Options</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="service in deliveryServicesAll">
 
-                <table class="table table-bordered table-striped">
-                    <h4>Assing Service Engine</h4>
-                    <thead>
-                        <tr>
-                            <th class="">Delivery Service</th>
-                            <th class="">Assigned Service Engine</th>
-                            <th class="">Service Engine</th>
-                            <th class="">Assign Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr ng-repeat="service in deliveryServicesAll">
-                            <td>
-                               {{service.name}}
-                            </td>
+                                <td>
+                                    <div ng-hide="editingDataDelivery[service.id]">{{service.name}}</div>
+                                    <div ng-show="editingDataDelivery[service.id]"><input type="text" ng-model="service.name" /></div>
+                                </td>
 
-                            <td>
-                                {{service.seName}}
-                            </td>
+                                <td>
+                                    <div ng-hide="editingDataDelivery[service.id]">{{service.originFqdn}}</div>
+                                    <div ng-show="editingDataDelivery[service.id]"><input type="text" ng-model="service.originFqdn" /></div>
+                                </td>
 
-                            <td>
-                                <select ng-model="formAssignDelSer.seName">
+                                <td>
+                                    <div ng-hide="editingDataDelivery[service.id]">{{service.rfqdn}}</div>
+                                    <div ng-show="editingDataDelivery[service.id]"><input type="text" ng-model="service.rfqdn" /></div>
+                                </td>
+
+                                <td>
+                                    <div ng-hide="editingDataDelivery[service.id]">{{service.seName}}</div>
+                                    <div ng-show="editingDataDelivery[service.id]"><input type="text" ng-model="service.seName" /></div>
+                                </td>
+
+                                <td>
+                                    <button class="btn btn-danger btn-xs" ng-click="deleteDeliveryService(service.id)">Delete</button>
+                                    <button class="btn btn-success btn-xs" ng-hide="editingDataDelivery[service.id]" ng-click="modifyDelivery(service)">Modify</button>
+                                    <button class="btn btn-success btn-xs" ng-show="editingDataDelivery[service.id]" ng-click="updateDeliveryService(service)">Update</button>
+                                    <button class="btn btn btn-warning btn-xs" ng-show="editingDataDelivery[service.id]" ng-click="cancelDelivery(service)">Cancel</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div>
+                    <form class="form-horizontal">
+                        <div class="form-group">
+                            <label for="endpoint" class="col-sm-1 control-label">Delivery Service Name</label>
+                            <div class="col-sm-3">
+                                <input type="text" class="form-control" id="serviceName" placeholder="Service Name" ng-model="formCreateDelSer.serName">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="subnetNum" class="col-sm-1 control-label">Content Origin</label>
+                            <div class="col-sm-3">
+                                <select ng-model="formCreateDelSer.contentOrigin">
+                                <option ng-repeat="x in contentOriginsData">{{x.name}}</option>
+                            </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-offset-1 col-sm-10">
+                                <button type="neco" class="btn btn-default" ng-click="createDeliveryService()">Create</button>
+                            </div>
+                        </div>
+
+
+                    </form>
+                </div>
+
+                <div>
+
+                    <table class="table table-bordered table-striped">
+                        <h4>Assing Service Engine</h4>
+                        <thead>
+                            <tr>
+                                <th class="">Delivery Service</th>
+                                <th class="">Assigned Service Engine</th>
+                                <th class="">Service Engine</th>
+                                <th class="">Assign Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="service in deliveryServicesAll">
+                                <td>
+                                    {{service.name}}
+                                </td>
+
+                                <td>
+                                    {{service.seName}}
+                                </td>
+
+                                <td>
+                                    <select ng-model="formAssignDelSer.seName">
                                     <option ng-repeat="x in serviceEnginesData">{{x.name}}</option>
                                 </select>
-                            </td>
+                                </td>
 
-                            <td>
-                                <button class="btn btn-success btn-xs" ng-click="assignSE(service.name,1)">Assing</button>
-                                <button class="btn btn-danger btn-xs" ng-click="assignSE(service.name,0)">Unassign</button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                                <td>
+                                    <button class="btn btn-success btn-xs" ng-click="assignSE(service.name,1)">Assing</button>
+                                    <button class="btn btn-danger btn-xs" ng-click="assignSE(service.name,0)">Unassign</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
             </div>
-
+            <br>
         </div>
-        <br>
-    </div>
-
-    <!--  Review Tab's Content  -->
-    <div ng-show="tab.isSet(6)">
-        <div class='TabHeading'>
-            <h3>CDN Logs</h3>
-        </div>
-        <br>
     </div>
 </body>
 
