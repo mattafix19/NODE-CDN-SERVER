@@ -41,10 +41,19 @@ router.post('/initialOffer', function (req, res, next) {
 
     request.post(
         urlSend,
-        { json: { sender: senderReq } },
+        {
+            json:{
+                sender: senderReq
+            }
+        },
         function (error, response, body) {
             if (!error && response.statusCode == 200) {
                 console.log(body)
+
+                
+
+
+                return res.json(body);
             }
         }
     );
@@ -54,7 +63,7 @@ router.post('/initialOffer', function (req, res, next) {
 router.post('/createOffer', function (req, res, next) {
 
     var sender = req.body.sender;
-    
+
 
 
 

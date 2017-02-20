@@ -11,6 +11,7 @@ var www = require('../bin/www');
 var Pgb = require("pg-bluebird");
 var pgb = new Pgb();
 
+var db = require('../services/databaseService.js');
 
 var connectionString = 'postgres://localhost:5432/Martin'
 
@@ -168,7 +169,7 @@ router.post('/addFootprints', function (req, res) {
 //---------------------------------------------------------------------------------------------------------------------------------------------------
 
 //GET ALL CDN INTERFACES
-router.get('/getData', function (req, res, next) {
+/*router.get('/getData', function (req, res, next) {
 
     var cnn;
 
@@ -223,8 +224,8 @@ router.get('/getData', function (req, res, next) {
             return res.json(results);
         });
 
-    });*/
-});
+    });
+});*/
 
 //INSERT CDN interface
 router.post('/addCDN', function (req, res) {

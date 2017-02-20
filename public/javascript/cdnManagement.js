@@ -61,6 +61,7 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
         $http.post('http://localhost:8080/cdniApi/initialOffer', req)
             .success(function (data) {
                 console.log(data);
+                
                 //window.location = '/'
             })
             .error(function (error) {
