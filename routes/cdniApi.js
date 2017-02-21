@@ -12,9 +12,8 @@ var www = require('../bin/www');
 var Pgb = require("pg-bluebird");
 var pgb = new Pgb();
 
-//var cdniMan = new cdniManager(pgb);
+var db = require('../services/databaseService.js');
 
-//var connectionString = process.env.DATABASE_URL || 'postgres://localhost:5432';
 var connectionString = 'postgres://localhost:5432/Martin'
 
 router.use(session({
@@ -63,9 +62,7 @@ router.post('/initialOffer', function (req, res, next) {
 router.post('/createOffer', function (req, res, next) {
 
     var sender = req.body.sender;
-
-
-
+    var response = db.addCdn(req.body.sender, res, next);
 
     res.send("OK");
 });

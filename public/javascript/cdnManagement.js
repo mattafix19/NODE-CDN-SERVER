@@ -80,7 +80,7 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
         $http.post('/addCDN', $scope.formDataCdni)
             .success(function (data) {
                 $scope.formDataCdni = {};
-                $scope.cdniData = data;
+                $scope.cdniData = data.data;
                 console.log(data);
             })
             .error(function (error) {
