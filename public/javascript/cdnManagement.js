@@ -61,7 +61,7 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
         $http.post('http://localhost:8080/cdniApi/initialOffer', req)
             .success(function (data) {
                 console.log(data);
-                
+                $scope.cdniData = data.data;
                 //window.location = '/'
             })
             .error(function (error) {
@@ -76,7 +76,7 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
     //---------------------------------------------------------------------------------------------------------------------------------------------------
 
     $scope.addCDN = function () {
-
+        $scope.formDataCdni["offerStatus"] = "4";
         $http.post('/addCDN', $scope.formDataCdni)
             .success(function (data) {
                 $scope.formDataCdni = {};

@@ -3,6 +3,8 @@ var session = require('express-session');
 var router = express.Router();
 var pg = require('pg');
 var path = require('path');
+
+var Promise = require('promise');
 //var cdniManager = require('CdniManager');
 
 var soap = require('soap');
@@ -36,12 +38,12 @@ router.post('/initialOffer', function (req, res, next) {
 
     var request = require('request');
 
-    urlSend = "http://" + urlReq + "/createOffer"
+    urlSend = "http://" + urlReq + "/cdniApi/createOffer"
 
     request.post(
         urlSend,
         {
-            json:{
+            json: {
                 sender: senderReq
             }
         },
@@ -49,22 +51,13 @@ router.post('/initialOffer', function (req, res, next) {
             if (!error && response.statusCode == 200) {
                 console.log(body)
 
-                
-
-
-                return res.json(body);
+                return db.updateTarget(target,res,next);
             }
         }
     );
 });
 
 
-router.post('/createOffer', function (req, res, next) {
-
-    var sender = req.body.sender;
-    var response = db.addCdn(req.body.sender, res, next);
-
-    res.send("OK");
-});
+router.post('/createOffer', db.checkInterface);
 
 module.exports = router;

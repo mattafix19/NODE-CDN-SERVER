@@ -92,9 +92,10 @@ function addCdn(req, res, next) {
     pass: req.body.pass,
     priority: req.body.priority,
     endpoint_gateway_type: req.body.endpoint_gateway_type,
-    endpoint_type: req.body.endpoint_type
+    endpoint_type: req.body.endpoint_type,
+    offer_status: req.body.offerStatus
   };
-  db.any('INSERT INTO cdn_interface (name, url, url_translator, url_cdn, port_cdn, login, pass, priority, endpoint_type_id, endpoint_gateway_type_id) values($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)', [data.name, data.url, data.url_translator, data.url_cdn, data.port_cdn, data.login, data.pass, data.priority, data.endpoint_gateway_type, data.endpoint_type])
+  db.any('INSERT INTO cdn_interface (name, url, url_translator, url_cdn, port_cdn, login, pass, priority, endpoint_type_id, endpoint_gateway_type_id, offer_status) values($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)', [data.name, data.url, data.url_translator, data.url_cdn, data.port_cdn, data.login, data.pass, data.priority, data.endpoint_gateway_type, data.endpoint_type, data.offer_status])
     .then(function (result) {
       db.any('SELECT * FROM cdn_interface cdn JOIN endpoint_gateway_type endp ON cdn.endpoint_gateway_type_id = endp.id_gateway JOIN endpoint_type endpt ON cdn.endpoint_type_id = endpt.id_type JOIN offer_status offStat ON cdn.offer_status = offStat.id_offer_status')
         .then(function (result2) {
@@ -174,8 +175,69 @@ function loginUser(req, res, next) {
     });
 }
 
-function insertOfferedCDNI (sender){
+function checkInterface(req, res, next) {
+  db.any('SELECT * from cdn_interface WHERE url=($1)', [req.body.sender.url])
+    .then(function (result) {
+      if (result != 0) {
+        var id = result[0].id;
+        db.any('UPDATE public.cdn_interface SET offer_status=($1) WHERE id=($2)', [id, 2])
+          .then(function (result2) {
+            res.status(200)
+              .json({
+                status: 'success',
+                data: 'OK',
+                message: 'Successfull receive of offer'
+              });
+          })
+          .catch(function (err) {
+            return next(err);
+          });
+      }
+      else {
+        var data = req.body.sender;
+        db.any('INSERT INTO cdn_interface (name, url, url_translator, url_cdn, port_cdn, login, pass, priority, endpoint_type_id, endpoint_gateway_type_id, offer_status) values($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)', [data.name, data.url, data.url_translator, data.url_cdn, data.port_cdn, data.login, data.pass, data.priority, 1, 2, 2])
+          .then(function (result2) {
+            res.status(200)
+              .json({
+                status: 'success',
+                data: 'OK',
+                message: 'Successfull receive of offer'
+              });
+          })
+          .catch(function (err) {
+            return next(err);
+          });
+      }
+    })
+    .catch(function (err) {
+      return next(err);
+    });
+}
 
+function updateTarget(req, res, next) {
+  var id = req.id;
+  db.any('UPDATE public.cdn_interface SET offer_status=($1) WHERE id=($2)', [2,id])
+    .then(function (result) {
+      db.any('SELECT * FROM cdn_interface cdn JOIN endpoint_gateway_type endp ON cdn.endpoint_gateway_type_id = endp.id_gateway JOIN endpoint_type endpt ON cdn.endpoint_type_id = endpt.id_type JOIN offer_status offStat ON cdn.offer_status = offStat.id_offer_status')
+        .then(function (result2) {
+          var interfaces = [];
+          for (var i = 0; i < result2.length; i++) {
+            interfaces.push(result2[i]);
+          }
+          res.status(200)
+            .json({
+              status: 'success',
+              data: interfaces,
+              message: 'Successfull receive of offer'
+            });
+        })
+        .catch(function (err) {
+          return next(err);
+        });
+    })
+    .catch(function (err) {
+      return next(err);
+    });
 }
 
 module.exports = {
@@ -184,5 +246,6 @@ module.exports = {
   addFootprints: addFootprints,
   addCdn: addCdn,
   deleteCDNinterface: deleteCDNinterface,
-  insertOfferedCDNI: insertOfferedCDNI
+  checkInterface: checkInterface,
+  updateTarget: updateTarget
 };

@@ -287,7 +287,7 @@
                     <td>Endpoint Type</td>
                     <td>Offer Status</td>
 
-                    <tr ng-repeat="cdni in cdniData" ng-if="cdni.id_offer_status === 1">
+                    <tr ng-repeat="cdni in cdniData" ng-if="cdni.offer_status === '1'">
                         <td>{{cdni.id}}</td>
                         <td>{{cdni.name}}</td>
                         <td>{{cdni.url}}</td>
@@ -317,8 +317,10 @@
                     <td>Endpoint gateway type</td>
                     <td>Endpoint Type</td>
                     <td>Offer Status</td>
+                    <td>Accept</td>
+                    <td>Decline</td>
 
-                    <tr ng-repeat="cdni in cdniData" ng-if="cdni.id_offer_status === 2">
+                    <tr ng-repeat="cdni in cdniData" ng-if="cdni.offer_status === '2'">
                         <td>{{cdni.id}}</td>
                         <td>{{cdni.name}}</td>
                         <td>{{cdni.url}}</td>
@@ -330,6 +332,12 @@
                         <td>{{cdni.endpoint_gateway_type}}</td>
                         <td>{{cdni.endpoint_type}}</td>
                         <td>{{cdni.status}}</td>
+                        <td>
+                            <button type="neco" class="btn btn-success" ng-click="createOffer(cdni)">Accept</button>
+                        </td>
+                        <td>
+                            <button type="neco" class="btn btn-warning" ng-click="createOffer(cdni)">Decline</button>
+                        </td>
                     </tr>
                 </tr>
             </table>
@@ -349,7 +357,7 @@
                     <td>Offer Status</td>
                     <td>Offer</td>
 
-                    <tr ng-repeat="cdni in cdniData" ng-if="(cdni.id_offer_status != 2) && (cdni.id != 1)">
+                    <tr ng-repeat="cdni in cdniData" ng-if="(cdni.offer_status != '2') && (cdni.id != '1')">
                         <td>{{cdni.id}}</td>
                         <td>{{cdni.name}}</td>
                         <td>{{cdni.url}}</td>

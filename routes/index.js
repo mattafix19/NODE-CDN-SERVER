@@ -7,7 +7,7 @@ var path = require('path');
 //import database Service
 var db = require('../services/databaseService.js');
 
-var connectionString = 'postgres://localhost:5432/Martin'
+var connectionString = 'postgres://localhost:5432/Martin2'
 
 router.use(session({
     secret: 'secret_key'
