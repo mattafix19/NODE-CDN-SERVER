@@ -30,6 +30,8 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
     $scope.user = loggedUser[0].login;
 
     $scope.init = function () {
+        // to get working assign to div ng-init="init()"
+
         var socket = io.connect('http://localhost:8080');
         /*$scope.join = function () {
             socket.emit('add-customer', $scope.currentCustomer);
@@ -58,13 +60,33 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
             sender: $scope.ownInterface,
             target: cdni
         }
+        waitingDialog.show();
         $http.post('http://localhost:8080/cdniApi/initialOffer', req)
             .success(function (data) {
                 console.log(data);
                 $scope.cdniData = data.data;
-                //window.location = '/'
+                waitingDialog.hide();
             })
             .error(function (error) {
+                waitingDialog.hide();
+                console.log('Error: ' + error);
+            });
+    }
+
+    $scope.acceptOffer = function (cdni){
+        var req = {
+            sender: $scope.ownInterface,
+            target: cdni
+        }
+        waitingDialog.show();
+        $http.post('http://localhost:8080/cdniApi/acceptOffer', req)
+            .success(function (data) {
+                console.log(data);
+                $scope.cdniData = data.data;
+                waitingDialog.hide();
+            })
+            .error(function (error) {
+                waitingDialog.hide();
                 console.log('Error: ' + error);
             });
     }
@@ -74,7 +96,7 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
     //CDN INTERFACE FUNCTIONS
     //---------------------------------------------------------------------------------------------------------------------------------------------------
     //---------------------------------------------------------------------------------------------------------------------------------------------------
-
+    //add CDN interface
     $scope.addCDN = function () {
         $scope.formDataCdni["offerStatus"] = "4";
         $http.post('/addCDN', $scope.formDataCdni)

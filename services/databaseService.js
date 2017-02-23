@@ -1,3 +1,4 @@
+//class which contains working with postgre database
 var promise = require('bluebird');
 
 var options = {
@@ -5,12 +6,13 @@ var options = {
   promiseLib: promise
 };
 
+
 var pgp = require('pg-promise')(options);
 var connectionString = 'postgres://localhost:5432/Martin';
 var db = pgp(connectionString);
 
 
-
+//get data from table cdn_interface witch join on foreingn keys
 function getData(req, res, next) {
   db.any('SELECT * FROM cdn_interface cdn JOIN endpoint_gateway_type endp ON cdn.endpoint_gateway_type_id = endp.id_gateway JOIN endpoint_type endpt ON cdn.endpoint_type_id = endpt.id_type JOIN offer_status offStat ON cdn.offer_status = offStat.id_offer_status')
     .then(function (result) {
@@ -30,6 +32,7 @@ function getData(req, res, next) {
     });
 }
 
+//get all footprints
 function getFootprints(req, res, next) {
   db.any('SELECT * from footprint')
     .then(function (result) {
@@ -175,12 +178,15 @@ function loginUser(req, res, next) {
     });
 }
 
-function checkInterface(req, res, next) {
+function registerOffer(req, res, next) {
+  //after get createOffer check the presence of interface
   db.any('SELECT * from cdn_interface WHERE url=($1)', [req.body.sender.url])
     .then(function (result) {
+      //if there is result
       if (result != 0) {
+        //update with offer status 5 -> NEW and respond with 200
         var id = result[0].id;
-        db.any('UPDATE public.cdn_interface SET offer_status=($1) WHERE id=($2)', [id, 2])
+        db.any('UPDATE public.cdn_interface SET offer_status=($1) WHERE id=($2)', [5, id])
           .then(function (result2) {
             res.status(200)
               .json({
@@ -193,9 +199,10 @@ function checkInterface(req, res, next) {
             return next(err);
           });
       }
+      //else create record with status 5 -> NEW and respond with 200
       else {
         var data = req.body.sender;
-        db.any('INSERT INTO cdn_interface (name, url, url_translator, url_cdn, port_cdn, login, pass, priority, endpoint_type_id, endpoint_gateway_type_id, offer_status) values($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)', [data.name, data.url, data.url_translator, data.url_cdn, data.port_cdn, data.login, data.pass, data.priority, 1, 2, 2])
+        db.any('INSERT INTO cdn_interface (name, url, url_translator, url_cdn, port_cdn, login, pass, priority, endpoint_type_id, endpoint_gateway_type_id, offer_status) values($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)', [data.name, data.url, data.url_translator, data.url_cdn, data.port_cdn, data.login, data.pass, data.priority, 1, 2, 5])
           .then(function (result2) {
             res.status(200)
               .json({
@@ -214,7 +221,7 @@ function checkInterface(req, res, next) {
     });
 }
 
-function updateTarget(req, res, next) {
+function notifyOffer(req, res, next) {
   var id = req.id;
   db.any('UPDATE public.cdn_interface SET offer_status=($1) WHERE id=($2)', [2,id])
     .then(function (result) {
@@ -246,6 +253,6 @@ module.exports = {
   addFootprints: addFootprints,
   addCdn: addCdn,
   deleteCDNinterface: deleteCDNinterface,
-  checkInterface: checkInterface,
-  updateTarget: updateTarget
+  registerOffer: registerOffer,
+  notifyOffer: notifyOffer
 };

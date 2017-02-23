@@ -100,9 +100,6 @@ function onListening() {
 
     var io = require("socket.io")(http);
 
-    var socket1 = client.connect('http://localhost:8081', {reconnect: true});
-    var socket2 = client.connect('http://localhost:8082', {reconnect: true});
-
     io.on('connection', function (socket) {
         console.log('Client connected.');
 

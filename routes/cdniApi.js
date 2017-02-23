@@ -51,13 +51,13 @@ router.post('/initialOffer', function (req, res, next) {
             if (!error && response.statusCode == 200) {
                 console.log(body)
 
-                return db.updateTarget(target,res,next);
+                return db.notifyOffer(target,res,next);
             }
         }
     );
 });
 
 
-router.post('/createOffer', db.checkInterface);
+router.post('/createOffer', db.registerOffer);
 
 module.exports = router;
