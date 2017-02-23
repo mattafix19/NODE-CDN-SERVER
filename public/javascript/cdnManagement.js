@@ -79,7 +79,7 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
             target: cdni
         }
         waitingDialog.show();
-        $http.post('http://localhost:8080/cdniApi/acceptOffer', req)
+        $http.post('http://localhost:8080/cdniApi/initialAcceptOffer', req)
             .success(function (data) {
                 console.log(data);
                 $scope.cdniData = data.data;
