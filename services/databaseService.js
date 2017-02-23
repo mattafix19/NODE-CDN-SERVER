@@ -223,7 +223,69 @@ function registerOffer(req, res, next) {
 
 function notifyOffer(req, res, next) {
   var id = req.id;
-  db.any('UPDATE public.cdn_interface SET offer_status=($1) WHERE id=($2)', [2,id])
+  db.any('UPDATE public.cdn_interface SET offer_status=($1) WHERE id=($2)', [2, id])
+    .then(function (result) {
+      db.any('SELECT * FROM cdn_interface cdn JOIN endpoint_gateway_type endp ON cdn.endpoint_gateway_type_id = endp.id_gateway JOIN endpoint_type endpt ON cdn.endpoint_type_id = endpt.id_type JOIN offer_status offStat ON cdn.offer_status = offStat.id_offer_status')
+        .then(function (result2) {
+          var interfaces = [];
+          for (var i = 0; i < result2.length; i++) {
+            interfaces.push(result2[i]);
+          }
+          res.status(200)
+            .json({
+              status: 'success',
+              data: interfaces,
+              message: 'Successfull receive of offer'
+            });
+        })
+        .catch(function (err) {
+          return next(err);
+        });
+    })
+    .catch(function (err) {
+      return next(err);
+    });
+}
+
+function acceptOffer(req, res, next) {
+  //get row from table to get local ID
+  db.any('SELECT * from cdn_interface WHERE url=($1)', [req.body.sender.url])
+    .then(function (result) {
+      //if there is result and is in offer status -> 2 (offered)
+      if ((result != 0) && (result[0].offer_status === "2")) {
+        //update with offer status 5 -> NEW and respond with 200
+        var id = result[0].id;
+        db.any('UPDATE public.cdn_interface SET offer_status=($1) WHERE id=($2)', [1, id])
+          .then(function (result2) {
+            res.status(200)
+              .json({
+                status: 'success',
+                data: 'OK',
+                message: 'Successfull receive of offer'
+              });
+          })
+          .catch(function (err) {
+            return next(err);
+          });
+      }
+      //else create record with status 5 -> NEW and respond with 200
+      else {
+        res.status(404)
+          .json({
+            status: 'FAILED',
+            data: 'FAILED',
+            message: 'Interface not present or is not offered'
+          });
+      }
+    })
+    .catch(function (err) {
+      return next(err);
+    });
+}
+
+function markValidOffer(req, res, next){
+  var id = req.id;
+  db.any('UPDATE public.cdn_interface SET offer_status=($1) WHERE id=($2)', [1, id])
     .then(function (result) {
       db.any('SELECT * FROM cdn_interface cdn JOIN endpoint_gateway_type endp ON cdn.endpoint_gateway_type_id = endp.id_gateway JOIN endpoint_type endpt ON cdn.endpoint_type_id = endpt.id_type JOIN offer_status offStat ON cdn.offer_status = offStat.id_offer_status')
         .then(function (result2) {
@@ -254,5 +316,7 @@ module.exports = {
   addCdn: addCdn,
   deleteCDNinterface: deleteCDNinterface,
   registerOffer: registerOffer,
-  notifyOffer: notifyOffer
+  notifyOffer: notifyOffer,
+  acceptOffer: acceptOffer,
+  markValidOffer: markValidOffer
 };
