@@ -7,28 +7,9 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Launch_server_2",
+            "name": "Launch Program",
             "program": "${workspaceRoot}/bin/www",
-            "cwd": "${workspaceRoot}",
-            "env": {
-                "NODE_ENV": "development",
-                "PORT": "8081",
-                "DATABASE_URL": "postgres://127.0.0.1:5432",
-                "DATABASE": "Martin2"
-            }
-        },
-        {
-            "type": "node",
-            "request": "launch",
-            "name": "Launch_server_1",
-            "program": "${workspaceRoot}/bin/www",
-            "cwd": "${workspaceRoot}",
-            "env": {
-                "NODE_ENV": "development",
-                "PORT": "8080",
-                "DATABASE_URL": "postgres://127.0.0.1:5432",
-                "DATABASE": "Martin1"
-            }
+            "cwd": "${workspaceRoot}"
         },
         {
             "type": "node",

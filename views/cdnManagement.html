@@ -286,6 +286,7 @@
                     <td>Endpoint gateway type</td>
                     <td>Endpoint Type</td>
                     <td>Offer Status</td>
+                    <td>Sync</td>
 
                     <tr ng-repeat="cdni in cdniData" ng-if="(cdni.offer_status === '1') && (cdni.id != '1')">
                         <td>{{cdni.id}}</td>
@@ -299,6 +300,10 @@
                         <td>{{cdni.endpoint_gateway_type}}</td>
                         <td>{{cdni.endpoint_type}}</td>
                         <td>{{cdni.status}}</td>
+                        <td>
+                            <button type="button" class="btn btn-success" ng-click="syncCdni(cdni)">Sync</button>
+                        </td>
+                        
                     </tr>
                 </tr>
             </table>

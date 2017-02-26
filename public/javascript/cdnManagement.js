@@ -90,6 +90,23 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
                 console.log('Error: ' + error);
             });
     }
+    $scope.syncCdni = function (cdni){
+        var req = {
+            sender: $scope.ownInterface,
+            target: cdni
+        }
+        waitingDialog.show();
+        $http.post('http://localhost:8080/cdniApi/createLists', req)
+            .success(function (data) {
+                console.log(data);
+                $scope.cdniData = data.data;
+                waitingDialog.hide();
+            })
+            .error(function (error) {
+                waitingDialog.hide();
+                console.log('Error: ' + error);
+            });
+    }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------
     //---------------------------------------------------------------------------------------------------------------------------------------------------

@@ -16,7 +16,9 @@ router.use(session({
 /* GET home page. */
 router.get('/', function (req, res, next) {
 
+
     var user = req.session.login;
+
 
     if (user == undefined) {
         res.sendFile(path.join(__dirname, '../views', 'login.html'));
