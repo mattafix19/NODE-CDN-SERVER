@@ -128,12 +128,13 @@ router.post('/createLists', function (req, res, next) {
                         var id = senderReq.id;
 
                         db.db.any('SELECT foot.subnet_num, foot.mask_num, foot.subnet_ip, foot.prefix from cdn_interface as cdn JOIN footprint as foot ON cdn.id = foot.endpoint_id where cdn.id = ($1)', [id])
-                            .then(function (result) {
+                            .then(function (result2) {
                                 var footprints = [];
-                                for (var i = 0; i < result.length; i++) {
-                                    footprints.push(result[i]);
+                                for (var i = 0; i < result2.length; i++) {
+                                    footprints.push(result2[i]);
                                 }
-
+                                
+                                
                                 urlSend = "http://" + urlReq + "/cdniApi/setLists"
 
                                 request.post(
@@ -141,7 +142,7 @@ router.post('/createLists', function (req, res, next) {
                                     {
                                         json: {
                                             ContentOrigins: result,
-                                            Footprints: interfaces
+                                            Footprints: footprints
                                         }
                                     },
                                     function (error, response, body) {
@@ -169,7 +170,7 @@ router.post('/createLists', function (req, res, next) {
     //get own dns records
 });
 
-router.post('/createLists', function (req, res, next) {
+router.post('/setLists', function (req, res, next) {
     console.log(req);
 });
 
