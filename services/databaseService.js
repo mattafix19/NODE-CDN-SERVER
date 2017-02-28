@@ -283,7 +283,7 @@ function acceptOffer(req, res, next) {
     });
 }
 
-function markValidOffer(req, res, next){
+function markValidOffer(req, res, next) {
   var id = req.id;
   db.any('UPDATE public.cdn_interface SET offer_status=($1) WHERE id=($2)', [1, id])
     .then(function (result) {
@@ -309,7 +309,29 @@ function markValidOffer(req, res, next){
     });
 }
 
+function getFootprintsList(req) {
+  var id = req.id;
+  db.any('SELECT foot.subnet_num, foot.mask_num, foot.subnet_ip, foot.prefix from cdn_interface as cdn JOIN footprint as foot ON cdn.id = foot.endpoint_id where cdn.id = ($1)', [id])
+    .then(function (result) {
+      var interfaces = [];
+      for (var i = 0; i < result.length; i++) {
+        interfaces.push(result[i]);
+      }
+      res.status(200)
+        .json({
+          status: 'success',
+          data: interfaces,
+          message: 'Successfull receive of offer'
+        });
+
+    })
+    .catch(function (err) {
+      return next(err);
+    });
+}
+
 module.exports = {
+  db:db,
   getData: getData,
   getFootprints: getFootprints,
   addFootprints: addFootprints,
@@ -318,5 +340,6 @@ module.exports = {
   registerOffer: registerOffer,
   notifyOffer: notifyOffer,
   acceptOffer: acceptOffer,
-  markValidOffer: markValidOffer
+  markValidOffer: markValidOffer,
+  getFootprintsList:getFootprintsList
 };

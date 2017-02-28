@@ -90,6 +90,7 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
                 console.log('Error: ' + error);
             });
     }
+    
     $scope.syncCdni = function (cdni){
         var req = {
             sender: $scope.ownInterface,
