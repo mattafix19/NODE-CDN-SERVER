@@ -10,7 +10,9 @@ var db = require('../services/databaseService.js');
 var connectionString = 'postgres://localhost:5432/Martin'
 
 router.use(session({
-    secret: 'secret_key'
+    secret: 'secret_key',
+    resave: true,
+    saveUninitialized: true
 }));
 
 /* GET home page. */
