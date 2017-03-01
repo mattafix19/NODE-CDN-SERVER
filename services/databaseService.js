@@ -199,10 +199,10 @@ function registerOffer(req, res, next) {
             return next(err);
           });
       }
-      //else create record with status 5 -> NEW and respond with 200
+      //else create record with status 5 and type remote endpoint_type = 2 -> NEW and respond with 200
       else {
         var data = req.body.sender;
-        db.any('INSERT INTO cdn_interface (name, url, url_translator, url_cdn, port_cdn, login, pass, priority, endpoint_type_id, endpoint_gateway_type_id, offer_status) values($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)', [data.name, data.url, data.url_translator, data.url_cdn, data.port_cdn, data.login, data.pass, data.priority, 1, 2, 5])
+        db.any('INSERT INTO cdn_interface (name, url, url_translator, url_cdn, port_cdn, login, pass, priority, endpoint_type_id, endpoint_gateway_type_id, offer_status) values($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)', [data.name, data.url, data.url_translator, data.url_cdn, data.port_cdn, data.login, data.pass, data.priority, 2, data.endpoint_gateway_type_id, 5])
           .then(function (result2) {
             res.status(200)
               .json({

@@ -135,8 +135,8 @@ router.post('/createLists', function (req, res, next) {
                                 for (var i = 0; i < result2.length; i++) {
                                     footprints.push(result2[i]);
                                 }
-                                
-                                
+
+
                                 urlSend = "http://" + urlReq + "/cdniApi/setLists"
 
                                 request.post(
@@ -144,7 +144,8 @@ router.post('/createLists', function (req, res, next) {
                                     {
                                         json: {
                                             ContentOrigins: result,
-                                            Footprints: footprints
+                                            Footprints: footprints,
+                                            Sender: senderReq
                                         }
                                     },
                                     function (error, response, body) {
@@ -173,7 +174,46 @@ router.post('/createLists', function (req, res, next) {
 });
 
 router.post('/setLists', function (req, res, next) {
-    console.log(req);
+    var url = req.body.Sender.url
+    db.db.any('SELECT * from cdn_interface WHERE url=($1)', [url])
+        .then(function (result) {
+            var endpointId = result[0].id;
+            var callbackCounter = 0;
+            for (var i = 0; i < req.body.Footprints.length; i++) {
+                
+                var subnetNum = req.body.Footprints[i].subnet_num;
+                var maskNum = req.body.Footprints[i].mask_num;
+                var prefix = req.body.Footprints[i].prefix;
+                var subnetIp = req.body.Footprints[i].subnet_ip;
+                callbackCounter++;
+                db.db.any('INSERT INTO public.footprint (endpoint_id, subnet_num, mask_num, subnet_ip, prefix) VALUES ($1, $2, $3, $4, $5)',[endpointId,subnetNum,maskNum,subnetIp,prefix])
+                    .then(function (result) {
+                        if (callbackCounter === req.body.Footprints.length){
+                            console.log();
+                        }
+                        
+                    })
+                    .catch(function (err) {
+                        return next(err);
+                    });
+            }
+
+
+
+            var footprints = [];
+            for (var i = 0; i < result.length; i++) {
+                footprints.push(result[i]);
+            }
+            res.status(200)
+                .json({
+                    status: 'success',
+                    data: footprints,
+                    message: 'Retrieved ALL Footprints'
+                });
+        })
+        .catch(function (err) {
+            return next(err);
+        });
 });
 
 router.post('/createOffer', db.registerOffer);
