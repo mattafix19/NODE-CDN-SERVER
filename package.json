@@ -18,5 +18,21 @@
     "pg-promise": "^5.5.7",
     "serve-favicon": "~2.3.0",
     "socket.io": "0.8.4"
-  }
+  },
+  "description": "node js cdn server",
+  "main": "node ./bin/www",
+  "directories": {
+    "doc": "docs"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mattafix19/Bakalarka-NODE.git"
+  },
+  "author": "Martin Pecha",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mattafix19/Bakalarka-NODE/issues"
+  },
+  "homepage": "https://github.com/mattafix19/Bakalarka-NODE#readme"
 }

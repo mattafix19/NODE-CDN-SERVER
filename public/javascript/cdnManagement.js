@@ -30,6 +30,8 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
     $scope.user = loggedUser[0].login;
 
     $scope.init = function () {
+        // to get working assign to div ng-init="init()"
+
         var socket = io.connect('http://localhost:8080');
         /*$scope.join = function () {
             socket.emit('add-customer', $scope.currentCustomer);
@@ -58,13 +60,51 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
             sender: $scope.ownInterface,
             target: cdni
         }
+        waitingDialog.show();
         $http.post('http://localhost:8080/cdniApi/initialOffer', req)
             .success(function (data) {
                 console.log(data);
-                
-                //window.location = '/'
+                $scope.cdniData = data.data;
+                waitingDialog.hide();
             })
             .error(function (error) {
+                waitingDialog.hide();
+                console.log('Error: ' + error);
+            });
+    }
+
+    $scope.acceptOffer = function (cdni){
+        var req = {
+            sender: $scope.ownInterface,
+            target: cdni
+        }
+        waitingDialog.show();
+        $http.post('http://localhost:8080/cdniApi/initialAcceptOffer', req)
+            .success(function (data) {
+                console.log(data);
+                $scope.cdniData = data.data;
+                waitingDialog.hide();
+            })
+            .error(function (error) {
+                waitingDialog.hide();
+                console.log('Error: ' + error);
+            });
+    }
+    
+    $scope.syncCdni = function (cdni){
+        var req = {
+            sender: $scope.ownInterface,
+            target: cdni
+        }
+        waitingDialog.show();
+        $http.post('http://localhost:8080/cdniApi/createLists', req)
+            .success(function (data) {
+                console.log(data);
+                $scope.cdniData = data.data;
+                waitingDialog.hide();
+            })
+            .error(function (error) {
+                waitingDialog.hide();
                 console.log('Error: ' + error);
             });
     }
@@ -74,13 +114,13 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
     //CDN INTERFACE FUNCTIONS
     //---------------------------------------------------------------------------------------------------------------------------------------------------
     //---------------------------------------------------------------------------------------------------------------------------------------------------
-
+    //add CDN interface
     $scope.addCDN = function () {
-
+        $scope.formDataCdni["offerStatus"] = "4";
         $http.post('/addCDN', $scope.formDataCdni)
             .success(function (data) {
                 $scope.formDataCdni = {};
-                $scope.cdniData = data;
+                $scope.cdniData = data.data;
                 console.log(data);
             })
             .error(function (error) {
@@ -93,13 +133,13 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
     $http.get('/getData')
 
         .success(function (data) {
-            $scope.cdniData = data;
-            for (var i = 0; i < data.length; i++){
-                if (data[i].id === 1){
-                    $scope.ownInterface = data[i];
+            console.log(data);
+            $scope.cdniData = data.data;
+            for (var i = 0; i < data.data.length; i++){
+                if (data.data[i].id === 1){
+                    $scope.ownInterface = data.data[i];
                 }
             }
-            console.log(data);
         })
         .error(function (error) {
             console.log('Error: ' + error);
@@ -127,9 +167,8 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
 
     $http.get('/getFootprints')
         .success(function (data) {
-            $scope.footprintData = data;
-
             console.log(data);
+            $scope.footprintData = data.data;
         })
         .error(function (error) {
             console.log('Error: ' + error);
@@ -140,7 +179,7 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
         $http.post('/addFootprints', $scope.formFootprintsData)
             .success(function (data) {
                 $scope.formFootprintsData = {};
-                $scope.footprintData = data;
+                $scope.footprintData = data.data;
                 console.log(data);
             })
             .error(function (error) {
