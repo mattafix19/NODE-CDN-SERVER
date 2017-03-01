@@ -87,7 +87,7 @@ router.post('/createContentOrigin', function (req, res) {
         password = "CdnLab_123",
         url = "https://cdsm.cdn.ab.sk:8443/servlet/com.cisco.unicorn.ui.ChannelApiServlet?action=createContentOrigin&name=" + req.body.origName + "&origin=" + req.body.origServer + "&fqdn=" + req.body.origFqdnName,
         //console.log(url);
-    auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
+        auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
 
     request(
         {
@@ -125,7 +125,7 @@ router.post('/updateContentOrigin/:originID', function (req, res) {
         password = "CdnLab_123",
         url = "https://cdsm.cdn.ab.sk:8443/servlet/com.cisco.unicorn.ui.ChannelApiServlet?action=modifyContentOrigin&contentOrigin=" + id + "&name=" + req.body.name + "&origin=" + req.body.originFqdn + "&fqdn=" + req.body.rfqdn,
         //console.log(url);
-    auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
+        auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
 
     request(
         {
@@ -164,7 +164,7 @@ router.delete('/deleteContentOrigin/:originID', function (req, res) {
         password = "CdnLab_123",
         url = "https://cdsm.cdn.ab.sk:8443/servlet/com.cisco.unicorn.ui.ChannelApiServlet?action=deleteContentOrigins&contentOrigin=" + id,
         //console.log(url);
-    auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
+        auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
 
     request(
         {
@@ -285,7 +285,7 @@ router.post('/createDeliveryService', function (req, res) {
         password = "CdnLab_123",
         url = "https://cdsm.cdn.ab.sk:8443/servlet/com.cisco.unicorn.ui.ChannelApiServlet?action=createDeliveryService&deliveryService=" + req.body.serName + "&contentOrigin=" + req.body.idOrigin,
         //console.log(url);
-    auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
+        auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
 
     request(
         {
@@ -323,7 +323,7 @@ router.delete('/deleteDeliveryService/:ID', function (req, res) {
         password = "CdnLab_123",
         url = "https://cdsm.cdn.ab.sk:8443/servlet/com.cisco.unicorn.ui.ChannelApiServlet?action=deleteDeliveryServices&deliveryService=" + id,
         //console.log(url);
-    auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
+        auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
 
     request(
         {
@@ -357,7 +357,7 @@ router.post('/assignSE', function (req, res) {
         password = "CdnLab_123",
         url = "https://cdsm.cdn.ab.sk:8443/servlet/com.cisco.unicorn.ui.ChannelApiServlet?action=assignSEs&deliveryService=" + req.body.delSerID + "&contentAcquirer=" + req.body.seID + "&se=" + req.body.seID,
         //console.log(url);
-    auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
+        auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
 
     request(
         {
@@ -390,7 +390,7 @@ router.post('/unAssignSE', function (req, res) {
         password = "CdnLab_123",
         url = "https://cdsm.cdn.ab.sk:8443/servlet/com.cisco.unicorn.ui.ChannelApiServlet?action=unassignSEs&deliveryService=" + req.body.delSerID + "&se=all",
         //console.log(url);
-    auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
+        auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
 
     request(
         {
@@ -410,11 +410,4 @@ router.post('/unAssignSE', function (req, res) {
     );
 });
 
-var setContentOrigins = function(data){
-    
-}
-
-module.exports = {
-    setContentOrigins:setContentOrigins,
-    router:router
-}
+module.exports = router;

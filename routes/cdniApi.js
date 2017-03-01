@@ -187,26 +187,19 @@ router.post('/setLists', function (req, res, next) {
                 var subnetIp = req.body.Footprints[i].subnet_ip;
                 callbackCounter++;
                 db.db.any('INSERT INTO public.footprint (endpoint_id, subnet_num, mask_num, subnet_ip, prefix) VALUES ($1, $2, $3, $4, $5)',[endpointId,subnetNum,maskNum,subnetIp,prefix])
-                    .then(function (result) {
+                    .then(function (result2) {
                         if (callbackCounter === req.body.Footprints.length){
+                            callbackCounter = 0;
                             console.log();
                             var cdsm = require('../routes/cdsmApi');
-                            cdsm.setContentOrigins(req.body.ContentOrigins);
+                            cdsm.setContentOrigins(req.body.ContentOrigins,result[0].url_cdn);
                         }
                         
                     })
                     .catch(function (err) {
                         return next(err);
                     });
-            }
-
-
-
-            var footprints = [];
-            for (var i = 0; i < result.length; i++) {
-                footprints.push(result[i]);
-            }
-            
+            }            
         })
         .catch(function (err) {
             return next(err);
