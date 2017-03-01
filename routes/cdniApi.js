@@ -190,6 +190,8 @@ router.post('/setLists', function (req, res, next) {
                     .then(function (result) {
                         if (callbackCounter === req.body.Footprints.length){
                             console.log();
+                            var cdsm = require('../routes/cdsmApi');
+                            cdsm.setContentOrigins(req.body.ContentOrigins);
                         }
                         
                     })
@@ -204,12 +206,7 @@ router.post('/setLists', function (req, res, next) {
             for (var i = 0; i < result.length; i++) {
                 footprints.push(result[i]);
             }
-            res.status(200)
-                .json({
-                    status: 'success',
-                    data: footprints,
-                    message: 'Retrieved ALL Footprints'
-                });
+            
         })
         .catch(function (err) {
             return next(err);

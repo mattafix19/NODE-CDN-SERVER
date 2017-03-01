@@ -410,4 +410,11 @@ router.post('/unAssignSE', function (req, res) {
     );
 });
 
-module.exports = router;
+var setContentOrigins = function(data){
+    
+}
+
+module.exports = {
+    setContentOrigins:setContentOrigins,
+    router:router
+}
