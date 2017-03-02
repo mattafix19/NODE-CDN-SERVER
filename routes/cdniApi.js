@@ -30,6 +30,11 @@ router.use(function (req, res, next) {
     next();
 });
 
+//localhost 8080
+var rfqdn1 = ["rfqdn2.cdn.dampech.tk", "rfqdn3.cdn.dampech.tk", "rfqdn4.cdn.dampech.tk","rfqdn5.cdn.dampech.tk"];
+//localhost 8081
+var rfqdn2 = ["rfqdn6.cdn.dampech.tk", "rfqdn7.cdn.dampech.tk", "rfqdn8.cdn.dampech.tk","rfqdn9.cdn.dampech.tk"];
+
 router.post('/initialOffer', function (req, res, next) {
 
     var senderReq = req.body.sender;
@@ -178,28 +183,39 @@ router.post('/setLists', function (req, res, next) {
     db.db.any('SELECT * from cdn_interface WHERE url=($1)', [url])
         .then(function (result) {
             var endpointId = result[0].id;
+            var endpointUrl = result[0].id;
+
+            var rfqdn = null;
+
+            if (endpointUrl == "localhost:8080") {
+                rfqdn = rfqdn1.slice();
+            }
+            else {
+                rfqdn = rfqdn2.slice();
+            }
+
             var callbackCounter = 0;
             for (var i = 0; i < req.body.Footprints.length; i++) {
-                
+
                 var subnetNum = req.body.Footprints[i].subnet_num;
                 var maskNum = req.body.Footprints[i].mask_num;
                 var prefix = req.body.Footprints[i].prefix;
                 var subnetIp = req.body.Footprints[i].subnet_ip;
                 callbackCounter++;
-                db.db.any('INSERT INTO public.footprint (endpoint_id, subnet_num, mask_num, subnet_ip, prefix) VALUES ($1, $2, $3, $4, $5)',[endpointId,subnetNum,maskNum,subnetIp,prefix])
+                db.db.any('INSERT INTO public.footprint (endpoint_id, subnet_num, mask_num, subnet_ip, prefix) VALUES ($1, $2, $3, $4, $5)', [endpointId, subnetNum, maskNum, subnetIp, prefix])
                     .then(function (result2) {
-                        if (callbackCounter === req.body.Footprints.length){
+                        if (callbackCounter === req.body.Footprints.length) {
                             callbackCounter = 0;
                             console.log();
-                            var cdsm = require('../routes/cdsmApi');
-                            cdsm.setContentOrigins(req.body.ContentOrigins,result[0].url_cdn);
+                            var cdsm = require('../routes/backupCdsmAPI');
+                            cdsm.setContentOrigins(req.body.ContentOrigins, result[0].url_cdn, rfqdn);
                         }
-                        
+
                     })
                     .catch(function (err) {
                         return next(err);
                     });
-            }            
+            }
         })
         .catch(function (err) {
             return next(err);
