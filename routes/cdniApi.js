@@ -183,7 +183,7 @@ router.post('/setLists', function (req, res, next) {
     db.db.any('SELECT * from cdn_interface WHERE url=($1)', [url])
         .then(function (result) {
             var endpointId = result[0].id;
-            var endpointUrl = result[0].id;
+            var endpointUrl = result[0].url_cdn;
 
             var rfqdn = null;
 

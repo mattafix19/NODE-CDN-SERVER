@@ -23,7 +23,7 @@ var setContentOrigins = function (data, cdsmUrl, rfqdn) {
             strictSSL: false,
             rejectUnauthorized: false
         });
-
+        //call create content origin
         username = "admin",
             password = "CdnLab_123",
             url = cdsmUrl + ":8443/servlet/com.cisco.unicorn.ui.ChannelApiServlet?action=createContentOrigin&name=" + conOrig.name + "&origin=" + conOrig.originFqdn + "&fqdn=" + rfqdn[i],
@@ -49,7 +49,7 @@ var setContentOrigins = function (data, cdsmUrl, rfqdn) {
                             var name = result.deliveryserviceProvisioning.record[0].$.Name;
 
                             console.log(id);
-
+                            //call create delivery service
                             username = "admin",
                                 password = "CdnLab_123",
                                 url = cdsmUrl + ":8443/servlet/com.cisco.unicorn.ui.ChannelApiServlet?action=createDeliveryService&deliveryService=" + name + "&contentOrigin=" + id,
@@ -72,9 +72,10 @@ var setContentOrigins = function (data, cdsmUrl, rfqdn) {
 
                                             }
                                             else {
-                                                var id = result.deliveryserviceProvisioning.record[0].$.Id;
+                                                var idDeliveryService = result.deliveryserviceProvisioning.record[0].$.Id;
                                                 console.log(id);
-
+                                                
+                                                //call get SE DEVICES 
                                                 username = "admin",
                                                     password = "CdnLab_123",
                                                     url = cdsmUrl + ":8443/servlet/com.cisco.unicorn.ui.DeviceApiServlet?action=getDevices&type=SE",
@@ -104,8 +105,31 @@ var setContentOrigins = function (data, cdsmUrl, rfqdn) {
                                                                     }
                                                                     console.log(devices);
 
-                                                                    for (var i = 0; i < devices.length ; i++){
+                                                                    for (var i = 0; i < devices.length; i++) {
+                                                                        //assign service engines
+                                                                        
+                                                                        username = "admin",
+                                                                            password = "CdnLab_123",
+                                                                            url = cdsmUrl + ":8443/servlet/com.cisco.unicorn.ui.ChannelApiServlet?action=assignSEs&deliveryService=" + idDeliveryService + "&contentAcquirer=" + devices[i].id + "&se=" + devices[i].id,
+                                                                            //console.log(url);
+                                                                            auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
 
+                                                                        request(
+                                                                            {
+                                                                                url: url,
+                                                                                headers: {
+                                                                                    "Authorization": auth
+                                                                                }
+                                                                            },
+                                                                            function (error, response, body) {
+                                                                                if (error != null || body != null) {
+                                                                                    //console.log(body);
+                                                                                }
+                                                                                if (response != null) {
+                                                                                    return res.json(response);
+                                                                                }
+                                                                            }
+                                                                        );
                                                                     }
 
                                                                 }
