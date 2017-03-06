@@ -31,9 +31,9 @@ router.use(function (req, res, next) {
 });
 
 //localhost 8080
-var rfqdn1 = ["rfqdn2.cdn.dampech.tk", "rfqdn3.cdn.dampech.tk", "rfqdn4.cdn.dampech.tk","rfqdn5.cdn.dampech.tk"];
+var rfqdn1 = ["rfqdn2.cdn.dampech.tk", "rfqdn3.cdn.dampech.tk", "rfqdn4.cdn.dampech.tk", "rfqdn5.cdn.dampech.tk"];
 //localhost 8081
-var rfqdn2 = ["rfqdn6.cdn.dampech.tk", "rfqdn7.cdn.dampech.tk", "rfqdn8.cdn.dampech.tk","rfqdn9.cdn.dampech.tk"];
+var rfqdn2 = ["rfqdn6.cdn.dampech.tk", "rfqdn7.cdn.dampech.tk", "rfqdn8.cdn.dampech.tk", "rfqdn9.cdn.dampech.tk"];
 
 router.post('/initialOffer', function (req, res, next) {
 
@@ -183,7 +183,7 @@ router.post('/setLists', function (req, res, next) {
     db.db.any('SELECT * from cdn_interface WHERE url=($1)', [url])
         .then(function (result) {
             var endpointId = result[0].id;
-            var endpointUrl = result[0].url_cdn;
+            var endpointUrl = result[0].url;
 
             var rfqdn = null;
 
@@ -195,6 +195,17 @@ router.post('/setLists', function (req, res, next) {
             }
 
             var callbackCounter = 0;
+
+            if (req.body.Footprints.length === 0) {
+
+                res.status(404)
+                    .json({
+                        status: 'failed',
+                        message: 'No footprints specified'
+                    });
+                return;
+            }
+
             for (var i = 0; i < req.body.Footprints.length; i++) {
 
                 var subnetNum = req.body.Footprints[i].subnet_num;
@@ -208,7 +219,24 @@ router.post('/setLists', function (req, res, next) {
                             callbackCounter = 0;
                             console.log();
                             var cdsm = require('../routes/backupCdsmAPI');
-                            cdsm.setContentOrigins(req.body.ContentOrigins, result[0].url_cdn, rfqdn);
+
+                            cdsm.setContentOrigins(req.body.ContentOrigins, result[0].url_cdn, rfqdn)
+                                .then(function (result) {
+                                    console.log("RETURNED PROMISEEEEEEEEEEE");
+                                    res.status(200)
+                                        .json({
+                                            status: 'success',
+                                            data: result,
+                                            message: 'Retrieved ALL footprints after success footprints insertion'
+                                        });
+                                })
+                                .catch(function (err) {
+                                    console.log(err);
+                                });
+
+                        
+
+
                         }
 
                     })
