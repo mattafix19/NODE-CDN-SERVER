@@ -9,6 +9,14 @@ var routes = require('./routes/index');
 var cdni = require('./routes/cdniApi');
 var cdsm = require('./routes/cdsmApi');
 
+var redis = require("redis");
+var client = redis.createClient();
+
+client.on("error", function (err) {
+    console.log("Error " + err);
+});
+
+
 var app = express();
 
 

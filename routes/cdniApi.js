@@ -154,11 +154,17 @@ router.post('/createLists', function (req, res, next) {
                                         }
                                     },
                                     function (error, response, body) {
-                                        if (!error && response.statusCode == 200 && response.statusCode != 404) {
+                                        if (response.body.status === "Failed"){
+                                            res.send(response);
+                                        }
+                                        else if (!error && response.statusCode == 200 && response.statusCode != 404) {
                                             console.log(body)
                                             return db.markValidOffer(target, res, next);
                                         }
-                                        if (response.statusCode === 404) {
+                                        else if (response.statusCode === 404) {
+                                            res.send(response);
+                                        }
+                                        else if (response.statusCode === 500){
                                             res.send(response);
                                         }
                                     }
@@ -186,7 +192,7 @@ router.post('/setLists', function (req, res, next) {
             var endpointUrl = result[0].url;
 
             var rfqdn = null;
-
+            //resolve rfqdn set
             if (endpointUrl == "localhost:8080") {
                 rfqdn = rfqdn1.slice();
             }
@@ -218,23 +224,38 @@ router.post('/setLists', function (req, res, next) {
                         if (callbackCounter === req.body.Footprints.length) {
                             callbackCounter = 0;
                             console.log();
-                            var cdsm = require('../routes/backupCdsmAPI');
+                            var cdsm = require('../routes/setCdsm');
 
                             cdsm.setContentOrigins(req.body.ContentOrigins, result[0].url_cdn, rfqdn)
                                 .then(function (result) {
-                                    console.log("RETURNED PROMISEEEEEEEEEEE");
-                                    res.status(200)
-                                        .json({
-                                            status: 'success',
-                                            data: result,
-                                            message: 'Retrieved ALL footprints after success footprints insertion'
-                                        });
+                                    if (result === "Success") {
+                                        console.log("RETURNED PROMISEEEEEEEEEEE");
+                                        res.status(200)
+                                            .json({
+                                                status: 'success',
+                                                data: result,
+                                                message: 'Retrieved ALL footprints after success footprints insertion'
+                                            });
+                                    }
+                                    else{
+                                        res.status(500)
+                                            .json({
+                                                status: 'Failed',
+                                                data: result,
+                                                message: 'Error while settings one or all content origins on CDSM'
+                                            });
+                                    }
                                 })
                                 .catch(function (err) {
-                                    console.log(err);
+                                    res.status(500)
+                                            .json({
+                                                status: 'Failed',
+                                                data: err,
+                                                message: 'Error while settings one or all content origins on CDSM'
+                                            });
                                 });
 
-                        
+
 
 
                         }

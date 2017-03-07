@@ -22,10 +22,19 @@ var createContentOrigin = function (cdsmUrl, conOrig, rfqdn) {
             },
             function (error, response, body) {
                 if (response != null) {
+                    
+                    var app = require("../app.js");
+                    var redisClient = app.client;
+
                     var parseString = require('xml2js').parseString;
                     parseString(response.body, function (err, result) {
                         if (result.deliveryserviceProvisioning.message[0].$.status === "fail") {
-
+                            var obj = {
+                                status: "Error",
+                                operation: "Error while creating content origin",
+                                response: result.deliveryserviceProvisioning
+                            }
+                            reject(obj);
                         }
                         else {
                             var id = result.deliveryserviceProvisioning.record[0].$.Id;
@@ -38,9 +47,6 @@ var createContentOrigin = function (cdsmUrl, conOrig, rfqdn) {
                             resolve(obj);
                         }
                     });
-                }
-                if (error) {
-                    reject(error);
                 }
             }
         );
@@ -75,16 +81,18 @@ var createDeliveryService = function (cdsmUrl, obj) {
                     var parseString = require('xml2js').parseString;
                     parseString(response.body, function (err, result) {
                         if (result.deliveryserviceProvisioning.message[0].$.status === "fail") {
-
+                            var obj = {
+                                status: "Error",
+                                operation: "Error while creating delivery service",
+                                response: result.deliveryserviceProvisioning
+                            }
+                            reject(obj);
                         }
                         else {
                             var id = result.deliveryserviceProvisioning.record[0].$.Id;
                             resolve(id);
                         }
                     });
-                }
-                if (error) {
-                    reject(error);
                 }
             }
         );
@@ -121,7 +129,12 @@ var getServiceEngines = function (cdsmUrl, id) {
                     var parseString = require('xml2js').parseString;
                     parseString(response.body, function (err, result) {
                         if (result.listing.message[0].$.status === "fail") {
-
+                            var obj = {
+                                status: "Error",
+                                operation: "Error while getting list of service engines",
+                                response: result.listing
+                            }
+                            reject(obj);
                         }
                         else {
                             for (var i = 0, len = result.listing.device.length; i < len; i++) {
