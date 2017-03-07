@@ -73,7 +73,7 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
             });
     }
 
-    $scope.acceptOffer = function (cdni){
+    $scope.acceptOffer = function (cdni) {
         var req = {
             sender: $scope.ownInterface,
             target: cdni
@@ -90,8 +90,8 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
                 console.log('Error: ' + error);
             });
     }
-    
-    $scope.syncCdni = function (cdni){
+
+    $scope.syncCdni = function (cdni) {
         var req = {
             sender: $scope.ownInterface,
             target: cdni
@@ -135,11 +135,14 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
         .success(function (data) {
             console.log(data);
             $scope.cdniData = data.data;
-            for (var i = 0; i < data.data.length; i++){
-                if (data.data[i].id === 1){
+            //getContentOrigins
+            
+            for (var i = 0; i < data.data.length; i++) {
+                if (data.data[i].id === 1) {
                     $scope.ownInterface = data.data[i];
                 }
             }
+            $scope.getContentOrigins();
         })
         .error(function (error) {
             console.log('Error: ' + error);
@@ -186,7 +189,6 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
                 console.log('Error: ' + error);
             });
     };
-
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------
     //---------------------------------------------------------------------------------------------------------------------------------------------------
@@ -247,31 +249,34 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
     };
 
     //GET ALL CONTENT ORIGINS
+    $scope.getContentOrigins = function () {
+        var obj = {
+            OwnInterface: $scope.ownInterface
+        }
+        $http.post('/cdsmApi/getContentOrigins', obj)
+            .success(function (data) {
+                var arrContentOrigins = [];
 
-    $http.get('/cdsmApi/getContentOrigins')
-        .success(function (data) {
-            var arrContentOrigins = [];
+                for (var i = 0, len = data.listing.record.length; i < len; i++) {
+                    var obj = data.listing.record[i];
 
-            for (var i = 0, len = data.listing.record.length; i < len; i++) {
-                var obj = data.listing.record[i];
+                    var contentOrigin = {
+                        name: obj.$.Name,
+                        originFqdn: obj.$.OriginFqdn,
+                        rfqdn: obj.$.Fqdn,
+                        id: obj.$.Id
+                    }
+                    arrContentOrigins.push(contentOrigin)
 
-                var contentOrigin = {
-                    name: obj.$.Name,
-                    originFqdn: obj.$.OriginFqdn,
-                    rfqdn: obj.$.Fqdn,
-                    id: obj.$.Id
                 }
-                arrContentOrigins.push(contentOrigin)
 
-            }
-
-            $scope.contentOriginsData = arrContentOrigins;
-            arrContentOrigins = [];
-        })
-        .error(function (error) {
-            console.log('Error: ' + error);
-        });
-
+                $scope.contentOriginsData = arrContentOrigins;
+                arrContentOrigins = [];
+            })
+            .error(function (error) {
+                console.log('Error: ' + error);
+            });
+    }
     //---------------------------------------------------------------------------------------------------------------------------------------------------
     //---------------------------------------------------------------------------------------------------------------------------------------------------
     //DELIVERY SERVICES EDITATION

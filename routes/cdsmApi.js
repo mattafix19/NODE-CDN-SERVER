@@ -34,8 +34,12 @@ var footprints = [];
 //---------------------------------------------------------------------------------------------------------------------------------------------------
 
 //GET CONTENT ORIGINS
-router.get('/getContentOrigins', function (req, res) {
+router.post('/getContentOrigins', function (req, res) {
 
+    //create redis client
+    var redisClient = require('../models/redisClient');
+
+    var sender = req.body.OwnInterface.url;
 
     var request = require('request');
     var request = request.defaults({
@@ -62,10 +66,29 @@ router.get('/getContentOrigins', function (req, res) {
             if (response != null) {
                 var parseString = require('xml2js').parseString;
                 parseString(response.body, function (err, result) {
-                    for (var i = 0, len = result.listing.record.length; i < len; i++) {
+
+                    redisClient.del("local:"+sender,function(err,res){
+                        console.log(res);
+                    })
+
+                    for (var i = 0; i < result.listing.record.length; i++) {
                         var obj = result.listing.record[i];
-                        //console.log(obj.$.Fqdn);
+
+                        var conOrig = {
+                            name: obj.$.Name,
+                            originFqdn: obj.$.OriginFqdn,
+                            rfqdn: obj.$.Fqdn,
+                            id: obj.$.Id
+                        };
+
+                        var stringObj = obj.$.Name + "//" + obj.$.OriginFqdn + "//" + obj.$.Fqdn + "//" + obj.$.Id;
+
+                        redisClient.rpush("local:" + sender, stringObj, function (err, res) {
+                            console.log(res);
+                        });
                     }
+
+
                     //console.log(response);
                     return res.json(result);
                 });
