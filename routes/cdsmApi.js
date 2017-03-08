@@ -41,6 +41,11 @@ router.post('/getContentOrigins', function (req, res) {
 
     var sender = req.body.OwnInterface.url;
 
+    //set info about own interface
+    redisClient.set("ownInterface1", JSON.stringify(req.body.OwnInterface),function(err,res){
+        console.log(res);
+    });
+
     var request = require('request');
     var request = request.defaults({
         strictSSL: false,
@@ -67,26 +72,38 @@ router.post('/getContentOrigins', function (req, res) {
                 var parseString = require('xml2js').parseString;
                 parseString(response.body, function (err, result) {
 
-                    redisClient.del("local:"+sender,function(err,res){
-                        console.log(res);
-                    })
+                    redisClient.exists("local:" + sender, function (err, res) {
+                        if (res === 0) {
 
-                    for (var i = 0; i < result.listing.record.length; i++) {
-                        var obj = result.listing.record[i];
+                            redisClient.del("local:" + sender, function (err, res) {
+                                console.log(res);
+                            });
 
-                        var conOrig = {
-                            name: obj.$.Name,
-                            originFqdn: obj.$.OriginFqdn,
-                            rfqdn: obj.$.Fqdn,
-                            id: obj.$.Id
-                        };
+                            for (var i = 0; i < result.listing.record.length; i++) {
+                                var obj = result.listing.record[i];
 
-                        var stringObj = obj.$.Name + "//" + obj.$.OriginFqdn + "//" + obj.$.Fqdn + "//" + obj.$.Id;
+                                var conOrig = {
+                                    name: obj.$.Name,
+                                    originFqdn: obj.$.OriginFqdn,
+                                    rfqdn: obj.$.Fqdn,
+                                    id: obj.$.Id
+                                };
 
-                        redisClient.rpush("local:" + sender, stringObj, function (err, res) {
-                            console.log(res);
-                        });
-                    }
+                                var stringObj = JSON.stringify(conOrig);
+                                
+                                //push records to end of list
+                                redisClient.rpush("local:" + sender, stringObj, function (err, res) {
+                                    console.log(res);
+                                    //save it for offline use
+                                    redisClient.save(function(err,res){
+                                        console.log(res);
+                                    })
+                                });
+                            }
+                        }
+                    });
+
+
 
 
                     //console.log(response);

@@ -16,8 +16,6 @@ var pgb = new Pgb();
 
 var db = require('../services/databaseService.js');
 
-var connectionString = 'postgres://localhost:5432/Martin'
-
 router.use(session({
     secret: 'secret_key',
     resave: true,
@@ -95,6 +93,53 @@ router.post('/initialAcceptOffer', function (req, res, next) {
 
 router.post('/createLists', function (req, res, next) {
 
+    var target = req.body.target;
+
+
+    var createListst = require("../routes/createLists");
+    createListst.getInterface()
+        .then(function (result) {
+            if (result) {
+                var target = req.body.target;
+
+                var urlReq = target.url;
+
+                var urlSend = "http://" + urlReq + "/cdniApi/setLists"
+
+                var request = require('request');
+
+                request.post(
+                    urlSend,
+                    {
+                        json: {
+                            ContentOrigins: result.ContentOrigins,
+                            Footprints: result.Footprints,
+                            Sender: result.Sender
+                        }
+                    },
+                    function (error, response, body) {
+                        if (response.body.status === "Failed") {
+                            res.send(response);
+                        }
+                        else if (!error && response.statusCode == 200 && response.statusCode != 404) {
+                            console.log(body)
+                            return db.markValidOffer(target, res, next);
+                        }
+                        else if (response.statusCode === 404) {
+                            res.send(response);
+                        }
+                        else if (response.statusCode === 500) {
+                            res.send(response);
+                        }
+                    }
+                );
+            }
+        })
+        .catch(function (err) {
+
+        })
+
+        /*
     var senderReq = req.body.sender;
     var target = req.body.target;
 
@@ -112,7 +157,7 @@ router.post('/createLists', function (req, res, next) {
 
     username = "admin",
         password = "CdnLab_123",
-        url = "https://cdsm.cdn.ab.sk:8443/servlet/com.cisco.unicorn.ui.ListApiServlet?action=getContentOrigins&param=all",
+        url = senderReq.url_cdn + ":8443/servlet/com.cisco.unicorn.ui.ListApiServlet?action=getContentOrigins&param=all",
         auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
 
     request(
@@ -180,8 +225,7 @@ router.post('/createLists', function (req, res, next) {
         }
     );
 
-    //get own capabilities
-    //get own dns records
+*/
 });
 
 router.post('/setLists', function (req, res, next) {
@@ -190,21 +234,21 @@ router.post('/setLists', function (req, res, next) {
     //create redis client
     var redisClient = require('../models/redisClient');
 
-    redisClient.del("remote:"+req.body.Sender.url, function (err, res) {
+    redisClient.del("remote:" + req.body.Sender.url, function (err, res) {
         console.log(res);
     });
 
-    for (var i = 0; i < req.body.ContentOrigins.listing.record.length; i++) {
-        var obj = req.body.ContentOrigins.listing.record[i];
+    for (var i = 0; i < req.body.ContentOrigins.length; i++) {
+        var obj = req.body.ContentOrigins[i];
 
         var conOrig = {
-            name: obj.$.Name,
-            originFqdn: obj.$.OriginFqdn,
-            rfqdn: obj.$.Fqdn,
-            id: obj.$.Id
+            name: obj.name,
+            originFqdn: obj.originFqdn,
+            rfqdn: obj.fqdn,
+            id: obj.id
         };
 
-        var stringObj = obj.$.Name + "//" + obj.$.OriginFqdn + "//" + obj.$.Fqdn + "//" + obj.$.Id;
+        var stringObj = JSON.stringify(conOrig);
 
         redisClient.rpush("remote:" + req.body.Sender.url, stringObj, function (err, res) {
             console.log(res);
@@ -243,9 +287,10 @@ router.post('/setLists', function (req, res, next) {
                 var maskNum = req.body.Footprints[i].mask_num;
                 var prefix = req.body.Footprints[i].prefix;
                 var subnetIp = req.body.Footprints[i].subnet_ip;
-                callbackCounter++;
+                
                 db.db.any('INSERT INTO public.footprint (endpoint_id, subnet_num, mask_num, subnet_ip, prefix) VALUES ($1, $2, $3, $4, $5)', [endpointId, subnetNum, maskNum, subnetIp, prefix])
                     .then(function (result2) {
+                        callbackCounter++;
                         if (callbackCounter === req.body.Footprints.length) {
                             callbackCounter = 0;
                             console.log();

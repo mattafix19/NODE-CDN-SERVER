@@ -310,28 +310,37 @@ function markValidOffer(req, res, next) {
 }
 
 function getFootprintsList(req) {
-  var id = req.id;
-  db.any('SELECT foot.subnet_num, foot.mask_num, foot.subnet_ip, foot.prefix from cdn_interface as cdn JOIN footprint as foot ON cdn.id = foot.endpoint_id where cdn.id = ($1)', [id])
-    .then(function (result) {
-      var interfaces = [];
-      for (var i = 0; i < result.length; i++) {
-        interfaces.push(result[i]);
-      }
-      res.status(200)
-        .json({
-          status: 'success',
-          data: interfaces,
-          message: 'Successfull receive of offer'
-        });
+  //function to get footprints according to endpoint ID
+  return new Promise(function (resolve, reject) {
+    db.any('SELECT foot.subnet_num, foot.mask_num, foot.subnet_ip, foot.prefix from cdn_interface as cdn JOIN footprint as foot ON cdn.id = foot.endpoint_id where cdn.id = ($1)', [req])
+      .then(function (result) {
+        var interfaces = [];
+        for (var i = 0; i < result.length; i++) {
+          interfaces.push(result[i]);
+        }
+        resolve (interfaces);
 
-    })
-    .catch(function (err) {
-      return next(err);
-    });
+      })
+      .catch(function (err) {
+        reject(err);
+      });
+  });
 }
 
+function getOwnInterface() {
+  return new Promise(function (resolve, reject) {
+    db.any('SELECT * FROM cdn_interface WHERE id = 1')
+      .then(function (result) {
+        resolve(result);
+      })
+      .catch(function (err) {
+        reject(err);
+      })
+  });
+};
+
 module.exports = {
-  db:db,
+  db: db,
   getData: getData,
   getFootprints: getFootprints,
   addFootprints: addFootprints,
@@ -341,5 +350,6 @@ module.exports = {
   notifyOffer: notifyOffer,
   acceptOffer: acceptOffer,
   markValidOffer: markValidOffer,
-  getFootprintsList:getFootprintsList
+  getFootprintsList: getFootprintsList,
+  getOwnInterface: getOwnInterface
 };

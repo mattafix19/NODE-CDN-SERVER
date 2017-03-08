@@ -4,28 +4,26 @@ var setContentOrigins = function (data, cdsmUrl, rfqdn) {
 
         var cdsm = require('../routes/cdsmSetList');
 
-        var callbackCounter = 2;
-        var recordsCount = data.listing.record.length;
+        var callbackCounter = 0;
+        var recordsCount = data.length;
 
         //because for can be called only one time there is this hack used
         //loop through all content origins of other side
-        for (var i = 0, len = data.listing.record.length; i < len; i++) {
+        for (var i = 0, len = data.length; i < len; i++) {
 
 
-            var obj = data.listing.record[i];
+            var obj = data[i];
 
             var conOrig = {
-                name: obj.$.Name,
-                originFqdn: obj.$.OriginFqdn,
-                rfqdn: obj.$.Fqdn,
-                id: obj.$.Id
+                name: obj.name,
+                originFqdn: obj.originFqdn,
+                rfqdn: obj.rfqdn,
+                id: obj.id
             };
 
             if (rfqdn.length === 0) {
                 reject("There is no rfqdn left");
             }
-
-
 
             cdsm.createContentOrigin(cdsmUrl, conOrig, rfqdn[i])
                 .then(function (result) {

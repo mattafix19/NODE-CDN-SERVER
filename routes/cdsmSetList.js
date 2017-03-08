@@ -23,9 +23,6 @@ var createContentOrigin = function (cdsmUrl, conOrig, rfqdn) {
             function (error, response, body) {
                 if (response != null) {
                     
-                    var app = require("../app.js");
-                    var redisClient = app.client;
-
                     var parseString = require('xml2js').parseString;
                     parseString(response.body, function (err, result) {
                         if (result.deliveryserviceProvisioning.message[0].$.status === "fail") {
