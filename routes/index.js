@@ -48,7 +48,30 @@ router.post('/addFootprints', db.addFootprints);
 router.post('/addCdn', db.addCdn);
 router.delete('/deleteCDNinterface/:cdnId', db.deleteCDNinterface);
 
-//LOGIN LOGOUT APIs
+
+
+var xmlparser = require('express-xml-bodyparser');
+router.post('/CDNTranslationService', xmlparser({ trim: false, explicitArray: false }), function (req, res, next) {
+    var soapBody = req.body['soap-env:envelope']['soap-env:body']['cdnutns2:urltranslationrequest'];
+
+    var requestIp = '';			// ip address of consumer
+    var requestIpLong = '';		// ip address of consumer in long format
+    var requestUrl = '';			// full requset url
+    var protocol = '';				// protocol that is used in request
+    var extension = '';			// extension of requsted content
+    var fqdnWithContent = '';		// help variable
+    var fqdn = '';					// will be resault fqdn. On this fqdn we will make redirect
+    var content = '';				// piece of URL that point on content
+    var originServer = '';			// url origin server
+    var originName = '';			// name of origin server which have content
+    var endpointRemoteArray = ''; 	// array of endpointRemotes that have footprints which contains requsted IP address
+
+    requestIp = soapBody.clientip;
+    requestUrl = soapBody.url;
+
+    console.log(soapBody);
+});
+
 
 //LOGOUT
 router.get('/logoutUser', function (req, res, next) {
