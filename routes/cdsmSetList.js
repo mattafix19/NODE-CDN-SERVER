@@ -22,7 +22,7 @@ var createContentOrigin = function (cdsmUrl, conOrig, rfqdn) {
             },
             function (error, response, body) {
                 if (response != null) {
-                    
+
                     var parseString = require('xml2js').parseString;
                     parseString(response.body, function (err, result) {
                         if (result.deliveryserviceProvisioning.message[0].$.status === "fail") {
@@ -36,10 +36,14 @@ var createContentOrigin = function (cdsmUrl, conOrig, rfqdn) {
                         else {
                             var id = result.deliveryserviceProvisioning.record[0].$.Id;
                             var name = result.deliveryserviceProvisioning.record[0].$.Name;
+                            var originFqdn = result.deliveryserviceProvisioning.record[0].$.OriginFqdn;
+                            var fqdn = result.deliveryserviceProvisioning.record[0].$.Fqdn;
 
                             var obj = {
                                 ID: id,
-                                Name: name
+                                Name: name,
+                                OriginFqdn: originFqdn,
+                                Fqdn: fqdn
                             }
                             resolve(obj);
                         }
@@ -196,10 +200,66 @@ var assignServiceEngine = function (cdsmUrl, id, deviceId) {
 
 };
 
+//GET CONTENT ORIGINS 
+var getContentOrigins = function () {
+    return new Promise(function (resolve, reject) {
+
+
+        var request = require('request');
+        var request = request.defaults({
+            strictSSL: false,
+            rejectUnauthorized: false
+        });
+
+        username = "admin",
+            password = "CdnLab_123",
+            url = "https://cdsm.cdn.ab.sk:8443/servlet/com.cisco.unicorn.ui.ListApiServlet?action=getContentOrigins&param=all",
+            auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
+
+        request(
+            {
+                url: url,
+                headers: {
+                    "Authorization": auth
+                }
+            },
+            function (error, response, body) {
+                if (error != null || body != null) {
+                    //console.log(body);
+                }
+                if (response != null) {
+                    var arrContentOrigins = []
+
+                    var parseString = require('xml2js').parseString;
+                    parseString(response.body, function (err, result) {
+
+                        for (var i = 0; i < result.listing.record.length; i++) {
+                            var obj = result.listing.record[i];
+
+                            var conOrig = {
+                                name: obj.$.Name,
+                                originFqdn: obj.$.OriginFqdn,
+                                rfqdn: obj.$.Fqdn,
+                                id: obj.$.Id
+                            };
+
+                            arrContentOrigins.push(conOrig);
+                        }
+                        //console.log(response);
+                        resolve(arrContentOrigins);
+                    });
+                }
+                reject("Failed");
+            }
+        );
+    });
+}
+
 
 module.exports = {
     createContentOrigin: createContentOrigin,
     createDeliveryService: createDeliveryService,
     getServiceEngines: getServiceEngines,
-    assignServiceEngine: assignServiceEngine
+    assignServiceEngine: assignServiceEngine,
+    getContentOrigins: getContentOrigins 
 }

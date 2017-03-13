@@ -1,21 +1,22 @@
 var db = require("../services/databaseService");
 var redisClient = require("../models/redisClient");
 
+//this class is used to get all required information for creating content origins on other side of interconnection
+// first of all get from datbase own interface, which is interface with ID = 1
+// then according to this interface find corresponding content origins in redis database
+// then get all footprints for found record ID from database
 
 var getInterface = function () {
     return new Promise(function (resolve, reject) {
         //get own local interface
         db.getOwnInterface()
             .then(function (result1) {
-                //according to this interface find record in redis, filled after get data function by getContentOrigin 
-                redisClient.lrangeAsync("local:" + result1[0].url, 0, -1)
-                    .then(function (result2) {
-                        console.log(result2);
-                        var obj = [];
-                        for (var i = 0; i < result2.length; i++) {
-                            var parsedString = JSON.parse(result2[i]);
-                            obj.push(parsedString);
-                        }
+
+                var cdsm = require("../routes/cdsmSetList");
+
+                cdsm.getContentOrigins()
+                    .then(function (resultContentOrigins) {
+                        var obj = resultContentOrigins;
                         db.getFootprintsList(result1[0].id)
                             .then(function (result3) {
                                 if (result3.length === 0) {
@@ -33,6 +34,7 @@ var getInterface = function () {
                             .catch(function (err) {
                                 reject(err);
                             })
+
                     })
             })
             .catch(function (err) {

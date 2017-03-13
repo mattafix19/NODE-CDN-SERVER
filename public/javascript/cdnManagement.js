@@ -57,6 +57,7 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
 
     $scope.createOffer = function (cdni) {
         var req = {
+            //own interface is filled after received getData function
             sender: $scope.ownInterface,
             target: cdni
         }
@@ -75,6 +76,7 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
 
     $scope.acceptOffer = function (cdni) {
         var req = {
+            //own interface is filled after received getData function
             sender: $scope.ownInterface,
             target: cdni
         }
@@ -93,6 +95,7 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
 
     $scope.syncCdni = function (cdni) {
         var req = {
+            //own interface is filled after received getData function
             sender: $scope.ownInterface,
             target: cdni
         }

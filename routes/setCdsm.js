@@ -1,10 +1,12 @@
-var setContentOrigins = function (data, cdsmUrl, rfqdn) {
+var setContentOrigins = function (data, cdsmUrl, rfqdn, endpointUrl) {
 
     return new Promise(function (resolve, reject) {
 
         var cdsm = require('../routes/cdsmSetList');
+        var redisClient = require("../models/redisClient");
 
-        var callbackCounter = 0;
+        var createdContentOrigins = [];
+        var callbackCounter = 2;
         var recordsCount = data.length;
 
         //because for can be called only one time there is this hack used
@@ -27,6 +29,7 @@ var setContentOrigins = function (data, cdsmUrl, rfqdn) {
 
             cdsm.createContentOrigin(cdsmUrl, conOrig, rfqdn[i])
                 .then(function (result) {
+                    createdContentOrigins.push(result);
                     cdsm.createDeliveryService(cdsmUrl, result)
                         .then(function (result1) {
                             cdsm.getServiceEngines(cdsmUrl, result1)
@@ -40,7 +43,37 @@ var setContentOrigins = function (data, cdsmUrl, rfqdn) {
                                                     callbackCounter++;
                                                     //after successfull setting of all content origins return resolve 
                                                     if (callbackCounter === recordsCount) {
-                                                        resolve("Success");
+
+                                                        redisClient.delAsync("remote:" + endpointUrl)
+                                                            .then(function (found) {
+                                                                callbackRedisCounter = 0;
+                                                                for (var i = 0; i < createdContentOrigins.length; i++) {
+                                                                    var obj = createdContentOrigins[i];
+
+                                                                    var conOrig = {
+                                                                        name: obj.Name,
+                                                                        originFqdn: obj.OriginFqdn,
+                                                                        rfqdn: obj.Fqdn,
+                                                                        id: obj.ID
+                                                                    };
+
+                                                                    var stringObj = JSON.stringify(conOrig);
+
+                                                                    redisClient.rpushAsync("remote:" + endpointUrl, stringObj) 
+                                                                    .then(function(resPush){
+                                                                        callbackRedisCounter++;
+                                                                        if (callbackRedisCounter === createdContentOrigins.length){
+                                                                            resolve("Success");
+                                                                        }
+                                                                    })
+                                                                    .catch(function(err){
+                                                                        console.log(err);
+                                                                    })
+                                                                }
+                                                            })
+                                                            .catch(function (err) {
+                                                                //delete not applied
+                                                            })
                                                     }
                                                 })
                                                 .catch(function (err) {

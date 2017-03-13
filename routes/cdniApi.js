@@ -95,10 +95,12 @@ router.post('/createLists', function (req, res, next) {
 
     var target = req.body.target;
 
-
+    // first find all related data for creating interconnection, get content origins, footrpints and sender
     var createListst = require("../routes/createLists");
     createListst.getInterface()
         .then(function (result) {
+            //then send data to target
+            //target is opposing interface  
             if (result) {
                 var target = req.body.target;
 
@@ -290,13 +292,14 @@ router.post('/setLists', function (req, res, next) {
                 
                 db.db.any('INSERT INTO public.footprint (endpoint_id, subnet_num, mask_num, subnet_ip, prefix) VALUES ($1, $2, $3, $4, $5)', [endpointId, subnetNum, maskNum, subnetIp, prefix])
                     .then(function (result2) {
+                        // TODO REGISTER CZ FILE ?
                         callbackCounter++;
                         if (callbackCounter === req.body.Footprints.length) {
                             callbackCounter = 0;
                             console.log();
                             var cdsm = require('../routes/setCdsm');
 
-                            cdsm.setContentOrigins(req.body.ContentOrigins, result[0].url_cdn, rfqdn)
+                            cdsm.setContentOrigins(req.body.ContentOrigins, result[0].url_cdn, rfqdn,endpointUrl)
                                 .then(function (result) {
                                     if (result === "Success") {
 
