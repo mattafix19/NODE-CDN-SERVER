@@ -1,16 +1,16 @@
-var setContentOrigins = function (data, cdsmUrl, rfqdn, endpointUrl) {
+var setContentOrigins = function (data, cdsmUrl, rfqdn, endpointId, endpointUrl) {
 
     return new Promise(function (resolve, reject) {
 
         var cdsm = require('../routes/cdsmSetList');
         var redisClient = require("../models/redisClient");
-
+        // array where are stored successfully created content origins
         var createdContentOrigins = [];
         var callbackCounter = 2;
         var recordsCount = data.length;
 
         //because for can be called only one time there is this hack used
-        //loop through all content origins of other side
+        //loop through all content origins which was received
         for (var i = 0, len = data.length; i < len; i++) {
 
 
@@ -19,34 +19,35 @@ var setContentOrigins = function (data, cdsmUrl, rfqdn, endpointUrl) {
             var conOrig = {
                 name: obj.name,
                 originFqdn: obj.originFqdn,
-                rfqdn: obj.rfqdn,
-                id: obj.id
+                rfqdn: obj.rfqdn
             };
 
             if (rfqdn.length === 0) {
                 reject("There is no rfqdn left");
             }
-
+            // create content origin, return obj with created content origin
             cdsm.createContentOrigin(cdsmUrl, conOrig, rfqdn[i])
-                .then(function (result) {
-                    createdContentOrigins.push(result);
-                    cdsm.createDeliveryService(cdsmUrl, result)
-                        .then(function (result1) {
-                            cdsm.getServiceEngines(cdsmUrl, result1)
-                                .then(function (result2) {
-                                    var id = result2.ID;
+                .then(function (createdOrigin) {
+                    createdContentOrigins.push(createdOrigin);
+                    cdsm.createDeliveryService(cdsmUrl, createdOrigin)
+                        .then(function (idCreatedDeliveryService) {
 
-                                    if (result2.Devices.length != 0) {
-                                        for (var i = 0; i < result2.Devices.length; i++) {
-                                            cdsm.assignServiceEngine(cdsmUrl, id, result2.Devices[i].$.id)
-                                                .then(function (result3) {
+                            // idCreatedDeliveryService is passed only for future use in assigning service engine
+                            cdsm.getServiceEngines(cdsmUrl)
+                                .then(function (devices) {
+                                
+                                    if (devices.Devices.length != 0) {
+                                        for (var i = 0; i < devices.Devices.length; i++) {
+                                            cdsm.assignServiceEngine(cdsmUrl, idCreatedDeliveryService, devices.Devices[i].$.id)
+                                                .then(function (result) {
                                                     callbackCounter++;
-                                                    //after successfull setting of all content origins return resolve 
+                                                    //after successfull setting of all content origins save them in redis as remoteEndpoint:{{ID}}
                                                     if (callbackCounter === recordsCount) {
 
-                                                        redisClient.delAsync("remote:" + endpointUrl)
+                                                        redisClient.delAsync("remoteEndpoint:" + endpointId)
                                                             .then(function (found) {
                                                                 callbackRedisCounter = 0;
+                                                                //for now insert new created services to redis according to ID
                                                                 for (var i = 0; i < createdContentOrigins.length; i++) {
                                                                     var obj = createdContentOrigins[i];
 
@@ -59,16 +60,16 @@ var setContentOrigins = function (data, cdsmUrl, rfqdn, endpointUrl) {
 
                                                                     var stringObj = JSON.stringify(conOrig);
 
-                                                                    redisClient.rpushAsync("remote:" + endpointUrl, stringObj) 
-                                                                    .then(function(resPush){
-                                                                        callbackRedisCounter++;
-                                                                        if (callbackRedisCounter === createdContentOrigins.length){
-                                                                            resolve("Success");
-                                                                        }
-                                                                    })
-                                                                    .catch(function(err){
-                                                                        console.log(err);
-                                                                    })
+                                                                    redisClient.rpushAsync("remoteEndpoint:" + endpointId, stringObj)
+                                                                        .then(function (resPush) {
+                                                                            callbackRedisCounter++;
+                                                                            if (callbackRedisCounter === createdContentOrigins.length) {
+                                                                                resolve("Success");
+                                                                            }
+                                                                        })
+                                                                        .catch(function (err) {
+                                                                            console.log(err);
+                                                                        })
                                                                 }
                                                             })
                                                             .catch(function (err) {
@@ -86,7 +87,7 @@ var setContentOrigins = function (data, cdsmUrl, rfqdn, endpointUrl) {
                                         var obj = {
                                             status: "Error",
                                             operation: "Error, no online delivery services available",
-                                            response: result.deliveryserviceProvisioning
+                                            response: devices.deliveryserviceProvisioning
                                         }
                                         reject(obj);
                                     }

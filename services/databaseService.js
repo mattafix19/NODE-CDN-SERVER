@@ -199,7 +199,7 @@ function registerOffer(req, res, next) {
             return next(err);
           });
       }
-      //else create record with status 5 and type remote endpoint_type = 2 -> NEW and respond with 200
+      //else create record with status 5 and type remote endpoint_type = 2 and respond with 200
       else {
         var data = req.body.sender;
         db.any('INSERT INTO cdn_interface (name, url, url_translator, url_cdn, port_cdn, login, pass, priority, endpoint_type_id, endpoint_gateway_type_id, offer_status) values($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)', [data.name, data.url, data.url_translator, data.url_cdn, data.port_cdn, data.login, data.pass, data.priority, 2, data.endpoint_gateway_type_id, 5])
@@ -253,7 +253,7 @@ function acceptOffer(req, res, next) {
     .then(function (result) {
       //if there is result and is in offer status -> 2 (offered)
       if ((result != 0) && (result[0].offer_status === "2")) {
-        //update with offer status 5 -> NEW and respond with 200
+        //update with offer status 1 -> ACCEPTED and respond with 200
         var id = result[0].id;
         db.any('UPDATE public.cdn_interface SET offer_status=($1) WHERE id=($2)', [1, id])
           .then(function (result2) {
@@ -261,14 +261,14 @@ function acceptOffer(req, res, next) {
               .json({
                 status: 'success',
                 data: 'OK',
-                message: 'Successfull receive of offer'
+                message: 'Successfull accepted offer'
               });
           })
           .catch(function (err) {
             return next(err);
           });
       }
-      //else create record with status 5 -> NEW and respond with 200
+      
       else {
         res.status(404)
           .json({
@@ -285,7 +285,7 @@ function acceptOffer(req, res, next) {
 
 function markValidOffer(req, res, next) {
   var id = req.id;
-  db.any('UPDATE public.cdn_interface SET offer_status=($1) WHERE id=($2)', [1, id])
+  db.any('UPDATE public.cdn_interface SET offer_status=($1) WHERE id=($2)', [6, id])
     .then(function (result) {
       db.any('SELECT * FROM cdn_interface cdn JOIN endpoint_gateway_type endp ON cdn.endpoint_gateway_type_id = endp.id_gateway JOIN endpoint_type endpt ON cdn.endpoint_type_id = endpt.id_type JOIN offer_status offStat ON cdn.offer_status = offStat.id_offer_status')
         .then(function (result2) {

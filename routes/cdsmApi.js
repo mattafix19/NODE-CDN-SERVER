@@ -92,7 +92,7 @@ router.post('/getContentOrigins', function (req, res) {
                                 var stringObj = JSON.stringify(conOrig);
                                 
                                 //push records to end of list
-                                redisClient.rpush("local:" + sender, stringObj, function (err, res) {
+                                redisClient.rpush("localEndpoint", stringObj, function (err, res) {
                                     console.log(res);
                                     //save it for offline use
                                     redisClient.save(function(err,res){

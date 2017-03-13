@@ -102,7 +102,7 @@ var createDeliveryService = function (cdsmUrl, obj) {
 };
 
 //GET SERVICE ENGINES
-var getServiceEngines = function (cdsmUrl, id) {
+var getServiceEngines = function (cdsmUrl) {
 
     return new Promise(function (resolve, reject) {
         var request = require('request');
@@ -147,7 +147,6 @@ var getServiceEngines = function (cdsmUrl, id) {
                             var assignCounter = 0;
 
                             var obj = {
-                                ID: id,
                                 Devices: devices
                             }
                             resolve(obj);
@@ -200,58 +199,105 @@ var assignServiceEngine = function (cdsmUrl, id, deviceId) {
 
 };
 
-//GET CONTENT ORIGINS 
+//GET CONTENT ORIGINS FROM OWN INTERFACE FOR OUR CDSM
 var getContentOrigins = function () {
     return new Promise(function (resolve, reject) {
 
+        var redisClient = require('../models/redisClient');
 
-        var request = require('request');
-        var request = request.defaults({
-            strictSSL: false,
-            rejectUnauthorized: false
-        });
+        var db = require('../services/databaseService');
+        // get own local interface -> ID = 1
+        db.getOwnInterface()
+            .then(function (localEndpoint) {
+                // send CDSM request for content origins according to selected own interface
+                var request = require('request');
+                var request = request.defaults({
+                    strictSSL: false,
+                    rejectUnauthorized: false
+                });
 
-        username = "admin",
-            password = "CdnLab_123",
-            url = "https://cdsm.cdn.ab.sk:8443/servlet/com.cisco.unicorn.ui.ListApiServlet?action=getContentOrigins&param=all",
-            auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
+                username = "admin",
+                    password = "CdnLab_123",
+                    url = localEndpoint[0].url_cdn + ":" + localEndpoint[0].port_cdn + "/servlet/com.cisco.unicorn.ui.ListApiServlet?action=getContentOrigins&param=all",
+                    auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
 
-        request(
-            {
-                url: url,
-                headers: {
-                    "Authorization": auth
-                }
-            },
-            function (error, response, body) {
-                if (error != null || body != null) {
-                    //console.log(body);
-                }
-                if (response != null) {
-                    var arrContentOrigins = []
-
-                    var parseString = require('xml2js').parseString;
-                    parseString(response.body, function (err, result) {
-
-                        for (var i = 0; i < result.listing.record.length; i++) {
-                            var obj = result.listing.record[i];
-
-                            var conOrig = {
-                                name: obj.$.Name,
-                                originFqdn: obj.$.OriginFqdn,
-                                rfqdn: obj.$.Fqdn,
-                                id: obj.$.Id
-                            };
-
-                            arrContentOrigins.push(conOrig);
+                request(
+                    {
+                        url: url,
+                        headers: {
+                            "Authorization": auth
                         }
-                        //console.log(response);
-                        resolve(arrContentOrigins);
-                    });
-                }
-                reject("Failed");
-            }
-        );
+                    },
+                    function (error, response, body) {
+                        if (error != null || body != null) {
+                            //console.log(body);
+                        }
+                        if (response != null) {
+                            var arrContentOrigins = []
+
+                            var parseString = require('xml2js').parseString;
+                            parseString(response.body, function (err, result) {
+
+                                for (var i = 0; i < result.listing.record.length; i++) {
+                                    var obj = result.listing.record[i];
+
+                                    var conOrig = {
+                                        name: obj.$.Name,
+                                        originFqdn: obj.$.OriginFqdn,
+                                        rfqdn: obj.$.Fqdn,
+                                        id: obj.$.Id
+                                    };
+
+                                    arrContentOrigins.push(conOrig);
+                                }
+                                //updateRedis db on key localEndpoint
+                                redisClient.existsAsync("localEndpoint")
+                                    .then(function (res) {
+                                        if (res === 0) {
+                                            redisClient.delAsync("localEndpoint")
+                                                .then(function (resultDelete) {
+
+                                                    for (var i = 0; i < result.listing.record.length; i++) {
+                                                        var obj = result.listing.record[i];
+
+                                                        var conOrig = {
+                                                            name: obj.$.Name,
+                                                            originFqdn: obj.$.OriginFqdn,
+                                                            rfqdn: obj.$.Fqdn,
+                                                            id: obj.$.Id
+                                                        };
+
+                                                        var stringObj = JSON.stringify(conOrig);
+
+                                                        //push records to end of list
+                                                        redisClient.rpush("local:" + sender, stringObj, function (err, res) {
+                                                            console.log(res);
+                                                            //save it for offline use
+                                                            redisClient.save(function (err, res) {
+                                                                console.log(res);
+                                                            })
+                                                        });
+                                                    }
+                                                })
+                                                .catch(function (err) {
+                                                    console.log(err);
+                                                })
+
+                                        }
+                                    })
+                                    .catch(function (err) {
+                                        console.log(err)
+                                    })
+                                resolve(arrContentOrigins);
+                            });
+                        }
+                        reject("Failed");
+                    }
+                );
+            })
+            .catch(function (err) {
+                console.log(err);
+            })
     });
 }
 
@@ -261,5 +307,5 @@ module.exports = {
     createDeliveryService: createDeliveryService,
     getServiceEngines: getServiceEngines,
     assignServiceEngine: assignServiceEngine,
-    getContentOrigins: getContentOrigins 
+    getContentOrigins: getContentOrigins
 }
