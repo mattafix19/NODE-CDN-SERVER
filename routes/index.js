@@ -66,6 +66,9 @@ router.post('/CDNTranslationService', xmlparser({ trim: false, explicitArray: fa
     var originName = '';			// name of origin server which have content
     var endpointRemoteArray = ''; 	// array of endpointRemotes that have footprints which contains requsted IP address
 
+    var redisClient = require('../models/redisClient');
+    
+
     requestIp = soapBody.clientip;
     requestUrl = soapBody.url;
     //"http://rfqdn1.cdn.dampech.tk/"
@@ -86,7 +89,21 @@ router.post('/CDNTranslationService', xmlparser({ trim: false, explicitArray: fa
         extension = tempArr[1].slice();
     }
 
-    
+    redisClient.lrangeAsync("rfqdn:" + fqdn, 0 , -1)
+    .then(function(found){
+        console.log(found);
+
+        var obj = JSON.parse(found);
+
+        originServer = obj.originFqdn;
+        originName = obj.name;
+
+        console.log();
+    })  
+    .catch(function(err){   
+        console.log(err);
+    })
+
 
 
 

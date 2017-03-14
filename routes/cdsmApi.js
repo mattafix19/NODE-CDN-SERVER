@@ -74,7 +74,12 @@ router.post('/getContentOrigins', function (req, res) {
                             console.log(res);
                         });
 
-                        
+                        redisClient.eval("return redis.call('del', 'defaultKey', unpack(redis.call('keys', ARGV[1])))", 0 , "rfqdn:*", function(err,res){
+                            console.log(err);
+                            console.log(res);
+                        });
+
+
                         for (var i = 0; i < result.listing.record.length; i++) {
                             var obj = result.listing.record[i];
 
@@ -87,6 +92,21 @@ router.post('/getContentOrigins', function (req, res) {
 
                             var stringObj = JSON.stringify(conOrig);
 
+                            var rfqdn = {
+                                name: obj.$.Name,
+                                originFqdn: obj.$.OriginFqdn,
+                                id: obj.$.Id
+                            }
+
+                            var stringRfqdn = JSON.stringify(rfqdn);
+
+                            redisClient.rpush("rfqdn:" + conOrig.rfqdn, stringRfqdn, function (err, res) {
+                                console.log(res);
+                                //save it for offline use
+                                redisClient.save(function (err, res) {
+                                    console.log(res);
+                                })
+                            });
                             //push records to end of list
                             redisClient.rpush("localEndpoint", stringObj, function (err, res) {
                                 console.log(res);
