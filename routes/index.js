@@ -54,11 +54,11 @@ var xmlparser = require('express-xml-bodyparser');
 router.post('/CDNTranslationService', xmlparser({ trim: false, explicitArray: false }), function (req, res, next) {
     var soapBody = req.body['soap-env:envelope']['soap-env:body']['cdnutns2:urltranslationrequest'];
 
-    var requestIp = '';			// ip address of consumer
-    var requestIpLong = '';		// ip address of consumer in long format
+    var requestIp = '';			    // ip address of consumer
+    var requestIpLong = '';		    // ip address of consumer in long format
     var requestUrl = '';			// full requset url
     var protocol = '';				// protocol that is used in request
-    var extension = '';			// extension of requsted content
+    var extension = '';			    // extension of requsted content
     var fqdnWithContent = '';		// help variable
     var fqdn = '';					// will be resault fqdn. On this fqdn we will make redirect
     var content = '';				// piece of URL that point on content
@@ -68,6 +68,30 @@ router.post('/CDNTranslationService', xmlparser({ trim: false, explicitArray: fa
 
     requestIp = soapBody.clientip;
     requestUrl = soapBody.url;
+    //"http://rfqdn1.cdn.dampech.tk/"
+    var tempArr = requestUrl.split('://');
+    //http
+    protocol = tempArr[0].slice();
+    //rfqdn1.cdn.dampech.tk/
+    fqdnWithContent = tempArr[1].slice();
+
+    tempArr = fqdnWithContent.split('/');
+
+    fqdn = tempArr[0].slice();
+    
+    content = fqdnWithContent.substring(fqdn.length);
+    
+    if (content != "/") {
+        tempArr = content.split('.');
+        extension = tempArr[1].slice();
+    }
+
+    
+
+
+
+
+
 
     console.log(soapBody);
 });

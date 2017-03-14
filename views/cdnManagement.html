@@ -211,7 +211,7 @@
                 </div>
                 <div class="form-group">
                     <div class="col-sm-offset-1 col-sm-10">
-                        <button type="submit" class="btn btn-default" ng-click="addCDN()">EDIT</button>
+                        <button type="submit" class="btn btn-default" ng-click="addCDN()">Create</button>
                     </div>
                 </div>
 
@@ -288,7 +288,7 @@
                     <td>Offer Status</td>
                     <td>Sync</td>
 
-                    <tr ng-repeat="cdni in cdniData" ng-if="((cdni.offer_status === '1') || (cdni.cdni.offer_status === '6')) && (cdni.id != '1')">
+                    <tr ng-repeat="cdni in cdniData" ng-if="(cdni.offer_status === '1' || cdni.offer_status === '6') && (cdni.id != '1')">
                         <td>{{cdni.id}}</td>
                         <td>{{cdni.name}}</td>
                         <td>{{cdni.url}}</td>

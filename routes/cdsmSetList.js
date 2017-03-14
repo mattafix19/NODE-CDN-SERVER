@@ -253,45 +253,47 @@ var getContentOrigins = function () {
                                 //updateRedis db on key localEndpoint
                                 redisClient.existsAsync("localEndpoint")
                                     .then(function (res) {
-                                        if (res === 0) {
-                                            redisClient.delAsync("localEndpoint")
-                                                .then(function (resultDelete) {
+                                        redisClient.delAsync("localEndpoint")
+                                            .then(function (resultDelete) {
+                                                callbackRedisCounter = 0;
+                                                for (var i = 0; i < result.listing.record.length; i++) {
+                                                    var obj = result.listing.record[i];
 
-                                                    for (var i = 0; i < result.listing.record.length; i++) {
-                                                        var obj = result.listing.record[i];
+                                                    var conOrig = {
+                                                        name: obj.$.Name,
+                                                        originFqdn: obj.$.OriginFqdn,
+                                                        rfqdn: obj.$.Fqdn,
+                                                        id: obj.$.Id
+                                                    };
 
-                                                        var conOrig = {
-                                                            name: obj.$.Name,
-                                                            originFqdn: obj.$.OriginFqdn,
-                                                            rfqdn: obj.$.Fqdn,
-                                                            id: obj.$.Id
-                                                        };
+                                                    var stringObj = JSON.stringify(conOrig);
 
-                                                        var stringObj = JSON.stringify(conOrig);
+                                                    //push records to end of list
+                                                    redisClient.rpushAsync("localEndpoint", stringObj)
+                                                        .then(function (resultLpush) {
+                                                            callbackRedisCounter++;
+                                                            if (callbackRedisCounter === result.listing.record.length) {
+                                                                resolve(arrContentOrigins);
+                                                            }
+                                                        })
+                                                        .catch(function (err) {
+                                                            console.log(err);
+                                                        })
 
-                                                        //push records to end of list
-                                                        redisClient.rpush("local:" + sender, stringObj, function (err, res) {
-                                                            console.log(res);
-                                                            //save it for offline use
-                                                            redisClient.save(function (err, res) {
-                                                                console.log(res);
-                                                            })
-                                                        });
-                                                    }
-                                                })
-                                                .catch(function (err) {
-                                                    console.log(err);
-                                                })
+                                                }
+                                            })
+                                            .catch(function (err) {
+                                                console.log(err);
+                                            })
 
-                                        }
+
                                     })
                                     .catch(function (err) {
                                         console.log(err)
                                     })
-                                resolve(arrContentOrigins);
+
                             });
                         }
-                        reject("Failed");
                     }
                 );
             })

@@ -12,11 +12,6 @@ var www = require('../bin/www');
 var Pgb = require("pg-bluebird");
 var pgb = new Pgb();
 
-//var cdniMan = new cdniManager(pgb);
-
-//var connectionString = process.env.DATABASE_URL || 'postgres://localhost:5432';
-var connectionString = 'postgres://localhost:5432/Martin'
-
 router.use(session({
     secret: 'secret_key',
     resave: true,
@@ -42,7 +37,7 @@ router.post('/getContentOrigins', function (req, res) {
     var sender = req.body.OwnInterface.url;
 
     //set info about own interface
-    redisClient.set("ownInterface1", JSON.stringify(req.body.OwnInterface),function(err,res){
+    redisClient.set("ownInterface1", JSON.stringify(req.body.OwnInterface), function (err, res) {
         console.log(res);
     });
 
@@ -72,35 +67,36 @@ router.post('/getContentOrigins', function (req, res) {
                 var parseString = require('xml2js').parseString;
                 parseString(response.body, function (err, result) {
 
-                    redisClient.exists("local:" + sender, function (err, res) {
-                        if (res === 0) {
+                    redisClient.exists("localEndpoint" + sender, function (err, res) {
 
-                            redisClient.del("local:" + sender, function (err, res) {
+
+                        redisClient.del("localEndpoint", function (err, res) {
+                            console.log(res);
+                        });
+
+                        
+                        for (var i = 0; i < result.listing.record.length; i++) {
+                            var obj = result.listing.record[i];
+
+                            var conOrig = {
+                                name: obj.$.Name,
+                                originFqdn: obj.$.OriginFqdn,
+                                rfqdn: obj.$.Fqdn,
+                                id: obj.$.Id
+                            };
+
+                            var stringObj = JSON.stringify(conOrig);
+
+                            //push records to end of list
+                            redisClient.rpush("localEndpoint", stringObj, function (err, res) {
                                 console.log(res);
-                            });
-
-                            for (var i = 0; i < result.listing.record.length; i++) {
-                                var obj = result.listing.record[i];
-
-                                var conOrig = {
-                                    name: obj.$.Name,
-                                    originFqdn: obj.$.OriginFqdn,
-                                    rfqdn: obj.$.Fqdn,
-                                    id: obj.$.Id
-                                };
-
-                                var stringObj = JSON.stringify(conOrig);
-                                
-                                //push records to end of list
-                                redisClient.rpush("localEndpoint", stringObj, function (err, res) {
+                                //save it for offline use
+                                redisClient.save(function (err, res) {
                                     console.log(res);
-                                    //save it for offline use
-                                    redisClient.save(function(err,res){
-                                        console.log(res);
-                                    })
-                                });
-                            }
+                                })
+                            });
                         }
+
                     });
 
 
