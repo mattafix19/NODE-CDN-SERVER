@@ -9,10 +9,10 @@ bluebird.promisifyAll(redis.Multi.prototype);
 var deleteItemAsync = function (data) {
     return new Promise(function (resolve, reject) {
         client.del(data, function (err, res) {
-            if (res){
+            if (res) {
                 resolve(res);
             }
-            else{
+            else {
                 reject(err);
             }
         });
@@ -25,10 +25,18 @@ var deleteItem = function (data) {
     });
 }
 
+var evalItem = function (call,number,data) {
+    redisClient.eval(call, number, data, function (err, res) {
+        console.log(err);
+        console.log(res);
+    });
+}
+
 
 
 
 module.exports = {
     deleteItem: deleteItem,
-    deleteItemAsync:deleteItemAsync
+    deleteItemAsync: deleteItemAsync,
+    evalItem: evalItem
 }
