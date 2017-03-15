@@ -1,5 +1,8 @@
 //class which contains working with postgre database
 var promise = require('bluebird');
+var ipUtils = require('ip2long');
+var ip2long = ipUtils.ip2long;
+var long2ip = ipUtils.long2ip;
 
 var options = {
   // Initialization Options
@@ -55,11 +58,14 @@ function getFootprints(req, res, next) {
 function addFootprints(req, res, next) {
   var data = {
     endpoint: req.body.endpoint,
-    subnetNum: req.body.subnetNum,
-    maskNum: req.body.maskNum,
     subnetIp: req.body.subnetIp,
     prefix: req.body.prefix
   };
+
+  var subnetNum = ip2long(data.subnetIp);
+  var maskNum =  ip2long("255.255.255.255") - ((ip2long("255.255.255.255") - subnetNum) -1);
+
+
   db.any('INSERT INTO footprint (endpoint_id,subnet_num,mask_num,subnet_ip,prefix) VALUES ($1,$2,$3,$4,$5)', [data.endpoint, data.subnetNum, data.maskNum, data.subnetIp, data.prefix])
     .then(function (result) {
       db.any('SELECT * FROM footprint ORDER BY id ASC')

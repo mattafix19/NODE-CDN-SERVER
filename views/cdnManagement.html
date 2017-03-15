@@ -235,32 +235,20 @@
                         <p ng-show="addFoot.endpointID.$invalid && !addFoot.endpointID.$pristine" class="help-block">Endpoint ID is required.</p>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label for="subnetNum" class="col-sm-1 control-label">Subnet num</label>
-                    <div class="col-sm-3">
-                        <input class="form-control" id="subnetNum" placeholder="Subnet Num" ng-model="formFootprintsData.subnetNum">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="maskNum" class="col-sm-1 control-label">Mask num</label>
-                    <div class="col-sm-3">
-                        <input class="form-control" id="maskNum" placeholder="Mask num" ng-model="formFootprintsData.maskNum">
-                    </div>
-                </div>
                 <div class="form-group" ng-class="{ 'has-error' : addFoot.subnet.$invalid && !addFoot.subnet.$pristine }">
                     <label for="subnetIp" class="col-sm-1 control-label">Subnet IP</label>
                     <div class="col-sm-3" ng-messages="addFoot.subnet.$error">
                         <input type="text" name="subnet" class="form-control" placeholder="Subnet IP" ng-model="formFootprintsData.subnetIp" strong-secret
                             required>
                         <p ng-show="addFoot.subnet.$invalid && !addFoot.subnet.$pristine" class="help-block">Ip address is required.</p>
-                        <p ng-message="ipValidator" class="help-block">Ip address is not valid</p>
+                        <p ng-message="ipValidator" class="help-block">Ip address is not valid.</p>
 
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="prefix" class="col-sm-1 control-label">Prefix</label>
                     <div class="col-sm-3">
-                        <input class="form-control" id="prefix" placeholder="Prefix" ng-model="formFootprintsData.prefix">
+                        <input type="number" class="form-control" id="prefix" placeholder="Prefix" ng-model="formFootprintsData.prefix">
                     </div>
                 </div>
 
