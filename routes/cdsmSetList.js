@@ -200,10 +200,10 @@ var assignServiceEngine = function (cdsmUrl, id, deviceId) {
 };
 
 //GET CONTENT ORIGINS FROM OWN INTERFACE FOR OUR CDSM
+//update rfqdn in redis database
+//update localEndpoint records in redis database
 var getContentOrigins = function () {
     return new Promise(function (resolve, reject) {
-
-        var redisClient = require('../models/redisClient');
 
         var db = require('../services/databaseService');
         // get own local interface -> ID = 1
@@ -251,11 +251,17 @@ var getContentOrigins = function () {
                                     arrContentOrigins.push(conOrig);
                                 }
                                 //updateRedis db on key localEndpoint
-                                redisClient.existsAsync("localEndpoint")
+                                var redisClient = require('../models/redisClient');
+                                var redisService = require('../services/redisService');
+                                redisService.existAsync("localEndpoint")
                                     .then(function (res) {
-                                        redisClient.delAsync("localEndpoint")
+                                        redisService.deleteItemAsync("localEndpoint")
                                             .then(function (resultDelete) {
                                                 callbackRedisCounter = 0;
+
+                                                // delete from redis all records contains rfqdn: *
+                                                redisService.evalItem("return redis.call('del', 'defaultKey', unpack(redis.call('keys', ARGV[1])))", 0, "rfqdn:*");
+
                                                 for (var i = 0; i < result.listing.record.length; i++) {
                                                     var obj = result.listing.record[i];
 
@@ -268,8 +274,24 @@ var getContentOrigins = function () {
 
                                                     var stringObj = JSON.stringify(conOrig);
 
+                                                    var rfqdn = {
+                                                        name: obj.$.Name,
+                                                        originFqdn: obj.$.OriginFqdn,
+                                                        id: obj.$.Id
+                                                    }
+
+                                                    var stringRfqdn = JSON.stringify(rfqdn);
+
+                                                    redisService.rightPush("rfqdn:" + conOrig.rfqdn, stringRfqdn, function (err, res) {
+                                                        console.log(res);
+                                                        //save it for offline use
+                                                        redisClient.save(function (err, res) {
+                                                            console.log(res);
+                                                        })
+                                                    });
+
                                                     //push records to end of list
-                                                    redisClient.rpushAsync("localEndpoint", stringObj)
+                                                    redisService.rightPushAsync("localEndpoint", stringObj)
                                                         .then(function (resultLpush) {
                                                             callbackRedisCounter++;
                                                             if (callbackRedisCounter === result.listing.record.length) {

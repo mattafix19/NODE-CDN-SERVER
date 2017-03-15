@@ -258,16 +258,17 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
         }
         $http.post('/cdsmApi/getContentOrigins', obj)
             .success(function (data) {
+                console.log(data);
                 var arrContentOrigins = [];
 
-                for (var i = 0, len = data.listing.record.length; i < len; i++) {
-                    var obj = data.listing.record[i];
+                for (var i = 0, len = data.length; i < len; i++) {
+                    var obj = data[i];
 
                     var contentOrigin = {
-                        name: obj.$.Name,
-                        originFqdn: obj.$.OriginFqdn,
-                        rfqdn: obj.$.Fqdn,
-                        id: obj.$.Id
+                        name: obj.name,
+                        originFqdn: obj.originFqdn,
+                        rfqdn: obj.rfqdn,
+                        id: obj.id
                     }
                     arrContentOrigins.push(contentOrigin)
 

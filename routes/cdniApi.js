@@ -150,7 +150,7 @@ router.post('/setLists', function (req, res, next) {
     var createListst = require("../routes/createLists");
     createListst.getInterface()
         .then(function (localEndpointInfo) {
-            
+
             localEndpointInfoForSend = localEndpointInfo;
             //load own interface in DB -> ID = 1
             db.getOwnInterface()
@@ -186,12 +186,20 @@ router.post('/setLists', function (req, res, next) {
                             // loop through all received footprints and get specific information, after call INSERT
                             for (var i = 0; i < req.body.Footprints.length; i++) {
 
-                                var subnetNum = req.body.Footprints[i].subnet_num;
-                                var maskNum = req.body.Footprints[i].mask_num;
-                                var prefix = req.body.Footprints[i].prefix;
-                                var subnetIp = req.body.Footprints[i].subnet_ip;
+                                var redisService = require("../services/redisService");
+
+                                var obj = {
+                                    maskNum: req.body.Footprints[i].mask_num,
+                                    prefix: req.body.Footprints[i].prefix,
+                                    subnetIp: req.body.Footprints[i].subnet_ip,
+                                    subnetNum: req.body.Footprints[i].subnet_num
+                                }
+
+                                var stringified = JSON.stringify(obj);
+                                redisService.rightPush("footprints:" + remoteEndpointId, stringified);
+
                                 //promise insert footprint into database according to endpoint id , so insert footprints with endpoint ID for specific requested interface
-                                db.db.any('INSERT INTO public.footprint (endpoint_id, subnet_num, mask_num, subnet_ip, prefix) VALUES ($1, $2, $3, $4, $5)', [remoteEndpointId, subnetNum, maskNum, subnetIp, prefix])
+                                db.db.any('INSERT INTO public.footprint (endpoint_id, subnet_num, mask_num, subnet_ip, prefix) VALUES ($1, $2, $3, $4, $5)', [remoteEndpointId, obj.subnetNum, obj.maskNum, obj.subnetIp, obj.prefix])
                                     .then(function (result2) {
                                         // TODO REGISTER CZ FILE ?
                                         callbackCounter++;

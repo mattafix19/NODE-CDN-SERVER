@@ -30,104 +30,115 @@ var footprints = [];
 
 //GET CONTENT ORIGINS
 router.post('/getContentOrigins', function (req, res) {
-
-    //create redis client
-    var redisClient = require('../models/redisClient');
-
-    var sender = req.body.OwnInterface.url;
-
-    //set info about own interface
-    redisClient.set("ownInterface1", JSON.stringify(req.body.OwnInterface), function (err, res) {
-        console.log(res);
-    });
-
+    //require request
     var request = require('request');
-    var request = request.defaults({
-        strictSSL: false,
-        rejectUnauthorized: false
-    });
+    //create redis service
+    var redisService = require('../services/redisService');
+    var cdsmSetLists = require('../routes/cdsmSetList');
 
-    username = "admin",
-        password = "CdnLab_123",
-        url = "https://cdsm.cdn.ab.sk:8443/servlet/com.cisco.unicorn.ui.ListApiServlet?action=getContentOrigins&param=all",
-        auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
+    cdsmSetLists.getContentOrigins()
+        .then(function (result) {
+            return res.json(result);
+        })
+        .catch(function (err) {
 
-    request(
-        {
-            url: url,
-            headers: {
-                "Authorization": auth
-            }
-        },
-        function (error, response, body) {
-            if (error != null || body != null) {
-                //console.log(body);
-            }
-            if (response != null) {
-                var parseString = require('xml2js').parseString;
-                parseString(response.body, function (err, result) {
-
-                    redisClient.exists("localEndpoint" + sender, function (err, res) {
+        })
+    /*
+var redisClient = require('../models/redisClient');
 
 
-                        redisClient.del("localEndpoint", function (err, res) {
-                            console.log(res);
-                        });
+var sender = req.body.OwnInterface.url;
 
-                        redisClient.eval("return redis.call('del', 'defaultKey', unpack(redis.call('keys', ARGV[1])))", 0 , "rfqdn:*", function(err,res){
-                            console.log(err);
-                            console.log(res);
-                        });
+//set info about own interface
+redisService.set("ownInterface1", JSON.stringify(req.body.OwnInterface));
+
+//setup
+var request = request.defaults({
+    strictSSL: false,
+    rejectUnauthorized: false
+});
+
+username = "admin",
+    password = "CdnLab_123",
+    url = "https://cdsm.cdn.ab.sk:8443/servlet/com.cisco.unicorn.ui.ListApiServlet?action=getContentOrigins&param=all",
+    auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
+
+request(
+    {
+        url: url,
+        headers: {
+            "Authorization": auth
+        }
+    },
+    function (error, response, body) {
+        if (error != null || body != null) {
+            //console.log(body);
+        }
+        if (response != null) {
+            var parseString = require('xml2js').parseString;
+            parseString(response.body, function (err, result) {
+
+                redisClient.exists("localEndpoint" + sender, function (err, res) {
 
 
-                        for (var i = 0; i < result.listing.record.length; i++) {
-                            var obj = result.listing.record[i];
+                    redisClient.del("localEndpoint", function (err, res) {
+                        console.log(res);
+                    });
 
-                            var conOrig = {
-                                name: obj.$.Name,
-                                originFqdn: obj.$.OriginFqdn,
-                                rfqdn: obj.$.Fqdn,
-                                id: obj.$.Id
-                            };
-
-                            var stringObj = JSON.stringify(conOrig);
-
-                            var rfqdn = {
-                                name: obj.$.Name,
-                                originFqdn: obj.$.OriginFqdn,
-                                id: obj.$.Id
-                            }
-
-                            var stringRfqdn = JSON.stringify(rfqdn);
-
-                            redisClient.rpush("rfqdn:" + conOrig.rfqdn, stringRfqdn, function (err, res) {
-                                console.log(res);
-                                //save it for offline use
-                                redisClient.save(function (err, res) {
-                                    console.log(res);
-                                })
-                            });
-                            //push records to end of list
-                            redisClient.rpush("localEndpoint", stringObj, function (err, res) {
-                                console.log(res);
-                                //save it for offline use
-                                redisClient.save(function (err, res) {
-                                    console.log(res);
-                                })
-                            });
-                        }
-
+                    redisClient.eval("return redis.call('del', 'defaultKey', unpack(redis.call('keys', ARGV[1])))", 0, "rfqdn:*", function (err, res) {
+                        console.log(err);
+                        console.log(res);
                     });
 
 
+                    for (var i = 0; i < result.listing.record.length; i++) {
+                        var obj = result.listing.record[i];
 
+                        var conOrig = {
+                            name: obj.$.Name,
+                            originFqdn: obj.$.OriginFqdn,
+                            rfqdn: obj.$.Fqdn,
+                            id: obj.$.Id
+                        };
 
-                    //console.log(response);
-                    return res.json(result);
+                        var stringObj = JSON.stringify(conOrig);
+
+                        var rfqdn = {
+                            name: obj.$.Name,
+                            originFqdn: obj.$.OriginFqdn,
+                            id: obj.$.Id
+                        }
+
+                        var stringRfqdn = JSON.stringify(rfqdn);
+
+                        redisClient.rpush("rfqdn:" + conOrig.rfqdn, stringRfqdn, function (err, res) {
+                            console.log(res);
+                            //save it for offline use
+                            redisClient.save(function (err, res) {
+                                console.log(res);
+                            })
+                        });
+                        //push records to end of list
+                        redisClient.rpush("localEndpoint", stringObj, function (err, res) {
+                            console.log(res);
+                            //save it for offline use
+                            redisClient.save(function (err, res) {
+                                console.log(res);
+                            })
+                        });
+                    }
+
                 });
-            }
+
+
+
+
+                //console.log(response);
+                return res.json(result);
+            });
         }
-    );
+    }
+);*/
 });
 
 //CREATE CONTENT ORIGIN
