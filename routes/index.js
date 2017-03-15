@@ -4,8 +4,14 @@ var router = express.Router();
 var pg = require('pg');
 var path = require('path');
 
+//specific body parser for translationservice
+var xmlparser = require('express-xml-bodyparser');
+
 //import database Service
 var db = require('../services/databaseService.js');
+
+//import translation service
+var translationService = require('../services/translationService');
 
 var connectionString = 'postgres://localhost:5432/Martin'
 
@@ -17,11 +23,7 @@ router.use(session({
 
 /* GET home page. */
 router.get('/', function (req, res, next) {
-
-
     var user = req.session.login;
-
-
     if (user == undefined) {
         res.sendFile(path.join(__dirname, '../views', 'login.html'));
     }
@@ -48,70 +50,8 @@ router.post('/addFootprints', db.addFootprints);
 router.post('/addCdn', db.addCdn);
 router.delete('/deleteCDNinterface/:cdnId', db.deleteCDNinterface);
 
-
-
-var xmlparser = require('express-xml-bodyparser');
-router.post('/CDNTranslationService', xmlparser({ trim: false, explicitArray: false }), function (req, res, next) {
-    var soapBody = req.body['soap-env:envelope']['soap-env:body']['cdnutns2:urltranslationrequest'];
-
-    var requestIp = '';			    // ip address of consumer
-    var requestIpLong = '';		    // ip address of consumer in long format
-    var requestUrl = '';			// full requset url
-    var protocol = '';				// protocol that is used in request
-    var extension = '';			    // extension of requsted content
-    var fqdnWithContent = '';		// help variable
-    var fqdn = '';					// will be resault fqdn. On this fqdn we will make redirect
-    var content = '';				// piece of URL that point on content
-    var originServer = '';			// url origin server
-    var originName = '';			// name of origin server which have content
-    var endpointRemoteArray = ''; 	// array of endpointRemotes that have footprints which contains requsted IP address
-
-    var redisClient = require('../models/redisClient');
-    
-
-    requestIp = soapBody.clientip;
-    requestUrl = soapBody.url;
-    //"http://rfqdn1.cdn.dampech.tk/"
-    var tempArr = requestUrl.split('://');
-    //http
-    protocol = tempArr[0].slice();
-    //rfqdn1.cdn.dampech.tk/
-    fqdnWithContent = tempArr[1].slice();
-
-    tempArr = fqdnWithContent.split('/');
-
-    fqdn = tempArr[0].slice();
-    
-    content = fqdnWithContent.substring(fqdn.length);
-    
-    if (content != "/") {
-        tempArr = content.split('.');
-        extension = tempArr[1].slice();
-    }
-
-    redisClient.lrangeAsync("rfqdn:" + fqdn, 0 , -1)
-    .then(function(found){
-        console.log(found);
-
-        var obj = JSON.parse(found);
-
-        originServer = obj.originFqdn;
-        originName = obj.name;
-
-        console.log();
-    })  
-    .catch(function(err){   
-        console.log(err);
-    })
-
-
-
-
-
-
-
-    console.log(soapBody);
-});
+//Translation Service
+router.post('/CDNTranslationService', xmlparser({ trim: false, explicitArray: false }), translationService.translationService);
 
 
 //LOGOUT
@@ -123,10 +63,7 @@ router.get('/logoutUser', function (req, res, next) {
 
 //LOGIN
 router.post('/loginUser', function (req, res) {
-
-
     req.session.login = req.body.login;
-
     var results = [];
 
     var data = {

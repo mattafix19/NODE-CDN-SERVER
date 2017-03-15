@@ -13,6 +13,7 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.min.js"></script>
     <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.0/angular-cookies.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.0/angular-messages.js"></script>
     <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
 
     <!-- local scripts -->
@@ -225,11 +226,13 @@
             </div>
             <h2>Add Footprints</h2>
             <br>
-            <form class="form-horizontal">
-                <div class="form-group">
+            <form name="addFoot" ng-submit="addFootprint(addFoot.$valid)" class="form-horizontal" novalidate>
+                <div class="form-group" ng-class="{ 'has-error' : addFoot.endpointID.$invalid && !addFoot.endpointID.$pristine }">
                     <label for="endpoint" class="col-sm-1 control-label">Endpoint</label>
                     <div class="col-sm-3">
-                        <input type="text" class="form-control" id="Endpoint" placeholder="Endpoint" ng-model="formFootprintsData.endpoint">
+                        <input type="number" name="endpointID" class="form-control" placeholder="Endpoint" ng-model="formFootprintsData.endpoint"
+                            required>
+                        <p ng-show="addFoot.endpointID.$invalid && !addFoot.endpointID.$pristine" class="help-block">Endpoint ID is required.</p>
                     </div>
                 </div>
                 <div class="form-group">
@@ -244,10 +247,14 @@
                         <input class="form-control" id="maskNum" placeholder="Mask num" ng-model="formFootprintsData.maskNum">
                     </div>
                 </div>
-                <div class="form-group">
+                <div class="form-group" ng-class="{ 'has-error' : addFoot.subnet.$invalid && !addFoot.subnet.$pristine }">
                     <label for="subnetIp" class="col-sm-1 control-label">Subnet IP</label>
-                    <div class="col-sm-3">
-                        <input class="form-control" id="subnetIP" placeholder="Subnet IP" ng-model="formFootprintsData.subnetIp">
+                    <div class="col-sm-3" ng-messages="addFoot.subnet.$error">
+                        <input type="text" name="subnet" class="form-control" placeholder="Subnet IP" ng-model="formFootprintsData.subnetIp" strong-secret
+                            required>
+                        <p ng-show="addFoot.subnet.$invalid && !addFoot.subnet.$pristine" class="help-block">Ip address is required.</p>
+                        <p ng-message="ipValidator" class="help-block">Ip address is not valid</p>
+
                     </div>
                 </div>
                 <div class="form-group">
@@ -259,7 +266,7 @@
 
                 <div class="form-group">
                     <div class="col-sm-offset-1 col-sm-10">
-                        <button type="neco" class="btn btn-default" ng-click="addFootprint()">ADD</button>
+                        <button type="submit" class="btn btn-primary" ng-disabled="addFoot.$invalid">ADD</button>
                     </div>
                 </div>
 
@@ -303,7 +310,7 @@
                         <td>
                             <button type="button" class="btn btn-success" ng-click="syncCdni(cdni)">Sync</button>
                         </td>
-                        
+
                     </tr>
                 </tr>
             </table>
@@ -323,7 +330,7 @@
                     <td>Offer Status</td>
                     <td>Accept</td>
                     <td>Decline</td>
-                    
+
                     <tr ng-repeat="cdni in cdniData" ng-if="(cdni.offer_status === '5') && (cdni.id != '1')">
                         <td>{{cdni.id}}</td>
                         <td>{{cdni.name}}</td>
@@ -360,7 +367,7 @@
                     <td>Endpoint gateway type</td>
                     <td>Endpoint Type</td>
                     <td>Offer Status</td>
-                    
+
                     <tr ng-repeat="cdni in cdniData" ng-if="(cdni.offer_status === '2') && (cdni.id != '1')">
                         <td>{{cdni.id}}</td>
                         <td>{{cdni.name}}</td>
@@ -373,7 +380,7 @@
                         <td>{{cdni.endpoint_gateway_type}}</td>
                         <td>{{cdni.endpoint_type}}</td>
                         <td>{{cdni.status}}</td>
-                        
+
                     </tr>
                 </tr>
             </table>

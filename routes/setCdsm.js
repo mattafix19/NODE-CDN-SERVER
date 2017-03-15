@@ -2,7 +2,7 @@ var setContentOrigins = function (data, cdsmUrl, rfqdn, endpointId, endpointUrl)
 
     return new Promise(function (resolve, reject) {
 
-        var cdsm = require('../routes/cdsmSetList');
+        var cdsm = require('../services/ciscoCdsService');
         var redisClient = require("../models/redisClient");
         // array where are stored successfully created content origins
         var createdContentOrigins = [];

@@ -12,7 +12,7 @@ var getInterface = function () {
         db.getOwnInterface()
             .then(function (result1) {
 
-                var cdsm = require("../routes/cdsmSetList");
+                var cdsm = require("../services/ciscoCdsService");
 
                 cdsm.getContentOrigins()
                     .then(function (resultContentOrigins) {

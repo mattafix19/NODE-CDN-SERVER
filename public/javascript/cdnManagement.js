@@ -1,5 +1,32 @@
-var app = angular.module('cdnManagement', ['ngCookies']);
+var app = angular.module('cdnManagement', ['ngCookies','ngMessages']);
 
+app.directive('strongSecret', function () {
+    return {
+
+        // limit usage to argument only
+        restrict: 'A',
+
+        // require NgModelController, i.e. require a controller of ngModel directive
+        require: 'ngModel',
+
+        // create linking function and pass in our NgModelController as a 4th argument
+        link: function (scope, element, attr, ctrl) {
+            // please note you can name your function & argument anything you like
+            function customValidator(ngModelValue) {
+
+                if (/\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/.test(ngModelValue)) {
+                    ctrl.$setValidity('ipValidator', true);
+                } else {
+                    ctrl.$setValidity('ipValidator', false);
+                }
+
+                // we need to return our ngModelValue, to be displayed to the user(value of the input)
+                return ngModelValue;
+            }
+            ctrl.$parsers.push(customValidator);
+        }
+    };
+});
 
 app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http', '$window', function ($location, $cookieStore, $scope, $http, $window) {
 
@@ -139,7 +166,7 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
             console.log(data);
             $scope.cdniData = data.data;
             //getContentOrigins
-            
+
             for (var i = 0; i < data.data.length; i++) {
                 if (data.data[i].id === 1) {
                     $scope.ownInterface = data.data[i];
@@ -181,16 +208,19 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
         });
 
     //CREATE NEW FOOTPRINT
-    $scope.addFootprint = function () {
-        $http.post('/addFootprints', $scope.formFootprintsData)
-            .success(function (data) {
-                $scope.formFootprintsData = {};
-                $scope.footprintData = data.data;
-                console.log(data);
-            })
-            .error(function (error) {
-                console.log('Error: ' + error);
-            });
+    $scope.addFootprint = function (isValid) {
+
+        if (isValid) {
+            $http.post('/addFootprints', $scope.formFootprintsData)
+                .success(function (data) {
+                    $scope.formFootprintsData = {};
+                    $scope.footprintData = data.data;
+                    console.log(data);
+                })
+                .error(function (error) {
+                    console.log('Error: ' + error);
+                });
+        }
     };
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------
@@ -514,3 +544,4 @@ app.controller('TabController', ['$scope', function ($scope) {
     };
 
 }]);
+

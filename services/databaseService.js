@@ -12,7 +12,7 @@ var connectionString = 'postgres://localhost:5432/Martin';
 var db = pgp(connectionString);
 
 
-//get data from table cdn_interface witch join on foreingn keys
+//get data from table cdn_interface with join on foreingn keys
 function getData(req, res, next) {
   db.any('SELECT * FROM cdn_interface cdn JOIN endpoint_gateway_type endp ON cdn.endpoint_gateway_type_id = endp.id_gateway JOIN endpoint_type endpt ON cdn.endpoint_type_id = endpt.id_type JOIN offer_status offStat ON cdn.offer_status = offStat.id_offer_status')
     .then(function (result) {
@@ -179,6 +179,7 @@ function loginUser(req, res, next) {
     });
 }
 
+//register offer 
 function registerOffer(req, res, next) {
   //after get createOffer check the presence of interface
   db.any('SELECT * from cdn_interface WHERE url=($1)', [req.body.sender.url])
@@ -232,6 +233,7 @@ function registerOffer(req, res, next) {
     });
 }
 
+//notify offer is response to those interfaces which sends offer 
 function notifyOffer(req, res, next) {
   var id = req.id;
   db.any('UPDATE public.cdn_interface SET offer_status=($1) WHERE id=($2)', [2, id])
@@ -258,6 +260,7 @@ function notifyOffer(req, res, next) {
     });
 }
 
+//accept offer
 function acceptOffer(req, res, next) {
   //get row from table to get local ID
   db.any('SELECT * from cdn_interface WHERE url=($1)', [req.body.sender.url])
@@ -294,6 +297,7 @@ function acceptOffer(req, res, next) {
     });
 }
 
+//mark valid offer after response of accept
 function markValidOffer(req, res, next) {
   var id = req.id;
   //set up offer status 6 which is accepted downstream
@@ -322,8 +326,8 @@ function markValidOffer(req, res, next) {
     });
 }
 
+//function to get footprints according to endpoint ID
 function getFootprintsList(req) {
-  //function to get footprints according to endpoint ID
   return new Promise(function (resolve, reject) {
     db.any('SELECT foot.subnet_num, foot.mask_num, foot.subnet_ip, foot.prefix from cdn_interface as cdn JOIN footprint as foot ON cdn.id = foot.endpoint_id where cdn.id = ($1)', [req])
       .then(function (result) {
@@ -340,6 +344,7 @@ function getFootprintsList(req) {
   });
 }
 
+//get own local interface ID = 1
 function getOwnInterface() {
   return new Promise(function (resolve, reject) {
     db.any('SELECT * FROM cdn_interface WHERE id = 1')

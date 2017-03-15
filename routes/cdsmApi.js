@@ -34,7 +34,7 @@ router.post('/getContentOrigins', function (req, res) {
     var request = require('request');
     //create redis service
     var redisService = require('../services/redisService');
-    var cdsmSetLists = require('../routes/cdsmSetList');
+    var cdsmSetLists = require('../services/ciscoCdsService');
 
     cdsmSetLists.getContentOrigins()
         .then(function (result) {

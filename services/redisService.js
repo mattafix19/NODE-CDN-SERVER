@@ -108,6 +108,19 @@ var addFootprintsRedis = function (data) {
     return footprints;
 }
 
+var listRangeAsync = function(key,start, stop){
+    return new Promise (function(resolve,reject){
+        client.lrange(key,start,stop,function(err,res){
+            if (res.length != 0){
+                resolve(res);
+            }
+            else{
+                reject(err)
+            }
+        })
+    });
+}
+
 
 
 module.exports = {
@@ -119,5 +132,6 @@ module.exports = {
     set: set,
     existAsync: existAsync,
     addRemoteInterface: addRemoteInterface,
-    addFootprintsRedis:addFootprintsRedis
+    addFootprintsRedis:addFootprintsRedis,
+    listRangeAsync: listRangeAsync
 }
