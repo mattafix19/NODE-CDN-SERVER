@@ -16,17 +16,10 @@ var db = pgp(connectionString);
 function getData(req, res, next) {
   db.any('SELECT * FROM cdn_interface cdn JOIN endpoint_gateway_type endp ON cdn.endpoint_gateway_type_id = endp.id_gateway JOIN endpoint_type endpt ON cdn.endpoint_type_id = endpt.id_type JOIN offer_status offStat ON cdn.offer_status = offStat.id_offer_status')
     .then(function (result) {
-      var interfaces = [];
-      var ids = [];
-      for (var i = 0; i < result.length; i++) {
-        interfaces.push(result[i]);
-        if (result[i].id != 1 && result[i].offer_status === "6") {
-          ids.push(result[i].id);
-        }
-      }
+
       var redisService = require('../services/redisService');
-      redisService.deleteItem("remoteInterfaces");
-      redisService.rightPush("remoteInterfaces", ids);
+      var interfaces = redisService.addRemoteInterface(result);
+
       res.status(200)
         .json({
           status: 'success',
@@ -43,25 +36,10 @@ function getData(req, res, next) {
 function getFootprints(req, res, next) {
   db.any('SELECT * from footprint')
     .then(function (result) {
+
       var redisService = require("../services/redisService");
+      var footprints = redisService.addFootprintsRedis(result);
 
-      redisService.evalItem("return redis.call('del', 'defaultKey', unpack(redis.call('keys', ARGV[1])))", 0, "footprints:*");
-      var footprints = [];
-
-      for (var i = 0; i < result.length; i++) {
-        footprints.push(result[i]);
-
-        var obj = {
-          maskNum: result[i].mask_num,
-          prefix: result[i].prefix,
-          subnetIp: result[i].subnet_ip,
-          subnetNum: result[i].subnet_num
-        }
-
-        var stringified = JSON.stringify(obj);
-        redisService.rightPush("footprints:" + result[i].endpoint_id, stringified);
-
-      }
       res.status(200)
         .json({
           status: 'success',
@@ -88,23 +66,9 @@ function addFootprints(req, res, next) {
         .then(function (result2) {
           var redisService = require("../services/redisService");
 
-          redisService.evalItem("return redis.call('del', 'defaultKey', unpack(redis.call('keys', ARGV[1])))", 0, "footprints:*");
-          var footprints = [];
+          var redisService = require("../services/redisService");
+          var footprints = redisService.addFootprintsRedis(result2);
 
-          for (var i = 0; i < result2.length; i++) {
-            footprints.push(result2[i]);
-
-            var obj = {
-              maskNum: result2[i].mask_num,
-              prefix: result2[i].prefix,
-              subnetIp: result2[i].subnet_ip,
-              subnetNum: result2[i].subnet_num
-            }
-
-            var stringified = JSON.stringify(obj);
-            redisService.rightPush("footprints:" + result2[i].endpoint_id, stringified);
-
-          }
           res.status(200)
             .json({
               status: 'success',
@@ -139,18 +103,10 @@ function addCdn(req, res, next) {
     .then(function (result) {
       db.any('SELECT * FROM cdn_interface cdn JOIN endpoint_gateway_type endp ON cdn.endpoint_gateway_type_id = endp.id_gateway JOIN endpoint_type endpt ON cdn.endpoint_type_id = endpt.id_type JOIN offer_status offStat ON cdn.offer_status = offStat.id_offer_status')
         .then(function (result2) {
-          var interfaces = [];
-          var ids = [];
-          for (var i = 0; i < result2.length; i++) {
-            interfaces.push(result2[i]);
 
-            if (result[i].id != 1 && result[i].offer_status === "6") {
-              ids.push(result2[i].id);
-            }
-          }
           var redisService = require('../services/redisService');
-          redisService.deleteItem("remoteInterfaces");
-          redisService.rightPush("remoteInterfaces", ids);
+          var interfaces = redisService.addRemoteInterface(result2);
+
           res.status(200)
             .json({
               status: 'success',
@@ -174,17 +130,10 @@ function deleteCDNinterface(req, res, next) {
     .then(function (result) {
       db.any('SELECT * FROM cdn_interface cdn JOIN endpoint_gateway_type endp ON cdn.endpoint_gateway_type_id = endp.id_gateway JOIN endpoint_type endpt ON cdn.endpoint_type_id = endpt.id_type JOIN offer_status offStat ON cdn.offer_status = offStat.id_offer_status')
         .then(function (result2) {
-          var interfaces = [];
-          var ids = [];
-          for (var i = 0; i < result2.length; i++) {
-            interfaces.push(result2[i]);
-            if (result[i].id != 1 && result[i].offer_status === "6") {
-              ids.push(result2[i].id);
-            }
-          }
+
           var redisService = require('../services/redisService');
-          redisService.deleteItem("remoteInterfaces");
-          redisService.rightPush("remoteInterfaces", ids);
+          var interfaces = redisService.addRemoteInterface(result2);
+
           res.status(200)
             .json({
               status: 'success',
@@ -258,17 +207,9 @@ function registerOffer(req, res, next) {
           .then(function (result2) {
             db.any('SELECT * FROM cdn_interface cdn JOIN endpoint_gateway_type endp ON cdn.endpoint_gateway_type_id = endp.id_gateway JOIN endpoint_type endpt ON cdn.endpoint_type_id = endpt.id_type JOIN offer_status offStat ON cdn.offer_status = offStat.id_offer_status')
               .then(function (result3) {
-                var interfaces = [];
-                var ids = [];
-                for (var i = 0; i < result3.length; i++) {
-                  interfaces.push(result3[i]);
-                  if (result[i].id != 1 && result[i].offer_status === "6") {
-                    ids.push(result3[i].id);
-                  }
-                }
+
                 var redisService = require('../services/redisService');
-                redisService.deleteItem("remoteInterfaces");
-                redisService.rightPush("remoteInterfaces", ids);
+                var interfaces = redisService.addRemoteInterface(result3);
 
                 res.status(200)
                   .json({
@@ -361,17 +302,10 @@ function markValidOffer(req, res, next) {
     .then(function (result) {
       db.any('SELECT * FROM cdn_interface cdn JOIN endpoint_gateway_type endp ON cdn.endpoint_gateway_type_id = endp.id_gateway JOIN endpoint_type endpt ON cdn.endpoint_type_id = endpt.id_type JOIN offer_status offStat ON cdn.offer_status = offStat.id_offer_status')
         .then(function (result2) {
-          var interfaces = [];
-          var ids = [];
-          for (var i = 0; i < result2.length; i++) {
-            interfaces.push(result2[i]);
-            if (result2[i].id != 1 && result2[i].offer_status === "6") {
-              ids.push(result2[i].id);
-            }
-          }
+
           var redisService = require('../services/redisService');
-          redisService.deleteItem("remoteInterfaces");
-          redisService.rightPush("remoteInterfaces", ids);
+          var interfaces = redisService.addRemoteInterface(result2);
+
           res.status(200)
             .json({
               status: 'success',

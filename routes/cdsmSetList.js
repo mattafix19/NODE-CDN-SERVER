@@ -237,19 +237,6 @@ var getContentOrigins = function () {
 
                             var parseString = require('xml2js').parseString;
                             parseString(response.body, function (err, result) {
-
-                                for (var i = 0; i < result.listing.record.length; i++) {
-                                    var obj = result.listing.record[i];
-
-                                    var conOrig = {
-                                        name: obj.$.Name,
-                                        originFqdn: obj.$.OriginFqdn,
-                                        rfqdn: obj.$.Fqdn,
-                                        id: obj.$.Id
-                                    };
-
-                                    arrContentOrigins.push(conOrig);
-                                }
                                 //updateRedis db on key localEndpoint
                                 var redisClient = require('../models/redisClient');
                                 var redisService = require('../services/redisService');
@@ -271,7 +258,7 @@ var getContentOrigins = function () {
                                                         rfqdn: obj.$.Fqdn,
                                                         id: obj.$.Id
                                                     };
-
+                                                    arrContentOrigins.push(conOrig);
                                                     var stringObj = JSON.stringify(conOrig);
 
                                                     var rfqdn = {
@@ -281,6 +268,8 @@ var getContentOrigins = function () {
                                                     }
 
                                                     var stringRfqdn = JSON.stringify(rfqdn);
+
+                                                    
 
                                                     redisService.rightPush("rfqdn:" + conOrig.rfqdn, stringRfqdn, function (err, res) {
                                                         console.log(res);
