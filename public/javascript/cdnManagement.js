@@ -201,7 +201,14 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
     $http.get('/getFootprints')
         .success(function (data) {
             console.log(data);
-            $scope.footprintData = data.data;
+            var arr = [];
+            for (var i = 0; i < data.data.length; i++){
+                if(data.data[i].endpoint_id === 1){
+                    arr.push(data.data[i]);
+                }
+            }
+
+            $scope.footprintData = arr;
         })
         .error(function (error) {
             console.log('Error: ' + error);

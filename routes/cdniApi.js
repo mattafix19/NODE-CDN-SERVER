@@ -187,12 +187,20 @@ router.post('/setLists', function (req, res, next) {
                             for (var i = 0; i < req.body.Footprints.length; i++) {
 
                                 var redisService = require("../services/redisService");
+                                var cidr = require('cidr.rb');
+
+                                var network = new cidr.Net(req.body.Footprints[i].subnet_ip + "/" + req.body.Footprints[i].prefix);
+                                var netAddressLong = network.netaddr();
+                                var netAddress = long2ip(netAddressLong.addr);
+
+                                var subnetNum = netAddressLong.addr;
+                                var maskNum = network.mask.addr;
 
                                 var obj = {
-                                    maskNum: req.body.Footprints[i].mask_num,
+                                    maskNum: masknum,
                                     prefix: req.body.Footprints[i].prefix,
                                     subnetIp: req.body.Footprints[i].subnet_ip,
-                                    subnetNum: req.body.Footprints[i].subnet_num
+                                    subnetNum: subnetNumber
                                 }
 
                                 var stringified = JSON.stringify(obj);

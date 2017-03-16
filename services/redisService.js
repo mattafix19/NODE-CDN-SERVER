@@ -95,6 +95,7 @@ var addFootprintsRedis = function (data) {
         footprints.push(data[i]);
 
         var obj = {
+            endpointId: data[i].endpoint_id,
             maskNum: data[i].mask_num,
             prefix: data[i].prefix,
             subnetIp: data[i].subnet_ip,

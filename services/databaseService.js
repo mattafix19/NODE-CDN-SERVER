@@ -56,17 +56,24 @@ function getFootprints(req, res, next) {
 }
 
 function addFootprints(req, res, next) {
+  
+  var cidr = require('cidr.rb');
+  
   var data = {
     endpoint: req.body.endpoint,
     subnetIp: req.body.subnetIp,
     prefix: req.body.prefix
   };
 
-  var subnetNum = ip2long(data.subnetIp);
-  var maskNum =  ip2long("255.255.255.255") - ((ip2long("255.255.255.255") - subnetNum) -1);
+  var network = new cidr.Net(data.subnetIp + "/"+ data.prefix);
+  var netAddressLong = network.netaddr();
+  var netAddress = long2ip(netAddressLong.addr);
+
+  var subnetNum = netAddressLong.addr;
+  var maskNum =  network.mask.addr;
 
 
-  db.any('INSERT INTO footprint (endpoint_id,subnet_num,mask_num,subnet_ip,prefix) VALUES ($1,$2,$3,$4,$5)', [data.endpoint, data.subnetNum, data.maskNum, data.subnetIp, data.prefix])
+  db.any('INSERT INTO footprint (endpoint_id,subnet_num,mask_num,subnet_ip,prefix) VALUES ($1,$2,$3,$4,$5)', [data.endpoint, subnetNum, maskNum, netAddress, data.prefix])
     .then(function (result) {
       db.any('SELECT * FROM footprint ORDER BY id ASC')
         .then(function (result2) {

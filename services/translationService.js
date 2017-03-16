@@ -1,4 +1,7 @@
 var redisService = require('../services/redisService');
+var ipUtils = require('ip2long');
+var ip2long = ipUtils.ip2long;
+var cidr = require('cidr.rb');
 
 var translationService = function (req, res, next) {
     
@@ -17,7 +20,12 @@ var translationService = function (req, res, next) {
     var endpointRemoteArray = ''; 	// array of endpointRemotes that have footprints which contains requsted IP address
 
     requestIp = soapBody.clientip;
+    requestIPv4 = new cidr.IPv4(requestIp);
+    requestIpLong = requestIPv4.addr;
     requestUrl = soapBody.url;
+
+    
+
     //"http://rfqdn1.cdn.dampech.tk/"
     var tempArr = requestUrl.split('://');
     //http
@@ -47,23 +55,35 @@ var translationService = function (req, res, next) {
             redisService.listRangeAsync("remoteInterfaces", 0 ,-1)
             .then(function(foundRemoteInterfaces){
 
+                var foundFootprintsMatches = [];
+
                 for (var i = 0; i < foundRemoteInterfaces.length; i++){
                     var interfaceId = foundRemoteInterfaces[i];
 
                     redisService.listRangeAsync("footprints:" + interfaceId,0,-1)
                     .then(function(foundFootprint){
 
-                        
-
                         for (var j = 0; j < foundFootprint.length; j++){
 
                             var deserializedFootprint = JSON.parse(foundFootprint[j]);
-
+                            
+                            var endpointId = deserializedFootprint.endpointId; 
                             var subnetIp = deserializedFootprint.subnetIp;
                             var prefix = deserializedFootprint.prefix;
                             var maskNum = deserializedFootprint.maskNum;
                             var subnetNum = deserializedFootprint.subnetNum;
 
+                            if(requestIpLong >= Number(subnetNum) && requestIpLong < (Number(subnetNum) + (Number(ip2long('255.255.255.255')) - Number(maskNum))))
+                            {
+                                var obj = {
+                                    remoteEndpointId: endpointId,
+                                    subnetNumber: subnetNum,
+                                    prefix: prefix,
+                                    fqdn: ""
+                                }
+                                foundFootprintsMatches.push(obj);
+
+                            }
                             console.log();
                         }
 
