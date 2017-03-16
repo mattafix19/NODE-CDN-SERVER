@@ -58,11 +58,13 @@ var translationService = function (req, res, next) {
                 var foundFootprintsMatches = [];
 
                 for (var i = 0; i < foundRemoteInterfaces.length; i++){
+
                     var interfaceId = foundRemoteInterfaces[i];
+                    var footprintsCallbacks = 0;
 
                     redisService.listRangeAsync("footprints:" + interfaceId,0,-1)
                     .then(function(foundFootprint){
-
+                        footprintsCallbacks++;
                         for (var j = 0; j < foundFootprint.length; j++){
 
                             var deserializedFootprint = JSON.parse(foundFootprint[j]);
@@ -83,6 +85,13 @@ var translationService = function (req, res, next) {
                                 }
                                 foundFootprintsMatches.push(obj);
 
+                            }
+
+                            if (footprintsCallbacks === foundRemoteInterfaces.length){
+
+                                for (var k = 0; k < foundFootprintsMatches.length; k++){
+                                    
+                                }
                             }
                             console.log();
                         }
