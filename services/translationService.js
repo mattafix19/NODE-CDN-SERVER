@@ -4,7 +4,7 @@ var ip2long = ipUtils.ip2long;
 var cidr = require('cidr.rb');
 
 var translationService = function (req, res, next) {
-    
+
     var soapBody = req.body['soap-env:envelope']['soap-env:body']['cdnutns2:urltranslationrequest'];
 
     var requestIp = '';			    // ip address of consumer
@@ -24,26 +24,27 @@ var translationService = function (req, res, next) {
     requestIpLong = requestIPv4.addr;
     requestUrl = soapBody.url;
 
-    
-
-    //"http://rfqdn1.cdn.dampech.tk/"
+    //http://rfqdn1.cdn.dampech.tk/img/hamster_dramatic_look.jpg
     var tempArr = requestUrl.split('://');
     //http
     protocol = tempArr[0].slice();
-    //rfqdn1.cdn.dampech.tk/
+    //rfqdn1.cdn.dampech.tk/img/hamster_dramatic_look.jpg
     fqdnWithContent = tempArr[1].slice();
-
+    //rfqdn1.cdn.dampech.tk img hamster_dramatic_look.jpg
     tempArr = fqdnWithContent.split('/');
-
+    //rfqdn1.cdn.dampech.tk
     fqdn = tempArr[0].slice();
-
+    //img/hamster_dramatic_look.jpg
     content = fqdnWithContent.substring(fqdn.length);
-
+    //check if there is content if it is split according to . (without content there is only / at the end)
     if (content != "/") {
+        //img/hamster_dramatic_look.jpg
         tempArr = content.split('.');
+        //jpg
         extension = tempArr[1].slice();
     }
 
+    //find parsed fqdn in redis where key is rfqdn:{{fqdn}}
     redisService.listRangeAsync("rfqdn:" + fqdn, 0, -1)
         .then(function (foundRfqdn) {
 
@@ -51,62 +52,80 @@ var translationService = function (req, res, next) {
 
             originServer = deserializedRfqdn.originFqdn;
             originName = deserializedRfqdn.name;
+            //get all IDs of remote interfaces saved in redis database
+            redisService.listRangeAsync("remoteInterfaces", 0, -1)
+                .then(function (foundRemoteInterfaces) {
 
-            redisService.listRangeAsync("remoteInterfaces", 0 ,-1)
-            .then(function(foundRemoteInterfaces){
-
-                var foundFootprintsMatches = [];
-
-                for (var i = 0; i < foundRemoteInterfaces.length; i++){
-
-                    var interfaceId = foundRemoteInterfaces[i];
+                    var foundFootprintsMatches = [];
                     var footprintsCallbacks = 0;
+                    //loop through all found remote interfaces
+                    for (var i = 0; i < foundRemoteInterfaces.length; i++) {
 
-                    redisService.listRangeAsync("footprints:" + interfaceId,0,-1)
-                    .then(function(foundFootprint){
-                        footprintsCallbacks++;
-                        for (var j = 0; j < foundFootprint.length; j++){
+                        var interfaceId = foundRemoteInterfaces[i];
+                        //for each of interface find footprints
+                        redisService.listRangeAsync("footprints:" + interfaceId, 0, -1,function(err,res){})
+                            .then(function (foundFootprint) {
+                                footprintsCallbacks++;
+                                //after found of footprints of specific interface
+                                for (var j = 0; j < foundFootprint.length; j++) {
 
-                            var deserializedFootprint = JSON.parse(foundFootprint[j]);
-                            
-                            var endpointId = deserializedFootprint.endpointId; 
-                            var subnetIp = deserializedFootprint.subnetIp;
-                            var prefix = deserializedFootprint.prefix;
-                            var maskNum = deserializedFootprint.maskNum;
-                            var subnetNum = deserializedFootprint.subnetNum;
+                                    var deserializedFootprint = JSON.parse(foundFootprint[j]);
 
-                            if(requestIpLong >= Number(subnetNum) && requestIpLong < (Number(subnetNum) + (Number(ip2long('255.255.255.255')) - Number(maskNum))))
-                            {
-                                var obj = {
-                                    remoteEndpointId: endpointId,
-                                    subnetNumber: subnetNum,
-                                    prefix: prefix,
-                                    fqdn: ""
+                                    var endpointId = deserializedFootprint.endpointId;
+                                    var subnetIp = deserializedFootprint.subnetIp;
+                                    var prefix = deserializedFootprint.prefix;
+                                    var maskNum = deserializedFootprint.maskNum;
+                                    var subnetNum = deserializedFootprint.subnetNum;
+                                    // check of IP address match
+                                    if (requestIpLong >= Number(subnetNum) && requestIpLong < (Number(subnetNum) + (Number(ip2long('255.255.255.255')) - Number(maskNum)))) {
+                                        var obj = {
+                                            remoteEndpointId: endpointId,
+                                            subnetNumber: subnetNum,
+                                            prefix: prefix,
+                                            fqdn: ""
+                                        }
+                                        //add match into array
+                                        foundFootprintsMatches.push(obj);
+                                    }
                                 }
-                                foundFootprintsMatches.push(obj);
+                                // check if were all interfaces done if so, continue
+                                if (footprintsCallbacks === foundRemoteInterfaces.length) {
+                                    var remoteEndCallback = 0;
+                                    //loop through all matched records in remote interface footprints
+                                    for (var k = 0; k < foundFootprintsMatches.length; k++) {
+                                        redisService.listRangeAsync('remoteEndpoint:' + foundFootprintsMatches[k].remoteEndpointId, 0, -1)
+                                        .then(function(foundRemoteEndpoint){
+                                            for(var l = 0; l < foundRemoteEndpoint.length; l++){
+                                                var parsedRemoteEndpoint = JSON.parse(foundRemoteEndpoint[l]);
 
-                            }
+                                                var name = parsedRemoteEndpoint.name;
+                                                var originFqdn = parsedRemoteEndpoint.originFqdn;
 
-                            if (footprintsCallbacks === foundRemoteInterfaces.length){
+                                                if (name === originName && originFqdn === originServer){
 
-                                for (var k = 0; k < foundFootprintsMatches.length; k++){
-                                    
+                                                }
+                                                console.log();
+
+                                            }
+                                        })
+                                        .catch(function(err){
+                                            console.log(err)
+                                        })
+                                    }
                                 }
-                            }
-                            console.log();
-                        }
+                                console.log();
 
-                    })
-                    .catch(function(err){
+                            })
+                            .catch(function (err) {
 
-                    })
-                }
+                            })
+                    }
 
 
-            })
-            .catch(function(err){
+                })
+                .catch(function (err) {
 
-            });
+                });
 
             console.log();
         })
@@ -119,8 +138,30 @@ var translationService = function (req, res, next) {
 
     console.log(soapBody);
 }
+//saved working response to cisco CDS
+/*
+res.set('Content-Type', 'text/xml');
 
+    var builder = require('xmlbuilder');
+    var xml = builder.create('SOAP-ENV:Envelope',{version: '1.0', encoding: 'UTF-8'})
+        .att('xmlns:SOAP-ENV','http://schemas.xmlsoap.org/soap/envelope/')
+        .att('xmlns:SOAP-ENC','http://schemas.xmlsoap.org/soap/encoding/')
+        .att('xmlns:xsi','http://www.w3.org/2001/XMLSchema-instance')
+        .att('xmlns:xsd','http://www.w3.org/2001/XMLSchema')
+        .att('xmlns:CDNUTNS1','http://cisco/CDS/CDNUrlTranslation')
+        .att('xmlns:CDNUTNS2','http://schemas.cisco/CDS/CDNUrlTranslation/Schema')
+        .ele('SOAP-ENV:Body')
+            .ele('CDNUTNS2:UrlTranslationResponse')
+                .ele('TranslatedUrl','rfqdn1.cdn.wayl.tk')
+                .up()
+                .ele('SignUrl','false')
+        .end({ pretty: true});
+
+    console.log(xml);
+
+    res.send(xml);
+*/
 
 module.exports = {
-    translationService:translationService
+    translationService: translationService
 }

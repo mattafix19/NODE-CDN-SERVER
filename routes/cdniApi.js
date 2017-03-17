@@ -186,6 +186,9 @@ router.post('/setLists', function (req, res, next) {
                             // loop through all received footprints and get specific information, after call INSERT
                             for (var i = 0; i < req.body.Footprints.length; i++) {
 
+                                var ipUtils = require('ip2long');
+                                var long2ip = ipUtils.long2ip;
+
                                 var redisService = require("../services/redisService");
                                 var cidr = require('cidr.rb');
 
@@ -193,11 +196,11 @@ router.post('/setLists', function (req, res, next) {
                                 var netAddressLong = network.netaddr();
                                 var netAddress = long2ip(netAddressLong.addr);
 
-                                var subnetNum = netAddressLong.addr;
-                                var maskNum = network.mask.addr;
+                                var subnetNumber = netAddressLong.addr;
+                                var maskNumber = network.mask.addr;
 
                                 var obj = {
-                                    maskNum: masknum,
+                                    maskNum: maskNumber,
                                     prefix: req.body.Footprints[i].prefix,
                                     subnetIp: req.body.Footprints[i].subnet_ip,
                                     subnetNum: subnetNumber

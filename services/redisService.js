@@ -9,6 +9,9 @@ bluebird.promisifyAll(redis.Multi.prototype);
 var deleteItemAsync = function (key) {
     return new Promise(function (resolve, reject) {
         client.del(key, function (err, res) {
+            if (err === undefined){
+                reject(err);
+            }
             if (res === 0 || res === 1) {
                 resolve(res);
             }
@@ -41,6 +44,9 @@ var rightPush = function (key, value) {
 var rightPushAsync = function (key, value) {
     return new Promise(function (resolve, reject) {
         client.rpush(key, value, function (err, res) {
+            if (err === undefined) {
+                reject(err);
+            }
             if (res) {
                 resolve(res);
             }
@@ -60,6 +66,9 @@ var set = function (key, value) {
 var existAsync = function (key) {
     return new Promise(function (resolve, reject) {
         client.exists(key, function (err, res) {
+            if (err === undefined) {
+                reject(err);
+            }
             if (res === 0 || res === 1) {
                 resolve(res);
             }
@@ -86,9 +95,9 @@ var addRemoteInterface = function (data) {
 }
 //specific function for adding footprints to redis database after select query from database
 var addFootprintsRedis = function (data) {
-    
+
     evalItem("return redis.call('del', 'defaultKey', unpack(redis.call('keys', ARGV[1])))", 0, "footprints:*");
-    
+
     var footprints = [];
 
     for (var i = 0; i < data.length; i++) {
@@ -109,16 +118,33 @@ var addFootprintsRedis = function (data) {
     return footprints;
 }
 
-var listRangeAsync = function(key,start, stop){
-    return new Promise (function(resolve,reject){
-        client.lrange(key,start,stop,function(err,res){
-            if (res.length != 0){
+var listRangeAsync = function (key, start, stop) {
+    return new Promise(function (resolve, reject) {
+        client.lrange(key, start, stop, function (err, res) {
+            if (err === undefined) {
+                reject(err);
+            }
+            if (res.length != 0) {
                 resolve(res);
             }
-            else{
+            else {
                 reject(err)
             }
         })
+    });
+}
+
+var listRange = function(key,start,stop){
+    client.lrange(key, start, stop, function (err, res) {
+        if (err === undefined) {
+                reject(err);
+            }
+            if (res.length != 0) {
+                resolve(res);
+            }
+            else {
+                reject(err)
+            }
     });
 }
 
@@ -133,6 +159,6 @@ module.exports = {
     set: set,
     existAsync: existAsync,
     addRemoteInterface: addRemoteInterface,
-    addFootprintsRedis:addFootprintsRedis,
+    addFootprintsRedis: addFootprintsRedis,
     listRangeAsync: listRangeAsync
 }

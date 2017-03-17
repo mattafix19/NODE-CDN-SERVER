@@ -52,6 +52,7 @@ var setContentOrigins = function (data, cdsmUrl, rfqdn, endpointId, endpointUrl)
                                                                     var obj = createdContentOrigins[i];
 
                                                                     var conOrig = {
+                                                                        remoteEndpointId: endpointId,
                                                                         name: obj.Name,
                                                                         originFqdn: obj.OriginFqdn,
                                                                         rfqdn: obj.Fqdn,
