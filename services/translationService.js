@@ -19,10 +19,14 @@ var translationService = function (req, res, next) {
     var originName = '';			// name of origin server which have content
     var endpointRemoteArray = ''; 	// array of endpointRemotes that have footprints which contains requsted IP address
 
+    var finalFqdn = '';
+
     requestIp = soapBody.clientip;
     requestIPv4 = new cidr.IPv4(requestIp);
     requestIpLong = requestIPv4.addr;
     requestUrl = soapBody.url;
+
+
 
     //http://rfqdn1.cdn.dampech.tk/img/hamster_dramatic_look.jpg
     var tempArr = requestUrl.split('://');
@@ -63,7 +67,7 @@ var translationService = function (req, res, next) {
 
                         var interfaceId = foundRemoteInterfaces[i];
                         //for each of interface find footprints
-                        redisService.listRangeAsync("footprints:" + interfaceId, 0, -1,function(err,res){})
+                        redisService.listRangeAsync("footprints:" + interfaceId, 0, -1)
                             .then(function (foundFootprint) {
                                 footprintsCallbacks++;
                                 //after found of footprints of specific interface
@@ -91,26 +95,65 @@ var translationService = function (req, res, next) {
                                 // check if were all interfaces done if so, continue
                                 if (footprintsCallbacks === foundRemoteInterfaces.length) {
                                     var remoteEndCallback = 0;
+                                    var higherPrefix = 0;
                                     //loop through all matched records in remote interface footprints
                                     for (var k = 0; k < foundFootprintsMatches.length; k++) {
                                         redisService.listRangeAsync('remoteEndpoint:' + foundFootprintsMatches[k].remoteEndpointId, 0, -1)
-                                        .then(function(foundRemoteEndpoint){
-                                            for(var l = 0; l < foundRemoteEndpoint.length; l++){
-                                                var parsedRemoteEndpoint = JSON.parse(foundRemoteEndpoint[l]);
+                                            .then(function (foundRemoteEndpoint) {
+                                                remoteEndCallback++;
 
-                                                var name = parsedRemoteEndpoint.name;
-                                                var originFqdn = parsedRemoteEndpoint.originFqdn;
+                                                for (var l = 0; l < foundRemoteEndpoint.length; l++) {
+                                                    var parsedRemoteEndpoint = JSON.parse(foundRemoteEndpoint[l]);
 
-                                                if (name === originName && originFqdn === originServer){
+                                                    var name = parsedRemoteEndpoint.name;
+                                                    var originFqdn = parsedRemoteEndpoint.originFqdn;
+                                                    var rfqdn = parsedRemoteEndpoint.rfqdn;
+                                                    var remoteEndpointIdAct = parsedRemoteEndpoint.remoteEndpointId;
 
+                                                    if (name === originName && originFqdn === originServer) {
+                                                        for (var i = 0; i < foundFootprintsMatches.length; i++) {
+                                                            if (foundFootprintsMatches[i].remoteEndpointId === remoteEndpointIdAct) {
+                                                                foundFootprintsMatches[i].fqdn = rfqdn;
+                                                                if (foundFootprintsMatches[i].prefix > higherPrefix) {
+                                                                    higherPrefix = foundFootprintsMatches[i].prefix;
+                                                                    finalFqdn = foundFootprintsMatches[i].fqdn;
+                                                                }
+                                                                break;
+                                                            }
+                                                        }
+                                                    }
                                                 }
-                                                console.log();
+                                                //if all callback of found remote endpoint were processed then there is last check of prefixes
+                                                //there can be multiple remote interfaces which can handle request
+                                                //we must specify according to prefix
+                                                if (remoteEndCallback === foundFootprintsMatches.length) {
+                                                    res.set('Content-Type', 'text/xml');
 
-                                            }
-                                        })
-                                        .catch(function(err){
-                                            console.log(err)
-                                        })
+                                                    var builder = require('xmlbuilder');
+                                                    var xml = builder.create('SOAP-ENV:Envelope', { version: '1.0', encoding: 'UTF-8' })
+                                                        .att('xmlns:SOAP-ENV', 'http://schemas.xmlsoap.org/soap/envelope/')
+                                                        .att('xmlns:SOAP-ENC', 'http://schemas.xmlsoap.org/soap/encoding/')
+                                                        .att('xmlns:xsi', 'http://www.w3.org/2001/XMLSchema-instance')
+                                                        .att('xmlns:xsd', 'http://www.w3.org/2001/XMLSchema')
+                                                        .att('xmlns:CDNUTNS1', 'http://cisco/CDS/CDNUrlTranslation')
+                                                        .att('xmlns:CDNUTNS2', 'http://schemas.cisco/CDS/CDNUrlTranslation/Schema')
+                                                        .ele('SOAP-ENV:Body')
+                                                        .ele('CDNUTNS2:UrlTranslationResponse')
+                                                        .ele('TranslatedUrl', finalFqdn)
+                                                        .up()
+                                                        .ele('SignUrl', 'false')
+                                                        .end({ pretty: true });
+
+                                                    console.log(xml);
+
+                                                    res.send(xml);
+                                                }
+
+
+                                            })
+                                            .catch(function (err) {
+                                                console.log(err)
+                                            })
                                     }
                                 }
                                 console.log();
