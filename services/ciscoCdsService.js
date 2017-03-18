@@ -190,7 +190,10 @@ var assignServiceEngine = function (cdsmUrl, id, deviceId) {
 
                     resolve("OK");
 
-                };
+                }
+                else{
+                    reject("False assigning");
+                }
 
 
             }

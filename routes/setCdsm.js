@@ -77,9 +77,12 @@ var setContentOrigins = function (data, cdsmUrl, rfqdn, endpointId, endpointUrl)
                                                                 //delete not applied
                                                             })
                                                     }
+                                                    else{
+                                                        reject("Failed");
+                                                    }
                                                 })
                                                 .catch(function (err) {
-                                                    reject(err);
+                                                    console.log(err);
                                                 });
                                             break;
                                         }
@@ -94,15 +97,15 @@ var setContentOrigins = function (data, cdsmUrl, rfqdn, endpointId, endpointUrl)
                                     }
                                 })
                                 .catch(function (err) {
-                                    reject(err);
+                                    console.log(err);
                                 })
                         })
                         .catch(function (err) {
-                            reject(err);
+                            console.log(err);
                         });
                 })
                 .catch(function (err) {
-                    reject(err);
+                    console.log(err);
                 });
         }
     });
