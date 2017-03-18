@@ -120,8 +120,17 @@ router.post('/createLists', function (req, res, next) {
                         }
                     },
                     function (error, response, body) {
-                        if (response.body.status === "Failed") {
-                            res.send(response);
+                        if (response.body != null) {
+                            if (body.status === "Success"){
+                                var processList = require('../routes/processRespList');
+                                processList.processResponse(body.data)
+                                .then(function(result){
+
+                                })
+                                .catch(function(err){
+                                    console.log(err);
+                                })
+                            }
                         }
                         else if (!error && response.statusCode == 200 && response.statusCode != 404) {
                             console.log(body)
@@ -144,7 +153,6 @@ router.post('/createLists', function (req, res, next) {
 router.post('/setLists', function (req, res, next) {
     var url = req.body.Sender.url;
     var localInterface = null;
-    var localEndpointInfoForSend = null;
 
     //load own interface in DB -> ID = 1
     db.getOwnInterface()
@@ -231,16 +239,6 @@ router.post('/setLists', function (req, res, next) {
                                                         console.log(err);
                                                     })
                                             }
-
-                                            //after successfull creating of services
-
-                                            res.status(200)
-                                                .json({
-                                                    status: 'success',
-                                                    data: result,
-                                                    message: 'Retrieved ALL footprints after success footprints insertion'
-                                                });
-
                                         })
                                         .catch(function (err) {
                                             res.status(500)

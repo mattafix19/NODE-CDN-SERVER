@@ -3,7 +3,7 @@ var setContentOrigins = function (data, cdsmUrl, rfqdn, endpointId, endpointUrl)
     return new Promise(function (resolve, reject) {
 
         var cdsm = require('../services/ciscoCdsService');
-        var redisClient = require("../models/redisClient");
+        var redisService = require("../services/redisService");
         // array where are stored successfully created content origins
         var createdContentOrigins = [];
         var callbackCounter = 2;
@@ -44,7 +44,7 @@ var setContentOrigins = function (data, cdsmUrl, rfqdn, endpointId, endpointUrl)
                                                     //after successfull setting of all content origins save them in redis as remoteEndpoint:{{ID}}
                                                     if (callbackCounter === recordsCount) {
 
-                                                        redisClient.delAsync("remoteEndpoint:" + endpointId)
+                                                        redisService.deleteItemAsync("remoteEndpointDownstream:" + endpointId)
                                                             .then(function (found) {
                                                                 callbackRedisCounter = 0;
                                                                 //for now insert new created services to redis according to ID
@@ -61,7 +61,7 @@ var setContentOrigins = function (data, cdsmUrl, rfqdn, endpointId, endpointUrl)
 
                                                                     var stringObj = JSON.stringify(conOrig);
 
-                                                                    redisClient.rpushAsync("remoteEndpoint:" + endpointId, stringObj)
+                                                                    redisService.rightPushAsync("remoteEndpointDownstream:" + endpointId, stringObj)
                                                                         .then(function (resPush) {
                                                                             callbackRedisCounter++;
                                                                             if (callbackRedisCounter === createdContentOrigins.length) {
@@ -76,10 +76,7 @@ var setContentOrigins = function (data, cdsmUrl, rfqdn, endpointId, endpointUrl)
                                                             .catch(function (err) {
                                                                 //delete not applied
                                                             })
-                                                    }
-                                                    else{
-                                                        reject("Failed");
-                                                    }
+                                                    }   
                                                 })
                                                 .catch(function (err) {
                                                     console.log(err);

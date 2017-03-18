@@ -272,15 +272,7 @@ var getContentOrigins = function () {
 
                                                     var stringRfqdn = JSON.stringify(rfqdn);
 
-                                                    
-
-                                                    redisService.rightPush("rfqdn:" + conOrig.rfqdn, stringRfqdn, function (err, res) {
-                                                        console.log(res);
-                                                        //save it for offline use
-                                                        redisClient.save(function (err, res) {
-                                                            console.log(res);
-                                                        })
-                                                    });
+                                                    redisService.rightPush("rfqdn:" + conOrig.rfqdn, stringRfqdn)
 
                                                     //push records to end of list
                                                     redisService.rightPushAsync("localEndpoint", stringObj)
