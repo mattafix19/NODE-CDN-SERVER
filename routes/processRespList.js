@@ -30,72 +30,75 @@ var processResponse = function (data) {
                         if (footprints.length === 0) {
                             return;
                         }
-                        for (var i = 0; i < footprints.length; i++) {
 
-                            var network = new cidr.Net(footprints[i].subnet_ip + "/" + footprints[i].prefix);
-                            var netAddressLong = network.netaddr();
-                            var netAddress = long2ip(netAddressLong.addr);
+                        db.db.any('DELETE FROM FOOTPRINT WHERE endpoint_id=($1)', [rmtEndptId])
+                            .then(function (resultDeletion) {
+                                for (var i = 0; i < footprints.length; i++) {
 
-                            var subnetNumber = netAddressLong.addr;
-                            var maskNumber = network.mask.addr;
+                                    var network = new cidr.Net(footprints[i].subnet_ip + "/" + footprints[i].prefix);
+                                    var netAddressLong = network.netaddr();
+                                    var netAddress = long2ip(netAddressLong.addr);
 
-                            var obj = {
-                                maskNum: maskNumber,
-                                prefix: footprints[i].prefix,
-                                subnetIp: footprints[i].subnet_ip,
-                                subnetNum: subnetNumber
-                            }
+                                    var subnetNumber = netAddressLong.addr;
+                                    var maskNumber = network.mask.addr;
 
-                            var stringified = JSON.stringify(obj);
-                            redisService.deleteItem("footprints:" + rmtEndptId);
-                            redisService.rightPush("footprints:" + rmtEndptId, stringified);
-                            //promise insert footprint into database according to endpoint id , so insert footprints with endpoint ID for specific requested interface
-                            db.db.any('INSERT INTO public.footprint (endpoint_id, subnet_num, mask_num, subnet_ip, prefix) VALUES ($1, $2, $3, $4, $5)', [rmtEndptId, obj.subnetNum, obj.maskNum, obj.subnetIp, obj.prefix])
-                                .then(function (result2) {
-                                    callbackCounter++;
-                                    // if all footprints were inserted succesfully
-                                    if (callbackCounter === footprints.length) {
-
-                                        redisService.deleteItemAsync("remoteEndpoint:" + rmtEndptId)
-                                            .then(function (found) {
-                                                callbackRedisCounter = 0;
-                                                //for now insert new created services to redis according to ID
-                                                for (var i = 0; i < contentOrigins.length; i++) {
-                                                    var obj = contentOrigins[i];
-
-                                                    var conOrig = {
-                                                        remoteEndpointId: rmtEndptId,
-                                                        name: obj.name,
-                                                        originFqdn: obj.originFqdn,
-                                                        rfqdn: obj.rfqdn,
-                                                        id: obj.id
-                                                    };
-
-                                                    var stringObj = JSON.stringify(conOrig);
-                                                    
-                                                    redisService.rightPushAsync("remoteEndpoint:" + rmtEndptId, stringObj)
-                                                        .then(function (resPush) {
-                                                            callbackRedisCounter++;
-                                                            if (callbackRedisCounter === contentOrigins.length) {
-                                                                resolve("Success");
-                                                            }
-                                                        })
-                                                        .catch(function (err) {
-                                                            console.log(err);
-                                                        })
-                                                }
-                                            })
-                                            .catch(function (err) {
-                                                //delete not applied
-                                            })
-
-
+                                    var obj = {
+                                        maskNum: maskNumber,
+                                        prefix: footprints[i].prefix,
+                                        subnetIp: footprints[i].subnet_ip,
+                                        subnetNum: subnetNumber
                                     }
 
+                                    var stringified = JSON.stringify(obj);
+                                    redisService.deleteItem("footprints:" + rmtEndptId);
+                                    redisService.rightPush("footprints:" + rmtEndptId, stringified);
 
-                                })
-                        }
+                                    //promise insert footprint into database according to endpoint id , so insert footprints with endpoint ID for specific requested interface
+                                    db.db.any('INSERT INTO public.footprint (endpoint_id, subnet_num, mask_num, subnet_ip, prefix) VALUES ($1, $2, $3, $4, $5)', [rmtEndptId, obj.subnetNum, obj.maskNum, obj.subnetIp, obj.prefix])
+                                        .then(function (result2) {
+                                            callbackCounter++;
+                                            // if all footprints were inserted succesfully
+                                            if (callbackCounter === footprints.length) {
 
+                                                redisService.deleteItemAsync("remoteEndpoint:" + rmtEndptId)
+                                                    .then(function (found) {
+                                                        callbackRedisCounter = 0;
+                                                        //for now insert new created services to redis according to ID
+                                                        for (var i = 0; i < contentOrigins.length; i++) {
+                                                            var obj = contentOrigins[i];
+
+                                                            var conOrig = {
+                                                                remoteEndpointId: rmtEndptId,
+                                                                name: obj.name,
+                                                                originFqdn: obj.originFqdn,
+                                                                rfqdn: obj.rfqdn,
+                                                                id: obj.id
+                                                            };
+
+                                                            var stringObj = JSON.stringify(conOrig);
+
+                                                            redisService.rightPushAsync("remoteEndpoint:" + rmtEndptId, stringObj)
+                                                                .then(function (resPush) {
+                                                                    callbackRedisCounter++;
+                                                                    if (callbackRedisCounter === contentOrigins.length) {
+                                                                        resolve("Success");
+                                                                    }
+                                                                })
+                                                                .catch(function (err) {
+                                                                    console.log(err);
+                                                                })
+                                                        }
+                                                    })
+                                                    .catch(function (err) {
+                                                        //delete not applied
+                                                    })
+                                            }
+                                        })
+                                }
+                            })
+                            .catch(function (err) {
+
+                            })
                     })
                     .catch(function (err) {
                         //interface not present in database

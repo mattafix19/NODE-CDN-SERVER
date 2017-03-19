@@ -121,15 +121,15 @@ router.post('/createLists', function (req, res, next) {
                     },
                     function (error, response, body) {
                         if (response.body != null) {
-                            if (body.status === "Success"){
+                            if (body.status === "Success") {
                                 var processList = require('../routes/processRespList');
                                 processList.processResponse(body.data)
-                                .then(function(result){
+                                    .then(function (result) {
 
-                                })
-                                .catch(function(err){
-                                    console.log(err);
-                                })
+                                    })
+                                    .catch(function (err) {
+                                        console.log(err);
+                                    })
                             }
                         }
                         else if (!error && response.statusCode == 200 && response.statusCode != 404) {
@@ -184,83 +184,86 @@ router.post('/setLists', function (req, res, next) {
                             });
                         return;
                     }
-                    // loop through all received footprints and get specific information, after call INSERT
-                    for (var i = 0; i < req.body.Footprints.length; i++) {
+                    db.db.any('DELETE FROM FOOTPRINT WHERE endpoint_id=($1)', [remoteEndpointId])
+                        .then(function (resultDeletion) {
+                            // loop through all received footprints and get specific information, after call INSERT
+                            for (var i = 0; i < req.body.Footprints.length; i++) {
 
-                        var ipUtils = require('ip2long');
-                        var long2ip = ipUtils.long2ip;
+                                var ipUtils = require('ip2long');
+                                var long2ip = ipUtils.long2ip;
 
-                        var redisService = require("../services/redisService");
-                        var cidr = require('cidr.rb');
+                                var redisService = require("../services/redisService");
+                                var cidr = require('cidr.rb');
 
-                        var network = new cidr.Net(req.body.Footprints[i].subnet_ip + "/" + req.body.Footprints[i].prefix);
-                        var netAddressLong = network.netaddr();
-                        var netAddress = long2ip(netAddressLong.addr);
+                                var network = new cidr.Net(req.body.Footprints[i].subnet_ip + "/" + req.body.Footprints[i].prefix);
+                                var netAddressLong = network.netaddr();
+                                var netAddress = long2ip(netAddressLong.addr);
 
-                        var subnetNumber = netAddressLong.addr;
-                        var maskNumber = network.mask.addr;
+                                var subnetNumber = netAddressLong.addr;
+                                var maskNumber = network.mask.addr;
 
-                        var obj = {
-                            maskNum: maskNumber,
-                            prefix: req.body.Footprints[i].prefix,
-                            subnetIp: req.body.Footprints[i].subnet_ip,
-                            subnetNum: subnetNumber
-                        }
-
-                        var stringified = JSON.stringify(obj);
-                        redisService.deleteItem("footprints:" + remoteEndpointId);
-                        redisService.rightPush("footprints:" + remoteEndpointId, stringified);
-
-                        //promise insert footprint into database according to endpoint id , so insert footprints with endpoint ID for specific requested interface
-                        db.db.any('INSERT INTO public.footprint (endpoint_id, subnet_num, mask_num, subnet_ip, prefix) VALUES ($1, $2, $3, $4, $5)', [remoteEndpointId, obj.subnetNum, obj.maskNum, obj.subnetIp, obj.prefix])
-                            .then(function (result2) {
-                                callbackCounter++;
-                                // if all footprints were inserted succesfully
-                                if (callbackCounter === req.body.Footprints.length) {
-                                    callbackCounter = 0;
-                                    console.log();
-                                    //class which is used to setCDSM with promises
-                                    var cdsm = require('../routes/setCdsm');
-                                    //set content origins on our CDSM
-                                    cdsm.setContentOrigins(req.body.ContentOrigins, localInterface[0].url_cdn, rfqdn, remoteEndpointId, remoteEndpointUrl)
-                                        .then(function (result) {
-                                            if (result === "Success") {
-                                                var createLists = require('../routes/createLists');
-                                                createLists.getInterface()
-                                                    .then(function (listInterfaces) {
-                                                        res.status(200)
-                                                            .json({
-                                                                status: 'Success',
-                                                                data: listInterfaces,
-                                                                message: 'Successfull creting remote services'
-                                                            });
-                                                        return;
-                                                    })
-                                                    .catch(function (err) {
-                                                        console.log(err);
-                                                    })
-                                            }
-                                        })
-                                        .catch(function (err) {
-                                            res.status(500)
-                                                .json({
-                                                    status: 'Failed',
-                                                    data: err,
-                                                    message: 'Error while settings one or all content origins on CDSM'
-                                                });
-                                        });
-
-
-
-
+                                var obj = {
+                                    maskNum: maskNumber,
+                                    prefix: req.body.Footprints[i].prefix,
+                                    subnetIp: req.body.Footprints[i].subnet_ip,
+                                    subnetNum: subnetNumber
                                 }
 
-                            })
-                            .catch(function (err) {
-                                //could not insert Footprint to database
-                                return next(err);
-                            });
-                    }
+                                var stringified = JSON.stringify(obj);
+                                redisService.deleteItem("footprints:" + remoteEndpointId);
+                                redisService.rightPush("footprints:" + remoteEndpointId, stringified);
+
+                                //promise insert footprint into database according to endpoint id , so insert footprints with endpoint ID for specific requested interface
+                                db.db.any('INSERT INTO public.footprint (endpoint_id, subnet_num, mask_num, subnet_ip, prefix) VALUES ($1, $2, $3, $4, $5)', [remoteEndpointId, obj.subnetNum, obj.maskNum, obj.subnetIp, obj.prefix])
+                                    .then(function (result2) {
+                                        callbackCounter++;
+                                        // if all footprints were inserted succesfully
+                                        if (callbackCounter === req.body.Footprints.length) {
+                                            callbackCounter = 0;
+                                            console.log();
+                                            //class which is used to setCDSM with promises
+                                            var cdsm = require('../routes/setCdsm');
+                                            //set content origins on our CDSM
+                                            cdsm.setContentOrigins(req.body.ContentOrigins, localInterface[0].url_cdn, rfqdn, remoteEndpointId, remoteEndpointUrl)
+                                                .then(function (result) {
+                                                    if (result === "Success") {
+                                                        var createLists = require('../routes/createLists');
+                                                        createLists.getInterface()
+                                                            .then(function (listInterfaces) {
+                                                                res.status(200)
+                                                                    .json({
+                                                                        status: 'Success',
+                                                                        data: listInterfaces,
+                                                                        message: 'Successfull creting remote services'
+                                                                    });
+                                                                return;
+                                                            })
+                                                            .catch(function (err) {
+                                                                console.log(err);
+                                                            })
+                                                    }
+                                                })
+                                                .catch(function (err) {
+                                                    res.status(500)
+                                                        .json({
+                                                            status: 'Failed',
+                                                            data: err,
+                                                            message: 'Error while settings one or all content origins on CDSM'
+                                                        });
+                                                });
+                                        }
+
+                                    })
+                                    .catch(function (err) {
+                                        //could not insert Footprint to database
+                                        return next(err);
+                                    });
+                            }
+                        })
+                        .catch(function (err) {
+
+                        })
+
                 })
                 .catch(function (err) {
                     //could not find interface in DB according to URL
