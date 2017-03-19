@@ -47,7 +47,7 @@ var processResponse = function (data) {
                             }
 
                             var stringified = JSON.stringify(obj);
-
+                            redisService.deleteItem("footprints:" + rmtEndptId);
                             redisService.rightPush("footprints:" + rmtEndptId, stringified);
                             //promise insert footprint into database according to endpoint id , so insert footprints with endpoint ID for specific requested interface
                             db.db.any('INSERT INTO public.footprint (endpoint_id, subnet_num, mask_num, subnet_ip, prefix) VALUES ($1, $2, $3, $4, $5)', [rmtEndptId, obj.subnetNum, obj.maskNum, obj.subnetIp, obj.prefix])

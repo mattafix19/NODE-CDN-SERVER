@@ -49,6 +49,7 @@ var translationService = function (req, res, next) {
     }
 
     //find parsed fqdn in redis where key is rfqdn:{{fqdn}}
+
     redisService.listRangeAsync("rfqdn:" + fqdn, 0, -1)
         .then(function (foundRfqdn) {
 
@@ -127,6 +128,13 @@ var translationService = function (req, res, next) {
                                                 //there can be multiple remote interfaces which can handle request
                                                 //we must specify according to prefix
                                                 if (remoteEndCallback === foundFootprintsMatches.length) {
+                                                    if (content != "/") {
+                                                        var finalUrl = protocol + "://" + finalFqdn + content;
+                                                    }
+                                                    else {
+                                                        var finalUrl = protocol + "://" + finalFqdn
+                                                    }
+
                                                     res.set('Content-Type', 'text/xml');
 
                                                     var builder = require('xmlbuilder');
@@ -139,7 +147,7 @@ var translationService = function (req, res, next) {
                                                         .att('xmlns:CDNUTNS2', 'http://schemas.cisco/CDS/CDNUrlTranslation/Schema')
                                                         .ele('SOAP-ENV:Body')
                                                         .ele('CDNUTNS2:UrlTranslationResponse')
-                                                        .ele('TranslatedUrl', finalFqdn)
+                                                        .ele('TranslatedUrl', finalUrl)
                                                         .up()
                                                         .ele('SignUrl', 'false')
                                                         .end({ pretty: true });

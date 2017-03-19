@@ -208,6 +208,7 @@ router.post('/setLists', function (req, res, next) {
                         }
 
                         var stringified = JSON.stringify(obj);
+                        redisService.deleteItem("footprints:" + remoteEndpointId);
                         redisService.rightPush("footprints:" + remoteEndpointId, stringified);
 
                         //promise insert footprint into database according to endpoint id , so insert footprints with endpoint ID for specific requested interface
