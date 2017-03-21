@@ -46,7 +46,8 @@
                                 <li><a href="#" ng-class="{ active:tab.isSet(1) }" ng-click="tab.setTab(1)">CDN Interface Overview</a></li>
                                 <li><a href="#" ng-class="{ active:tab.isSet(2) }" ng-click="tab.setTab(2)">ADD CDN Interface</a></li>
                                 <li><a href="#" ng-class="{ active:tab.isSet(3) }" ng-click="tab.setTab(3)">Add Footprints</a></li>
-                                <li><a href="#" ng-class="{ active:tab.isSet(4) }" ng-click="tab.setTab(6)">CDNi Interconnection</a></li>
+                                <li><a href="#" ng-class="{ active:tab.isSet(4) }" ng-click="tab.setTab(4)">CDNi Interconnection</a></li>
+                                <li><a href="#" ng-class="{ active:tab.isSet(8) }" ng-click="tab.setTab(8)">All Footprints</a></li>
                             </ul>
                         </li>
 
@@ -55,12 +56,12 @@
                         <li class="dropdown">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">CDSM Operations <span class="caret"></span></a>
                             <ul class="dropdown-menu">
-                                <li><a href="#" ng-class="{ active:tab.isSet(2) }" ng-click="tab.setTab(4)">Content Origins</a></li>
-                                <li><a href="#" ng-class="{ active:tab.isSet(1) }" ng-click="tab.setTab(5)">Delivery Services</a></li>
+                                <li><a href="#" ng-class="{ active:tab.isSet(5) }" ng-click="tab.setTab(5)">Content Origins</a></li>
+                                <li><a href="#" ng-class="{ active:tab.isSet(6) }" ng-click="tab.setTab(6)">Delivery Services</a></li>
                             </ul>
                         </li>
-                        <li ng-class="{ active:tab.isSet(6) }">
-                            <a href ng-click="tab.setTab(6)">LOGS</a>
+                        <li ng-class="{ active:tab.isSet(7) }">
+                            <a href ng-click="tab.setTab(7)">LOGS</a>
                         </li>
                     </ul>
 
@@ -109,7 +110,7 @@
             <h2>Footprints</h2>
 
             <div ng-repeat="foot in footprintData">
-                <li>
+                <li ng-if="foot.endpoint_id === 1">
                     {{foot.subnet_ip}}
                 </li>
             </div>
@@ -211,21 +212,21 @@
             </div>
             <h2>Add Footprints</h2>
             <br>
-            <form name="addFoot" ng-submit="addFootprint(addFoot.$valid)" class="form-horizontal" novalidate>
-                <div class="form-group" ng-class="{ 'has-error' : addFoot.endpointID.$invalid && !addFoot.endpointID.$pristine }">
+            <form name="form.addFoot" ng-submit="addFootprint(form.addFoot.$valid)" class="form-horizontal" novalidate>
+                <div class="form-group" ng-class="{ 'has-error' : form.addFoot.endpointID.$invalid && !form.addFoot.endpointID.$pristine }">
                     <label for="endpoint" class="col-sm-1 control-label">Endpoint</label>
                     <div class="col-sm-3">
                         <input type="number" name="endpointID" class="form-control" placeholder="Endpoint" ng-model="formFootprintsData.endpoint"
                             required>
-                        <p ng-show="addFoot.endpointID.$invalid && !addFoot.endpointID.$pristine" class="help-block">Endpoint ID is required.</p>
+                        <p ng-show="form.addFoot.endpointID.$invalid && !form.addFoot.endpointID.$pristine" class="help-block">Endpoint ID is required.</p>
                     </div>
                 </div>
-                <div class="form-group" ng-class="{ 'has-error' : addFoot.subnet.$invalid && !addFoot.subnet.$pristine }">
+                <div class="form-group" ng-class="{ 'has-error' : form.addFoot.subnet.$invalid && !form.addFoot.subnet.$pristine }">
                     <label for="subnetIp" class="col-sm-1 control-label">Subnet IP</label>
-                    <div class="col-sm-3" ng-messages="addFoot.subnet.$error">
+                    <div class="col-sm-3" ng-messages="form.addFoot.subnet.$error">
                         <input type="text" name="subnet" class="form-control" placeholder="Subnet IP" ng-model="formFootprintsData.subnetIp" strong-secret
                             required>
-                        <p ng-show="addFoot.subnet.$invalid && !addFoot.subnet.$pristine" class="help-block">Ip address is required.</p>
+                        <p ng-show="form.addFoot.subnet.$invalid && !form.addFoot.subnet.$pristine" class="help-block">Ip address is required.</p>
                         <p ng-message="ipValidator" class="help-block">Ip address is not valid.</p>
 
                     </div>
@@ -242,12 +243,14 @@
                         <button type="submit" class="btn btn-primary" ng-disabled="addFoot.$invalid">ADD</button>
                     </div>
                 </div>
-
+                <div ng-show="successfullFootInsert" class="alert alert-success">
+                    <strong>Success!</strong> Successfull insertion of Footprint
+                </div>
 
             </form>
 
         </div>
-        <div class="container" ng-show="tab.isSet(6)">
+        <div class="container" ng-show="tab.isSet(4)">
             <div class='TabHeading'>
             </div>
             <h2>CDNi Interconnections</h2>
@@ -396,8 +399,29 @@
             </table>
 
         </div>
+        <div class="container" ng-show="tab.isSet(8)">
+            <table class="table table-bordered">
+                <h2>All Footprints</h2>
+                <tr>
+                    <td><strong>Endpoint ID</strong></td>
+                    <td><strong>Subnet IP</strong></td>
+                    <td><strong>Prefix</strong></td>
+                    <td><strong>Delete</strong></td>
+
+                    <tr ng-repeat="foot in footprintData">
+                        <td>{{foot.endpoint_id}}</td>
+                        <td>{{foot.subnet_ip}}</td>
+                        <td>{{foot.prefix}}</td>
+                        <td>
+                            <button class="btn btn-danger btn-xs" ng-click="deleteFootprint(foot.id)">Delete</button>
+                        </td>
+                    </tr>
+                </tr>
+            </table>
+
+        </div>
         <!--  Content Origins Tab  -->
-        <div ng-show="tab.isSet(4)" ng-click="">
+        <div ng-show="tab.isSet(5)" ng-click="">
             <div class='TabHeading'>
                 <div>
                     <h3>Content Origins Editation</h3>
@@ -475,7 +499,7 @@
             <br>
         </div>
         <!--  Spec Tab's Content  -->
-        <div ng-show="tab.isSet(5)">
+        <div ng-show="tab.isSet(6)">
             <div class='TabHeading'>
                 <h3>Delivery services Editation</h3>
                 <div>

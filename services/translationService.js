@@ -4,7 +4,7 @@ var ip2long = ipUtils.ip2long;
 var cidr = require('cidr.rb');
 
 var translationService = function (req, res, next) {
-
+    console.time("handleTime");
     var soapBody = req.body['soap-env:envelope']['soap-env:body']['cdnutns2:urltranslationrequest'];
 
     var requestIp = '';			    // ip address of consumer
@@ -155,6 +155,7 @@ var translationService = function (req, res, next) {
                                                     console.log(xml);
 
                                                     res.send(xml);
+                                                    console.timeEnd("handleTime");
                                                 }
 
 

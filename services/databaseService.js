@@ -55,6 +55,22 @@ function getFootprints(req, res, next) {
     });
 }
 
+function deleteFootprints (req ,res, next){
+  var id = req.params.footId;
+  db.any('DELETE FROM footprint where id = ($1)', [id])
+  .then(function(deleteResult){
+    db.any('SELECT * FROM footprint')
+    .then(function(selectAllFootRes){
+      var redisService = require("../services/redisService");
+      var footprints = redisService.addFootprintsRedis(selectAllFootRes);
+      res.json(footprints);
+    })
+  })
+  .catch(function(err){
+    res.json(err);
+  })
+}
+
 function addFootprints(req, res, next) {
   
   var cidr = require('cidr.rb');
@@ -374,6 +390,7 @@ module.exports = {
   db: db,
   getData: getData,
   getFootprints: getFootprints,
+  deleteFootprints:deleteFootprints,
   addFootprints: addFootprints,
   addCdn: addCdn,
   deleteCDNinterface: deleteCDNinterface,

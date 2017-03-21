@@ -49,6 +49,7 @@ router.get('/getFootprints', db.getFootprints);
 router.post('/addFootprints', db.addFootprints);
 router.post('/addCdn', db.addCdn);
 router.delete('/deleteCDNinterface/:cdnId', db.deleteCDNinterface);
+router.delete('/deleteFootprints/:footId', db.deleteFootprints);
 
 //Translation Service
 router.post('/CDNTranslationService', xmlparser({ trim: false, explicitArray: false }), translationService.translationService);

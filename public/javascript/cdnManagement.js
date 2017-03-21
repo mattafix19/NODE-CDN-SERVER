@@ -1,4 +1,4 @@
-var app = angular.module('cdnManagement', ['ngCookies','ngMessages']);
+var app = angular.module('cdnManagement', ['ngCookies', 'ngMessages']);
 
 app.directive('strongSecret', function () {
     return {
@@ -28,7 +28,7 @@ app.directive('strongSecret', function () {
     };
 });
 
-app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http', '$window', function ($location, $cookieStore, $scope, $http, $window) {
+app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http', '$window', '$timeout', function ($location, $cookieStore, $scope, $http, $window, $timeout) {
 
     $scope.formDataCdni = {};
     $scope.cdniData = {};
@@ -42,7 +42,13 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
     $scope.deliveryServicesData = {};
     $scope.deliveryServicesAll = {};
 
+    //show div when success insert of footprins
+    $scope.successfullFootInsert = false;
+
     $scope.ownInterface = {};
+
+    //setting set pristine test
+    $scope.form = {};
 
     $scope.formCreateContent = {};
     $scope.formCreateDelSer = {};
@@ -202,10 +208,10 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
         .success(function (data) {
             console.log(data);
             var arr = [];
-            for (var i = 0; i < data.data.length; i++){
-                if(data.data[i].endpoint_id === 1){
-                    arr.push(data.data[i]);
-                }
+            for (var i = 0; i < data.data.length; i++) {
+
+                arr.push(data.data[i]);
+
             }
 
             $scope.footprintData = arr;
@@ -214,6 +220,20 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
             console.log('Error: ' + error);
         });
 
+    $scope.deleteFootprint = function (footId) {
+        waitingDialog.show();
+        $http.delete('/deleteFootprints/' + footId)
+            .success(function (data) {
+                waitingDialog.hide();
+                $scope.footprintData = data;
+                console.log(data);
+            })
+            .error(function (error) {
+                console.log('Error: ' + error);
+            });
+    }
+
+
     //CREATE NEW FOOTPRINT
     $scope.addFootprint = function (isValid) {
 
@@ -221,14 +241,23 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
             $http.post('/addFootprints', $scope.formFootprintsData)
                 .success(function (data) {
                     $scope.formFootprintsData = {};
+                    $scope.form.addFoot.$setPristine();
                     $scope.footprintData = data.data;
+                    $scope.afterInsertFootprint();
                     console.log(data);
+
+
                 })
                 .error(function (error) {
                     console.log('Error: ' + error);
                 });
         }
     };
+
+    $scope.afterInsertFootprint = function () {
+        $scope.successfullFootInsert = true;
+        $timeout(function () { $scope.successfullFootInsert = false; }, 3000);
+    }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------
     //---------------------------------------------------------------------------------------------------------------------------------------------------
