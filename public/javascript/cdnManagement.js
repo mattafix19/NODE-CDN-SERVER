@@ -32,7 +32,6 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
 
     $scope.formDataCdni = {};
     $scope.cdniData = {};
-    $scope.cdniDataCopy = {};
 
     $scope.formFootprintsData = {};
     $scope.footprintData = {};
@@ -53,6 +52,11 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
     $scope.formCreateContent = {};
     $scope.formCreateDelSer = {};
     $scope.formAssignDelSer = {};
+
+    //array for temporary store of content before editation
+    $scope.modifyContentOrigin = {};
+    //object to store information about actual editing content origins
+    $scope.editingData = {};
 
     var deliveryServicesReceived = 0;
     var serviceEnginesReceived = 0;
@@ -285,6 +289,7 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
 
     $scope.modify = function (tableData) {
         $scope.editingData[tableData.id] = true;
+        $scope.modifyContentOrigin = angular.copy(tableData);
     };
 
     //UPDATE CONTENT ORIGIN
@@ -301,7 +306,16 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
     };
 
     $scope.cancel = function (tableData) {
-        $scope.editingData[tableData.id] = false
+        $scope.editingData[tableData.id] = false;
+        for (var i = 0 ; i < $scope.contentOriginsData.length; i++){
+            if ($scope.contentOriginsData[i].id === $scope.modifyContentOrigin.id){
+                $scope.contentOriginsData[i].name = $scope.modifyContentOrigin.name;
+                $scope.contentOriginsData[i].originFqdn = $scope.modifyContentOrigin.originFqdn;
+                $scope.contentOriginsData[i].rfqdn = $scope.modifyContentOrigin.rfqdn;
+                $scope.modifyContentOrigin = {};
+                return;
+            }
+        }
     }
 
     //DELETE CONTENT ORIGIN

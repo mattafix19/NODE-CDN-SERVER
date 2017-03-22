@@ -408,7 +408,7 @@
                     <td><strong>Prefix</strong></td>
                     <td><strong>Delete</strong></td>
 
-                    <tr ng-repeat="foot in footprintData | orderBy:'endpoint_id'" >
+                    <tr ng-repeat="foot in footprintData | orderBy:'endpoint_id'">
                         <td>{{foot.endpoint_id}}</td>
                         <td>{{foot.subnet_ip}}</td>
                         <td>{{foot.prefix}}</td>
@@ -595,8 +595,12 @@
                                     {{service.seName}}
                                 </td>
 
-                                <td>
+                                <td ng-if="service.seName != 'Unassigned'">
+                                    Assigned
+                                </td>
+                                <td ng-if="service.seName === 'Unassigned'">
                                     <select ng-model="formAssignDelSer.seName">
+                                    <p ng-if="service.seName != 'Unassigned'"> Assigned </p>
                                     <option ng-repeat="x in serviceEnginesData">{{x.name}}</option>
                                 </select>
                                 </td>
