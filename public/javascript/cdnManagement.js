@@ -213,7 +213,6 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
                 arr.push(data.data[i]);
 
             }
-
             $scope.footprintData = arr;
         })
         .error(function (error) {

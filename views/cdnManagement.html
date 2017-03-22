@@ -408,7 +408,7 @@
                     <td><strong>Prefix</strong></td>
                     <td><strong>Delete</strong></td>
 
-                    <tr ng-repeat="foot in footprintData">
+                    <tr ng-repeat="foot in footprintData | orderBy:'endpoint_id'" >
                         <td>{{foot.endpoint_id}}</td>
                         <td>{{foot.subnet_ip}}</td>
                         <td>{{foot.prefix}}</td>
@@ -418,7 +418,6 @@
                     </tr>
                 </tr>
             </table>
-
         </div>
         <!--  Content Origins Tab  -->
         <div ng-show="tab.isSet(5)" ng-click="">
