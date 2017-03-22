@@ -270,6 +270,7 @@
                     <td>Endpoint Type</td>
                     <td>Offer Status</td>
                     <td>Sync</td>
+                    <td>Delete Interconnection</td>
 
                     <tr ng-repeat="cdni in cdniData" ng-if="(cdni.offer_status === '1' || cdni.offer_status === '6') && (cdni.id != '1')">
                         <td>{{cdni.id}}</td>
@@ -288,6 +289,9 @@
                         </td>
                         <td ng-if="cdni.offer_status === '6'">
                             <button type="button" class="btn btn-success" ng-click="syncCdni(cdni)">Sync</button>
+                        </td>
+                        <td>
+                            <button type="button" class="btn btn-danger" ng-click="deleteInterconnection(cdni)">Delete</button>
                         </td>
 
                     </tr>

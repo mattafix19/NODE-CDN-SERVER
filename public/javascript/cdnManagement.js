@@ -149,6 +149,25 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
             });
     }
 
+    $scope.deleteInterconnection = function(cdni){
+        var req = {
+            //own interface is filled after received getData function
+            sender: $scope.ownInterface,
+            target: cdni
+        }
+        waitingDialog.show();
+        $http.delete('http://localhost:8080/cdniApi/deleteInterconnection', req)
+            .success(function (data) {
+                console.log(data);
+                $scope.cdniData = data.data;
+                waitingDialog.hide();
+            })
+            .error(function (error) {
+                waitingDialog.hide();
+                console.log('Error: ' + error);
+            });
+    }
+
     //---------------------------------------------------------------------------------------------------------------------------------------------------
     //---------------------------------------------------------------------------------------------------------------------------------------------------
     //CDN INTERFACE FUNCTIONS

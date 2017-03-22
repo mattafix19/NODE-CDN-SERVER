@@ -150,6 +150,11 @@ router.post('/createLists', function (req, res, next) {
         })
 });
 
+router.delete('/deleteInterconnection', function (req, res, next) {
+    var target = req.body.target;
+    console.log();
+});
+
 router.post('/setLists', function (req, res, next) {
     var url = req.body.Sender.url;
     var localInterface = null;
@@ -276,6 +281,7 @@ router.post('/setLists', function (req, res, next) {
         })
 
 });
+
 
 router.post('/createOffer', db.registerOffer);
 router.post('/acceptOffer', db.acceptOffer);
