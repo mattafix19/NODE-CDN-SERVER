@@ -81,7 +81,13 @@ var processResponse = function (data) {
                                                                 .then(function (resPush) {
                                                                     callbackRedisCounter++;
                                                                     if (callbackRedisCounter === contentOrigins.length) {
-                                                                        resolve("Success");
+                                                                        db.db.any('UPDATE cdn_interface SET sync = true WHERE id = ($1)',[rmtEndptId])
+                                                                        .then(function(resultUpdate){
+                                                                            resolve("Success");
+                                                                        })
+                                                                        .catch(function(err){
+                                                                            console.log(err)
+                                                                        })
                                                                     }
                                                                 })
                                                                 .catch(function (err) {

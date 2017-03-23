@@ -77,7 +77,7 @@
         </nav>
         <!--  Description Tab's Content  -->
         <div class="container" ng-show="tab.isSet(1)">
-            
+
             <table class="table table-bordered table-striped">
                 <h2>CDNI Overview</h2>
                 <br>
@@ -256,22 +256,23 @@
             </div>
             <h2>CDNi Interconnections</h2>
             <br>
-            <table class="table table-bordered">
+            <table class="table table-bordered table-striped">
                 <h3>Accepted Offers</h3>
                 <tr>
-                    <td>ID</td>
-                    <td>Name</td>
-                    <td>URL</td>
-                    <td>URL Translator</td>
-                    <td>URL CDN</td>
-                    <td>Port CDN</td>
-                    <td>Login</td>
-                    <td>Priority</td>
-                    <td>Endpoint gateway type</td>
-                    <td>Endpoint Type</td>
-                    <td>Offer Status</td>
-                    <td>Sync</td>
-                    <td>Delete Interconnection</td>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>URL</th>
+                    <th>URL Translator</th>
+                    <th>URL CDN</th>
+                    <th>Port CDN</th>
+                    <th>Login</th>
+                    <th>Priority</th>
+                    <th>Endpoint gateway type</th>
+                    <th>Endpoint Type</th>
+                    <th>Offer Status</th>
+                    <th>Sync</th>
+                    <th>Delete Interconnection</th>
+                    <th>Sync Status</th>
 
                     <tr ng-repeat="cdni in cdniData" ng-if="(cdni.offer_status === '1' || cdni.offer_status === '6') && (cdni.id != '1')">
                         <td>{{cdni.id}}</td>
@@ -289,31 +290,35 @@
                             Can't sync as Downstream
                         </td>
                         <td ng-if="cdni.offer_status === '6'">
-                            <button type="button" class="btn btn-success" ng-click="syncCdni(cdni)">Sync</button>
+                            <button ng-if="cdni.sync === false" type="button" class="btn btn-success" ng-click="syncCdni(cdni)">Sync</button>
+                            <button ng-if="cdni.sync === true" type="button" class="btn btn-success" ng-click="syncCdni(cdni)">Re-sync</button>
                         </td>
                         <td>
                             <button type="button" class="btn btn-danger" ng-click="deleteInterconnection(cdni)">Delete</button>
+                        </td>
+                        <td>
+                            {{cdni.sync}}
                         </td>
 
                     </tr>
                 </tr>
             </table>
-            <table class="table table-bordered">
+            <table class="table table-bordered table-striped">
                 <h3>Received Offers</h3>
                 <tr>
-                    <td>ID</td>
-                    <td>Name</td>
-                    <td>URL</td>
-                    <td>URL Translator</td>
-                    <td>URL CDN</td>
-                    <td>Port CDN</td>
-                    <td>Login</td>
-                    <td>Priority</td>
-                    <td>Endpoint gateway type</td>
-                    <td>Endpoint Type</td>
-                    <td>Offer Status</td>
-                    <td>Accept</td>
-                    <td>Decline</td>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>URL</th>
+                    <th>URL Translator</th>
+                    <th>URL CDN</th>
+                    <th>Port CDN</th>
+                    <th>Login</th>
+                    <th>Priority</th>
+                    <th>Endpoint gateway type</th>
+                    <th>Endpoint Type</th>
+                    <th>Offer Status</th>
+                    <th>Accept</th>
+                    <th>Decline</th>
 
                     <tr ng-repeat="cdni in cdniData" ng-if="(cdni.offer_status === '5') && (cdni.id != '1')">
                         <td>{{cdni.id}}</td>
@@ -337,20 +342,20 @@
                 </tr>
             </table>
 
-            <table class="table table-bordered">
+            <table class="table table-bordered table-striped">
                 <h3>Awaiting offers</h3>
                 <tr>
-                    <td>ID</td>
-                    <td>Name</td>
-                    <td>URL</td>
-                    <td>URL Translator</td>
-                    <td>URL CDN</td>
-                    <td>Port CDN</td>
-                    <td>Login</td>
-                    <td>Priority</td>
-                    <td>Endpoint gateway type</td>
-                    <td>Endpoint Type</td>
-                    <td>Offer Status</td>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>URL</th>
+                    <th>URL Translator</th>
+                    <th>URL CDN</th>
+                    <th>Port CDN</th>
+                    <th>Login</th>
+                    <th>Priority</th>
+                    <th>Endpoint gateway type</th>
+                    <th>Endpoint Type</th>
+                    <th>Offer Status</th>
 
                     <tr ng-repeat="cdni in cdniData" ng-if="(cdni.offer_status === '2') && (cdni.id != '1')">
                         <td>{{cdni.id}}</td>
@@ -368,21 +373,21 @@
                     </tr>
                 </tr>
             </table>
-            <table class="table table-bordered">
+            <table class="table table-bordered table-striped">
                 <h3>Not offered</h3>
                 <tr>
-                    <td>ID</td>
-                    <td>Name</td>
-                    <td>URL</td>
-                    <td>URL Translator</td>
-                    <td>URL CDN</td>
-                    <td>Port CDN</td>
-                    <td>Login</td>
-                    <td>Priority</td>
-                    <td>Endpoint gateway type</td>
-                    <td>Endpoint Type</td>
-                    <td>Offer Status</td>
-                    <td>Offer</td>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>URL</th>
+                    <th>URL Translator</th>
+                    <th>URL CDN</th>
+                    <th>Port CDN</th>
+                    <th>Login</th>
+                    <th>Priority</th>
+                    <th>Endpoint gateway type</th>
+                    <th>Endpoint Type</th>
+                    <th>Offer Status</th>
+                    <th>Offer</th>
 
                     <tr ng-repeat="cdni in cdniData" ng-if="(cdni.offer_status === '4') && (cdni.id != '1')">
                         <td>{{cdni.id}}</td>
@@ -405,7 +410,7 @@
 
         </div>
         <div class="container" ng-show="tab.isSet(8)">
-            <table class="table table-bordered">
+            <table class="table table-bordered table-striped">
                 <h2>All Footprints</h2>
                 <tr>
                     <td><strong>Endpoint ID</strong></td>
@@ -544,7 +549,7 @@
 
                                 <td>
                                     <button class="btn btn-danger btn-xs" ng-click="deleteDeliveryService(service.id)">Delete</button>
- 
+
                                 </td>
                             </tr>
                         </tbody>

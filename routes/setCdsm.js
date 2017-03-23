@@ -6,6 +6,7 @@ var setContentOrigins = function (data, cdsmUrl, rfqdn, endpointId, endpointUrl)
         var redisService = require("../services/redisService");
         // array where are stored successfully created content origins
         var createdContentOrigins = [];
+        var createdDeliveryService = [];
         var callbackCounter = 2;
         var recordsCount = data.length;
 
@@ -31,11 +32,11 @@ var setContentOrigins = function (data, cdsmUrl, rfqdn, endpointId, endpointUrl)
                     createdContentOrigins.push(createdOrigin);
                     cdsm.createDeliveryService(cdsmUrl, createdOrigin)
                         .then(function (idCreatedDeliveryService) {
-
+                            createdDeliveryService.push(idCreatedDeliveryService);
                             // idCreatedDeliveryService is passed only for future use in assigning service engine
                             cdsm.getServiceEngines(cdsmUrl)
                                 .then(function (devices) {
-                                
+                                    
                                     if (devices.Devices.length != 0) {
                                         for (var i = 0; i < devices.Devices.length; i++) {
                                             cdsm.assignServiceEngine(cdsmUrl, idCreatedDeliveryService, devices.Devices[i].$.id)

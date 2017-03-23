@@ -153,18 +153,18 @@ router.post('/createLists', function (req, res, next) {
 router.delete('/deleteInterconnection/:targetID', function (req, res, next) {
     var id = req.params.targetID;
     db.getOwnInterface()
-    .then(function(ownInterface){
-        db.db.any('SELECT * FROM cdn_interface WHERE id = ($1)', id)
-        .then(function(foundRemoteInterface){
-            console.log();
+        .then(function (ownInterface) {
+            db.db.any('SELECT * FROM cdn_interface WHERE id = ($1)', id)
+                .then(function (foundRemoteInterface) {
+                    console.log();
+                })
+                .catch(function (err) {
+                    console.log(err);
+                })
         })
-        .catch(function(err){
+        .catch(function (err) {
             console.log(err);
         })
-    })
-    .catch(function(err){
-        console.log(err);
-    })
 });
 
 router.post('/setLists', function (req, res, next) {
@@ -247,13 +247,19 @@ router.post('/setLists', function (req, res, next) {
                                                         var createLists = require('../routes/createLists');
                                                         createLists.getInterface()
                                                             .then(function (listInterfaces) {
-                                                                res.status(200)
-                                                                    .json({
-                                                                        status: 'Success',
-                                                                        data: listInterfaces,
-                                                                        message: 'Successfull creting remote services'
-                                                                    });
-                                                                return;
+                                                                db.db.any('UPDATE cdn_interface SET sync = true where id = ($1)', [remoteEndpointId])
+                                                                    .then(function (updated) {
+                                                                        res.status(200)
+                                                                            .json({
+                                                                                status: 'Success',
+                                                                                data: listInterfaces,
+                                                                                message: 'Successfull creting remote services'
+                                                                            });
+                                                                    })
+                                                                    .catch(function (err) {
+                                                                        console.log(err);
+                                                                    })
+
                                                             })
                                                             .catch(function (err) {
                                                                 console.log(err);
