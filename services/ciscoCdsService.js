@@ -1,11 +1,12 @@
+var request = require('request');
+var request = request.defaults({
+    strictSSL: false,
+    rejectUnauthorized: false
+});
+
 //CREATE CONTENT ORIGIN
 var createContentOrigin = function (cdsmUrl, conOrig, rfqdn) {
     return new Promise(function (resolve, reject) {
-        var request = require('request');
-        var request = request.defaults({
-            strictSSL: false,
-            rejectUnauthorized: false
-        });
 
         username = "admin",
             password = "CdnLab_123",
@@ -58,12 +59,6 @@ var createContentOrigin = function (cdsmUrl, conOrig, rfqdn) {
 //CREATE DELIVERY SERVICE
 var createDeliveryService = function (cdsmUrl, obj) {
     return new Promise(function (resolve, reject) {
-        var request = require('request');
-        var request = request.defaults({
-            strictSSL: false,
-            rejectUnauthorized: false
-        });
-
         username = "admin",
             password = "CdnLab_123",
             url = cdsmUrl + ":8443/servlet/com.cisco.unicorn.ui.ChannelApiServlet?action=createDeliveryService&deliveryService=" + obj.Name + "&contentOrigin=" + obj.ID,
@@ -83,9 +78,9 @@ var createDeliveryService = function (cdsmUrl, obj) {
                     parseString(response.body, function (err, result) {
                         if (result.deliveryserviceProvisioning.message[0].$.status === "fail") {
                             var obj = {
-                                status: "Error",
-                                operation: "Error while creating delivery service",
-                                response: result.deliveryserviceProvisioning
+                                status: "Failed",
+                                data: result.deliveryserviceProvisioning.message[0].$.message,
+                                message: result.deliveryserviceProvisioning.message[0].$.message
                             }
                             reject(obj);
                         }
@@ -105,12 +100,6 @@ var createDeliveryService = function (cdsmUrl, obj) {
 var getServiceEngines = function (cdsmUrl) {
 
     return new Promise(function (resolve, reject) {
-        var request = require('request');
-        var request = request.defaults({
-            strictSSL: false,
-            rejectUnauthorized: false
-        });
-
         //call get SE DEVICES 
         username = "admin",
             password = "CdnLab_123",
@@ -131,9 +120,9 @@ var getServiceEngines = function (cdsmUrl) {
                     parseString(response.body, function (err, result) {
                         if (result.listing.message[0].$.status === "fail") {
                             var obj = {
-                                status: "Error",
-                                operation: "Error while getting list of service engines",
-                                response: result.listing
+                                status: "Failed",
+                                data: result.listing.message[0].$.message,
+                                message: result.listing.message[0].$.message
                             }
                             reject(obj);
                         }
@@ -143,7 +132,6 @@ var getServiceEngines = function (cdsmUrl) {
                                     devices.push(result.listing.device[i]);
                                 }
                             }
-                            console.log(devices);
                             var assignCounter = 0;
 
                             var obj = {
@@ -164,14 +152,7 @@ var getServiceEngines = function (cdsmUrl) {
 
 //ASSIGN SERVICE ENGINE
 var assignServiceEngine = function (cdsmUrl, id, deviceId) {
-
     return new Promise(function (resolve, reject) {
-        var request = require('request');
-        var request = request.defaults({
-            strictSSL: false,
-            rejectUnauthorized: false
-        });
-
         username = "admin",
             password = "CdnLab_123",
             url = cdsmUrl + ":8443/servlet/com.cisco.unicorn.ui.ChannelApiServlet?action=assignSEs&deliveryService=" + id + "&contentAcquirer=" + deviceId + "&se=" + deviceId,
@@ -187,19 +168,27 @@ var assignServiceEngine = function (cdsmUrl, id, deviceId) {
             },
             function (error, response, body) {
                 if (response != null) {
-
-                    resolve("OK");
-
-                }
-                else {
-                    reject("False assigning");
+                    var parseString = require('xml2js').parseString;
+                    parseString(response.body, function (err, result) {
+                        if (result.deliveryserviceProvisioning.message[0].$.status === "fail") {
+                            var obj = {
+                                status: "Failed",
+                                data: result.deliveryserviceProvisioning.message[0].$.message,
+                                message: result.deliveryserviceProvisioning.message[0].$.message
+                            }
+                            reject(obj);
+                        }
+                        else {
+                            var id = result.deliveryserviceProvisioning.record[0].$.Id;
+                            resolve(id);
+                        }
+                    });
                 }
 
 
             }
         );
     });
-
 };
 
 //GET CONTENT ORIGINS FROM OWN INTERFACE FOR OUR CDSM
@@ -213,12 +202,6 @@ var getContentOrigins = function () {
         db.getOwnInterface()
             .then(function (localEndpoint) {
                 // send CDSM request for content origins according to selected own interface
-                var request = require('request');
-                var request = request.defaults({
-                    strictSSL: false,
-                    rejectUnauthorized: false
-                });
-
                 username = "admin",
                     password = "CdnLab_123",
                     url = localEndpoint[0].url_cdn + ":" + localEndpoint[0].port_cdn + "/servlet/com.cisco.unicorn.ui.ListApiServlet?action=getContentOrigins&param=all",
@@ -357,13 +340,6 @@ var updateContentOrigin = function (req, res, next) {
 
     // Grab data from the URL parameters
     var id = req.params.originID;
-
-    var request = require('request');
-    var request = request.defaults({
-        strictSSL: false,
-        rejectUnauthorized: false
-    });
-
     username = "admin",
         password = "CdnLab_123",
         url = "https://cdsm.cdn.ab.sk:8443/servlet/com.cisco.unicorn.ui.ChannelApiServlet?action=modifyContentOrigin&contentOrigin=" + id + "&name=" + req.body.name + "&origin=" + req.body.originFqdn + "&fqdn=" + req.body.rfqdn,
@@ -417,12 +393,6 @@ var deleteContentOrigin = function (req, res, next) {
     // Grab data from the URL parameters
     var id = req.params.originID;
 
-    var request = require('request');
-    var request = request.defaults({
-        strictSSL: false,
-        rejectUnauthorized: false
-    });
-
     username = "admin",
         password = "CdnLab_123",
         url = "https://cdsm.cdn.ab.sk:8443/servlet/com.cisco.unicorn.ui.ChannelApiServlet?action=deleteContentOrigins&contentOrigin=" + id,
@@ -470,13 +440,6 @@ var deleteContentOrigin = function (req, res, next) {
 }
 
 var getDeliveryServices = function (req, res, next) {
-
-    var request = require('request');
-    var request = request.defaults({
-        strictSSL: false,
-        rejectUnauthorized: false
-    });
-
     username = "admin",
         password = "CdnLab_123",
         url = "https://cdsm.cdn.ab.sk:8443/servlet/com.cisco.unicorn.ui.ListApiServlet?action=getDeliveryServices&param=all",
@@ -497,7 +460,7 @@ var getDeliveryServices = function (req, res, next) {
                     .json({
                         status: 'Failed',
                         data: error,
-                        message: 'Delete content origin failed'
+                        message: 'Get delivery services failed'
                     });
             }
             parseString(response.body, function (err, result) {
@@ -530,13 +493,176 @@ var getDeliveryServices = function (req, res, next) {
                         .json({
                             status: 'Success',
                             data: arrContentOrigins,
-                            message: 'Delete content origin success'
+                            message: 'Get delivery services success'
                         });
                 }
             });
         }
     );
 }
+
+var getServiceEnginesRouter = function (req, res, next) {
+    getServiceEngines('https://cdsm.cdn.ab.sk')
+        .then(function (result) {
+            var arrdevices = result.Devices;
+            var arrDevicesFinal = [];
+
+            for (var i = 0, len = arrdevices.length; i < len; i++) {
+                var obj = arrdevices[i].$;
+                var contentOrigin = {
+                    name: obj.name,
+                    id: obj.id
+                }
+                arrDevicesFinal.push(contentOrigin)
+
+            }
+            res.status(200)
+                .json({
+                    status: 'Success',
+                    data: arrDevicesFinal,
+                    message: 'Retrieved all delivery services success'
+                });
+        })
+        .catch(function (err) {
+            res.status(404)
+                .json(err);
+        })
+}
+
+var createDeliveryServiceRouter = function (req, res, next) {
+    var obj = {
+        Name: req.body.serName,
+        ID: req.body.idOrigin
+    }
+    createDeliveryService("https://cdsm.cdn.ab.sk", obj)
+        .then(function (result) {
+            res.status(200)
+                .json({
+                    status: 'Success',
+                    data: result,
+                    message: 'Creating delivery service successfull'
+                });
+        })
+        .catch(function (err) {
+            res.status(404)
+                .json(err);
+        })
+}
+
+var deleteDeliveryService = function (req, res, next) {
+    var results = [];
+    // Grab data from the URL parameters
+    var id = req.params.ID;
+    username = "admin",
+        password = "CdnLab_123",
+        url = "https://cdsm.cdn.ab.sk:8443/servlet/com.cisco.unicorn.ui.ChannelApiServlet?action=deleteDeliveryServices&deliveryService=" + id,
+        //console.log(url);
+        auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
+
+    request(
+        {
+            url: url,
+            headers: {
+                "Authorization": auth
+            }
+        },
+        function (error, response, body) {
+            var parseString = require('xml2js').parseString;
+
+            if (error) {
+                res.status(404)
+                    .json({
+                        status: 'Failed',
+                        data: error,
+                        message: 'Delete delivery service failed'
+                    });
+            }
+            parseString(response.body, function (err, result) {
+                if (result.deliveryserviceProvisioning.message[0].$.status === "fail") {
+                    res.status(404)
+                        .json({
+                            status: 'Failed',
+                            data: result.deliveryserviceProvisioning.error[0].$.message,
+                            message: result.deliveryserviceProvisioning.error[0].$.message
+                        });
+                }
+                else {
+                    res.status(200)
+                        .json({
+                            status: 'Success',
+                            data: result.deliveryserviceProvisioning,
+                            message: 'Delete delivery service success'
+                        });
+                }
+            });
+        }
+    );
+}
+
+var assignServiceEngineRouter = function (req, res, next) {
+    assignServiceEngine('https://cdsm.cdn.ab.sk', req.body.delSerID, req.body.seID)
+        .then(function (result) {
+            res.status(200)
+                .json({
+                    status: 'Success',
+                    data: result,
+                    message: 'Assigning service engine successfull'
+                });
+        })
+        .catch(function (err) {
+            res.status(404)
+                .json(err);
+        })
+
+}
+
+var unassignServiceEngine = function (req, res, next) {
+    username = "admin",
+        password = "CdnLab_123",
+        url = "https://cdsm.cdn.ab.sk:8443/servlet/com.cisco.unicorn.ui.ChannelApiServlet?action=unassignSEs&deliveryService=" + req.body.delSerID + "&se=all",
+        //console.log(url);
+        auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
+
+    request(
+        {
+            url: url,
+            headers: {
+                "Authorization": auth
+            }
+        },
+        function (error, response, body) {
+            var parseString = require('xml2js').parseString;
+
+            if (error) {
+                res.status(404)
+                    .json({
+                        status: 'Failed',
+                        data: error,
+                        message: 'Unassign service engine failed'
+                    });
+            }
+            parseString(response.body, function (err, result) {
+                if (result.deliveryserviceProvisioning.message[0].$.status === "fail") {
+                    res.status(404)
+                        .json({
+                            status: 'Failed',
+                            data: result.deliveryserviceProvisioning.error[0].$.message,
+                            message: result.deliveryserviceProvisioning.error[0].$.message
+                        });
+                }
+                else {
+                    res.status(200)
+                        .json({
+                            status: 'Success',
+                            data: result.deliveryserviceProvisioning,
+                            message: 'Unassign service engine success'
+                        });
+                }
+            });
+        }
+    );
+}
+
 
 module.exports = {
     createContentOrigin: createContentOrigin,
@@ -548,5 +674,10 @@ module.exports = {
     createContentOriginRouter: createContentOriginRouter,
     updateContentOrigin: updateContentOrigin,
     deleteContentOrigin: deleteContentOrigin,
-    getDeliveryServices: getDeliveryServices
+    getDeliveryServices: getDeliveryServices,
+    getServiceEnginesRouter: getServiceEnginesRouter,
+    createDeliveryServiceRouter: createDeliveryServiceRouter,
+    deleteDeliveryService: deleteDeliveryService,
+    assignServiceEngineRouter: assignServiceEngineRouter,
+    unassignServiceEngine: unassignServiceEngine
 }

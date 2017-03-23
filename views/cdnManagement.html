@@ -78,20 +78,21 @@
         <!--  Description Tab's Content  -->
         <div class="container" ng-show="tab.isSet(1)">
             
-            <table class="table table-bordered">
-                <h2>CDN Overview</h2>
+            <table class="table table-bordered table-striped">
+                <h2>CDNI Overview</h2>
                 <br>
+                <h3>Local Interface</h3>
                 <tr>
-                    <td>ID</td>
-                    <td>Name</td>
-                    <td>URL</td>
-                    <td>URL Translator</td>
-                    <td>URL CDN</td>
-                    <td>Port CDN</td>
-                    <td>Login</td>
-                    <td>Priority</td>
-                    <td>Endpoint gateway type</td>
-                    <td>Endpoint Type</td>
+                    <td><b>ID</b></td>
+                    <td><b>Name</b></td>
+                    <td><b>URL</b></td>
+                    <td><b>URL Translator</b></td>
+                    <td><b>URL CDN</b></td>
+                    <td><b>Port CDN</b></td>
+                    <td><b>Login</b></td>
+                    <td><b>Priority</b></td>
+                    <td><b>Endpoint gateway type</b></td>
+                    <td><b>Endpoint Type</b></td>
 
                     <tr ng-repeat="cdni in cdniData" ng-if="cdni.id === 1">
                         <td>{{cdni.id}}</td>
@@ -114,13 +115,13 @@
                     {{foot.subnet_ip}}
                 </li>
             </div>
-            <table class="table table-bordered">
+            <table class="table table-bordered table-striped">
                 <h2>Content Origins</h2>
                 <br>
                 <tr>
-                    <td>Name</td>
-                    <td>Origin FQDN</td>
-                    <td>FQDN</td>
+                    <td><b>Name</b></td>
+                    <td><b>Origin FQDN</b></td>
+                    <td><b>FQDN</b></td>
 
                     <tr ng-repeat="origin in contentOriginsData">
                         <td>{{origin.name}}</td>
@@ -543,9 +544,7 @@
 
                                 <td>
                                     <button class="btn btn-danger btn-xs" ng-click="deleteDeliveryService(service.id)">Delete</button>
-                                    <button class="btn btn-success btn-xs" ng-hide="editingDataDelivery[service.id]" ng-click="modifyDelivery(service)">Modify</button>
-                                    <button class="btn btn-success btn-xs" ng-show="editingDataDelivery[service.id]" ng-click="updateDeliveryService(service)">Update</button>
-                                    <button class="btn btn btn-warning btn-xs" ng-show="editingDataDelivery[service.id]" ng-click="cancelDelivery(service)">Cancel</button>
+ 
                                 </td>
                             </tr>
                         </tbody>
@@ -610,8 +609,8 @@
                                 </td>
 
                                 <td>
-                                    <button class="btn btn-success btn-xs" ng-click="assignSE(service.name,1)">Assing</button>
-                                    <button class="btn btn-danger btn-xs" ng-click="assignSE(service.name,0)">Unassign</button>
+                                    <button ng-if="service.seName == 'Unassigned'" class="btn btn-success btn-xs" ng-click="assignSE(service.name,1)">Assing</button>
+                                    <button ng-if="service.seName != 'Unassigned'" class="btn btn-danger btn-xs" ng-click="assignSE(service.name,0)">Unassign</button>
                                 </td>
                             </tr>
                         </tbody>

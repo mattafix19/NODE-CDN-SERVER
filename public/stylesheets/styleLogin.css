@@ -37,9 +37,13 @@ ul {
 
 .user-form{
   border-radius: 10px;
+  max-width: 32%;
+  float: none;
+  margin: 0 auto
 }
 
 .col-md-4.custom{
    float: none;
     margin: 0 auto;
 }
+

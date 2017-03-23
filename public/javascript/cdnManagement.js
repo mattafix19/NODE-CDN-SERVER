@@ -436,29 +436,16 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
     //GET SERVICE ENGINES
     $http.get('/cdsmApi/getSE')
         .success(function (data) {
-            var arrContentOrigins = [];
-
-            for (var i = 0, len = data.listing.record.length; i < len; i++) {
-                var obj = data.listing.record[i];
-                var contentOrigin = {
-                    name: obj.$.Name,
-                    id: obj.$.Id
-                }
-                arrContentOrigins.push(contentOrigin)
-
-            }
-            $scope.serviceEnginesData = arrContentOrigins;
+            $scope.serviceEnginesData = data.data;
             //this is check if response come first from get Service engines or get delivery services
             serviceEnginesReceived = 1;
-            var arrDeliveryServices = [];
             //if delivery services was received then call function
             if (deliveryServicesReceived == 1) {
                 $scope.addSeName();
             }
-            arrContentOrigins = [];
         })
         .error(function (error) {
-            console.log('Error: ' + error);
+            $window.alert(error.message);
         });
 
     //CREATE DELIVERY SERVICE
@@ -485,7 +472,8 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
                 $window.location.reload();
             })
             .error(function (error) {
-                console.log('Error: ' + error);
+                waitingDialog.hide();
+                $window.alert(error.message);
             });
     };
 
@@ -497,7 +485,8 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
                 $window.location.reload();
             })
             .error(function (error) {
-                console.log('Error: ' + error);
+                waitingDialog.hide();
+                $window.alert(error.message);
             });
     };
 
@@ -535,7 +524,7 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
                     $window.location.reload();
                 })
                 .error(function (error) {
-                    console.log('Error: ' + error);
+                    $window.alert(error.message);
                 });
         }
         else {
@@ -544,7 +533,7 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
                     $window.location.reload();
                 })
                 .error(function (error) {
-                    console.log('Error: ' + error);
+                    $window.alert(error.message);
                 });
         }
 
