@@ -149,14 +149,15 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
             });
     }
 
-    $scope.deleteInterconnection = function(cdni){
+    $scope.deleteInterconnection = function (cdni) {
         var req = {
             //own interface is filled after received getData function
             sender: $scope.ownInterface,
             target: cdni
         }
+        console.log(req.target.id);
         waitingDialog.show();
-        $http.delete('http://localhost:8080/cdniApi/deleteInterconnection', req)
+        $http.delete('http://localhost:8080/cdniApi/deleteInterconnection/' + req.target.id)
             .success(function (data) {
                 console.log(data);
                 $scope.cdniData = data.data;
@@ -174,6 +175,7 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
     //---------------------------------------------------------------------------------------------------------------------------------------------------
     //---------------------------------------------------------------------------------------------------------------------------------------------------
     //add CDN interface
+
     $scope.addCDN = function () {
         $scope.formDataCdni["offerStatus"] = "4";
         $http.post('/addCDN', $scope.formDataCdni)
@@ -187,14 +189,11 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
             });
     };
 
-
-    //GET ALL CDN
+    //GET ALL CDN interfaces
     $http.get('/getData')
-
         .success(function (data) {
             console.log(data);
             $scope.cdniData = data.data;
-            //getContentOrigins
 
             for (var i = 0; i < data.data.length; i++) {
                 if (data.data[i].id === 1) {
@@ -286,17 +285,29 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
     //CONTENT ORIGINS EDITATION
     //---------------------------------------------------------------------------------------------------------------------------------------------------
     //---------------------------------------------------------------------------------------------------------------------------------------------------
-
+    //GET ALL CONTENT ORIGINS
+    $scope.getContentOrigins = function () {
+        $http.get('/cdsmApi/getContentOrigins')
+            .success(function (data) {
+                $scope.contentOriginsData = data.data;
+                arrContentOrigins = [];
+            })
+            .error(function (error) {
+                console.log('Error: ' + error);
+            });
+    }
 
     //CREATE CONTENT ORIGIN
     $scope.createContentOrigin = function () {
         waitingDialog.show();
-        $http.post('/cdsmApi/createContentOrigin', $scope.formCreateContent)
+        $http.post('/cdsmApi/createContentOrigins', $scope.formCreateContent)
             .success(function (data) {
+                console.log(data);
                 $window.location.reload();
             })
             .error(function (error) {
-                console.log('Error: ' + error);
+                waitingDialog.hide();
+                $window.alert(error.message);
             });
     };
 
@@ -315,19 +326,20 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
     $scope.updateContentOrigin = function (tableData) {
         $scope.editingData[tableData.id] = false;
         waitingDialog.show();
-        $http.post('/cdsmApi/updateContentOrigin/' + tableData.id, tableData)
+        $http.put('/cdsmApi/updateContentOrigins/' + tableData.id, tableData)
             .success(function (data) {
                 $window.location.reload();
             })
             .error(function (error) {
-                console.log('Error: ' + error);
+                waitingDialog.hide();
+                $window.alert(error.message);
             });
     };
 
     $scope.cancel = function (tableData) {
         $scope.editingData[tableData.id] = false;
-        for (var i = 0 ; i < $scope.contentOriginsData.length; i++){
-            if ($scope.contentOriginsData[i].id === $scope.modifyContentOrigin.id){
+        for (var i = 0; i < $scope.contentOriginsData.length; i++) {
+            if ($scope.contentOriginsData[i].id === $scope.modifyContentOrigin.id) {
                 $scope.contentOriginsData[i].name = $scope.modifyContentOrigin.name;
                 $scope.contentOriginsData[i].originFqdn = $scope.modifyContentOrigin.originFqdn;
                 $scope.contentOriginsData[i].rfqdn = $scope.modifyContentOrigin.rfqdn;
@@ -340,45 +352,16 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
     //DELETE CONTENT ORIGIN
     $scope.deleteContentOrigin = function (originID) {
         waitingDialog.show();
-        $http.delete('/cdsmApi/deleteContentOrigin/' + originID)
+        $http.delete('/cdsmApi/deleteContentOrigins/' + originID)
             .success(function (data) {
                 $window.location.reload();
             })
             .error(function (error) {
-                console.log('Error: ' + error);
+                waitingDialog.hide();
+                $window.alert(error.message);
             });
     };
 
-    //GET ALL CONTENT ORIGINS
-    $scope.getContentOrigins = function () {
-        var obj = {
-            OwnInterface: $scope.ownInterface
-        }
-        $http.post('/cdsmApi/getContentOrigins', obj)
-            .success(function (data) {
-                console.log(data);
-                var arrContentOrigins = [];
-
-                for (var i = 0, len = data.length; i < len; i++) {
-                    var obj = data[i];
-
-                    var contentOrigin = {
-                        name: obj.name,
-                        originFqdn: obj.originFqdn,
-                        rfqdn: obj.rfqdn,
-                        id: obj.id
-                    }
-                    arrContentOrigins.push(contentOrigin)
-
-                }
-
-                $scope.contentOriginsData = arrContentOrigins;
-                arrContentOrigins = [];
-            })
-            .error(function (error) {
-                console.log('Error: ' + error);
-            });
-    }
     //---------------------------------------------------------------------------------------------------------------------------------------------------
     //---------------------------------------------------------------------------------------------------------------------------------------------------
     //DELIVERY SERVICES EDITATION
@@ -436,25 +419,8 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
     // GET ALL DELIVERY SERVICES
     $http.get('/cdsmApi/getDeliveryServices')
         .success(function (data) {
-            var arrContentOrigins = [];
-
-            for (var i = 0, len = data.listing.record.length; i < len; i++) {
-                var obj = data.listing.record[i];
-
-
-                var contentOrigin = {
-                    name: obj.$.Name,
-                    originFqdn: obj.$.OriginFqdn,
-                    rfqdn: obj.$.Fqdn,
-                    id: obj.$.Id,
-                    originID: obj.$.ContentOriginId,
-                    seID: obj.$.ContentAcquirer
-                }
-                arrContentOrigins.push(contentOrigin)
-
-            }
-            $scope.deliveryServicesData = arrContentOrigins;
-            var arrDeliveryServices = [];
+            
+            $scope.deliveryServicesData = data.data;
             //this is check if response come first from get Service engines or get delivery services
             deliveryServicesReceived = 1;
             //if service engines was received then call addSeName FUNCTIONS
@@ -464,7 +430,7 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
             arrContentOrigins = [];
         })
         .error(function (error) {
-            console.log('Error: ' + error);
+            $window.alert(error.message);
         });
 
     //GET SERVICE ENGINES
@@ -598,7 +564,6 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
     $scope.cancelDelivery = function (tableData) {
         $scope.editingDataDelivery[tableData.id] = false
     }
-
 }]);
 
 app.controller('TabController', ['$scope', function ($scope) {
@@ -612,4 +577,3 @@ app.controller('TabController', ['$scope', function ($scope) {
     };
 
 }]);
-

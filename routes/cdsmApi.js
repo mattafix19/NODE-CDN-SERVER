@@ -1,16 +1,6 @@
 var express = require('express');
 var session = require('express-session');
 var router = express.Router();
-var pg = require('pg');
-var path = require('path');
-//var cdniManager = require('CdniManager');
-
-var soap = require('soap');
-
-var www = require('../bin/www');
-
-var Pgb = require("pg-bluebird");
-var pgb = new Pgb();
 
 router.use(session({
     secret: 'secret_key',
@@ -18,190 +8,24 @@ router.use(session({
     saveUninitialized: true
 }));
 
-
-var interfaces = [];
-var footprints = [];
-
-//---------------------------------------------------------------------------------------------------------------------------------------------------
-//---------------------------------------------------------------------------------------------------------------------------------------------------
 //CONTENT ORIGINS ROUTES
-//---------------------------------------------------------------------------------------------------------------------------------------------------
-//---------------------------------------------------------------------------------------------------------------------------------------------------
 
+var ciscoCds = require('../services/ciscoCdsService');
 //GET CONTENT ORIGINS
-router.post('/getContentOrigins', function (req, res) {
-    //require request
-    var request = require('request');
-    //create redis service
-    var redisService = require('../services/redisService');
-    var cdsmSetLists = require('../services/ciscoCdsService');
-
-    cdsmSetLists.getContentOrigins()
-        .then(function (result) {
-            return res.json(result);
-        })
-        .catch(function (err) {
-
-        })
-});
-
+router.get('/getContentOrigins', ciscoCds.getContentOriginsRouter);
 //CREATE CONTENT ORIGIN
-router.post('/createContentOrigin', function (req, res) {
-
-    var request = require('request');
-    var request = request.defaults({
-        strictSSL: false,
-        rejectUnauthorized: false
-    });
-
-    username = "admin",
-        password = "CdnLab_123",
-        url = "https://cdsm.cdn.ab.sk:8443/servlet/com.cisco.unicorn.ui.ChannelApiServlet?action=createContentOrigin&name=" + req.body.origName + "&origin=" + req.body.origServer + "&fqdn=" + req.body.origFqdnName,
-        //console.log(url);
-        auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
-
-    request(
-        {
-            url: url,
-            headers: {
-                "Authorization": auth
-            }
-        },
-        function (error, response, body) {
-            if (error != null || body != null) {
-                //console.log(body);
-            }
-            if (response != null) {
-                return res.json(response);
-            }
-        }
-    );
-});
-
+router.post('/createContentOrigins', ciscoCds.createContentOriginRouter);
 //UPDATE CONTENT ORIGIN
-router.post('/updateContentOrigin/:originID', function (req, res) {
-
-    var results = [];
-
-    // Grab data from the URL parameters
-    var id = req.params.originID;
-
-    var request = require('request');
-    var request = request.defaults({
-        strictSSL: false,
-        rejectUnauthorized: false
-    });
-
-    username = "admin",
-        password = "CdnLab_123",
-        url = "https://cdsm.cdn.ab.sk:8443/servlet/com.cisco.unicorn.ui.ChannelApiServlet?action=modifyContentOrigin&contentOrigin=" + id + "&name=" + req.body.name + "&origin=" + req.body.originFqdn + "&fqdn=" + req.body.rfqdn,
-        //console.log(url);
-        auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
-
-    request(
-        {
-            url: url,
-            headers: {
-                "Authorization": auth
-            }
-        },
-        function (error, response, body) {
-            if (error != null || body != null) {
-                //console.log(body);
-            }
-            if (response != null) {
-                return res.json(response);
-            }
-        }
-    );
-
-});
-
+router.put('/updateContentOrigins/:originID', ciscoCds.updateContentOrigin);
 //DELETE CONTENT ORIGIN
-router.delete('/deleteContentOrigin/:originID', function (req, res) {
+router.delete('/deleteContentOrigins/:originID', ciscoCds.deleteContentOrigin); 
 
-    var results = [];
-
-    // Grab data from the URL parameters
-    var id = req.params.originID;
-
-    var request = require('request');
-    var request = request.defaults({
-        strictSSL: false,
-        rejectUnauthorized: false
-    });
-
-    username = "admin",
-        password = "CdnLab_123",
-        url = "https://cdsm.cdn.ab.sk:8443/servlet/com.cisco.unicorn.ui.ChannelApiServlet?action=deleteContentOrigins&contentOrigin=" + id,
-        //console.log(url);
-        auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
-
-    request(
-        {
-            url: url,
-            headers: {
-                "Authorization": auth
-            }
-        },
-        function (error, response, body) {
-            if (error != null || body != null) {
-                //console.log(body);
-            }
-            if (response != null) {
-                return res.json(response);
-            }
-        }
-    );
-
-});
-
-
-//---------------------------------------------------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------------------------------------------
 //DELIVERY SERVICES ROUTES
 //---------------------------------------------------------------------------------------------------------------------------------------------------
-//---------------------------------------------------------------------------------------------------------------------------------------------------
 
 //GET DELIVERY SERVICES
-router.get('/getDeliveryServices', function (req, res) {
-
-    var request = require('request');
-    var request = request.defaults({
-        strictSSL: false,
-        rejectUnauthorized: false
-    });
-
-    username = "admin",
-        password = "CdnLab_123",
-        url = "https://cdsm.cdn.ab.sk:8443/servlet/com.cisco.unicorn.ui.ListApiServlet?action=getDeliveryServices&param=all",
-        auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
-
-    request(
-        {
-            url: url,
-            headers: {
-                "Authorization": auth
-            }
-        },
-        function (error, response, body) {
-            if (error != null || body != null) {
-                //console.log(body);
-            }
-            if (response != null) {
-                var parseString = require('xml2js').parseString;
-                parseString(response.body, function (err, result) {
-                    for (var i = 0, len = result.listing.record.length; i < len; i++) {
-                        var obj = result.listing.record[i];
-                        //console.log(obj.$.Fqdn);
-                    }
-                    //console.log(response);
-                    return res.json(result);
-                });
-            }
-        }
-    );
-});
+router.get('/getDeliveryServices', ciscoCds.getDeliveryServices);
 
 //GET SERVICE ENGINES
 router.get('/getSE', function (req, res) {

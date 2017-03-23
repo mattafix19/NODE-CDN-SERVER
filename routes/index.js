@@ -38,8 +38,9 @@ router.get('/afterLogin', function (req, res, next) {
     if (user == undefined) {
         res.sendFile(path.join(__dirname, '../views', 'login.html'));
     }
-    else
+    else {
         res.sendFile(path.join(__dirname, '../views', 'cdnManagement.html'));
+    }
 });
 
 
