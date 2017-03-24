@@ -11,6 +11,7 @@ var processResponse = function (data) {
         var contentOrigins = data.ContentOrigins;
         var footprints = data.Footprints;
         var sender = data.Sender;
+        var remoteEndpointId = data.remoteEndpointId;
 
         var url = sender.url;
         var localInterface = null;
@@ -53,14 +54,17 @@ var processResponse = function (data) {
                                     redisService.deleteItem("footprints:" + rmtEndptId);
                                     redisService.rightPush("footprints:" + rmtEndptId, stringified);
 
+                                    redisService.deleteItem("remoteEndpointIds:" + rmtEndptId);
+                                    redisService.rightPush("remoteEndpointIds:" + rmtEndptId,  remoteEndpointId);
+
                                     //promise insert footprint into database according to endpoint id , so insert footprints with endpoint ID for specific requested interface
                                     db.db.any('INSERT INTO public.footprint (endpoint_id, subnet_num, mask_num, subnet_ip, prefix) VALUES ($1, $2, $3, $4, $5)', [rmtEndptId, obj.subnetNum, obj.maskNum, obj.subnetIp, obj.prefix])
                                         .then(function (result2) {
                                             callbackCounter++;
                                             // if all footprints were inserted succesfully
                                             if (callbackCounter === footprints.length) {
-
-                                                redisService.deleteItemAsync("remoteEndpoint:" + rmtEndptId)
+                                                
+                                                redisService.deleteItemAsync("remoteEndpointOrigins:" + rmtEndptId)
                                                     .then(function (found) {
                                                         callbackRedisCounter = 0;
                                                         //for now insert new created services to redis according to ID
@@ -68,7 +72,7 @@ var processResponse = function (data) {
                                                             var obj = contentOrigins[i];
 
                                                             var conOrig = {
-                                                                remoteEndpointId: rmtEndptId,
+                                                                remoteEndpointLocalId: rmtEndptId,
                                                                 name: obj.name,
                                                                 originFqdn: obj.originFqdn,
                                                                 rfqdn: obj.rfqdn,
@@ -77,7 +81,7 @@ var processResponse = function (data) {
 
                                                             var stringObj = JSON.stringify(conOrig);
 
-                                                            redisService.rightPushAsync("remoteEndpoint:" + rmtEndptId, stringObj)
+                                                            redisService.rightPushAsync("remoteEndpointOrigins:" + rmtEndptId, stringObj)
                                                                 .then(function (resPush) {
                                                                     callbackRedisCounter++;
                                                                     if (callbackRedisCounter === contentOrigins.length) {

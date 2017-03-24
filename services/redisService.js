@@ -84,8 +84,8 @@ var addRemoteInterface = function (data) {
             ids.push(data[i].id);
         }
     }
-    deleteItem("remoteInterfaces");
-    rightPush("remoteInterfaces", ids);
+    deleteItem("remoteEndpointLocalIds");
+    rightPush("remoteEndpointLocalIds", ids);
     return interfaces;
 }
 //specific function for adding footprints to redis database after select query from database

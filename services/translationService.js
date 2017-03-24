@@ -58,7 +58,7 @@ var translationService = function (req, res, next) {
             originServer = deserializedRfqdn.originFqdn;
             originName = deserializedRfqdn.name;
             //get all IDs of remote interfaces saved in redis database
-            redisService.listRangeAsync("remoteInterfaces", 0, -1)
+            redisService.listRangeAsync("remoteEndpointLocalIds", 0, -1)
                 .then(function (foundRemoteInterfaces) {
 
                     var foundFootprintsMatches = [];
@@ -99,7 +99,7 @@ var translationService = function (req, res, next) {
                                     var higherPrefix = 0;
                                     //loop through all matched records in remote interface footprints
                                     for (var k = 0; k < foundFootprintsMatches.length; k++) {
-                                        redisService.listRangeAsync('remoteEndpoint:' + foundFootprintsMatches[k].remoteEndpointId, 0, -1)
+                                        redisService.listRangeAsync('remoteEndpointOrigins:' + foundFootprintsMatches[k].remoteEndpointId, 0, -1)
                                             .then(function (foundRemoteEndpoint) {
                                                 remoteEndCallback++;
 
@@ -109,7 +109,7 @@ var translationService = function (req, res, next) {
                                                     var name = parsedRemoteEndpoint.name;
                                                     var originFqdn = parsedRemoteEndpoint.originFqdn;
                                                     var rfqdn = parsedRemoteEndpoint.rfqdn;
-                                                    var remoteEndpointIdAct = parsedRemoteEndpoint.remoteEndpointId;
+                                                    var remoteEndpointIdAct = parsedRemoteEndpoint.remoteEndpointLocalId;
 
                                                     if (name === originName && originFqdn === originServer) {
                                                         for (var i = 0; i < foundFootprintsMatches.length; i++) {

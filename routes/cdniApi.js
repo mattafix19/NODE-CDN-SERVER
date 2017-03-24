@@ -37,11 +37,8 @@ router.post('/initialOffer', function (req, res, next) {
 
     var senderReq = req.body.sender;
     var target = req.body.target;
-
     var urlReq = target.url;
-
     var request = require('request');
-
     urlSend = "http://" + urlReq + "/cdniApi/createOffer"
 
     request.post(
@@ -54,7 +51,6 @@ router.post('/initialOffer', function (req, res, next) {
         function (error, response, body) {
             if (!error && response.statusCode == 200) {
                 console.log(body)
-
                 return db.notifyOffer(target, res, next);
             }
         }
@@ -65,11 +61,8 @@ router.post('/initialAcceptOffer', function (req, res, next) {
 
     var senderReq = req.body.sender;
     var target = req.body.target;
-
     var urlReq = target.url;
-
     var request = require('request');
-
     urlSend = "http://" + urlReq + "/cdniApi/acceptOffer"
 
     request.post(
@@ -103,11 +96,8 @@ router.post('/createLists', function (req, res, next) {
             //target is opposing interface  
             if (result) {
                 var target = req.body.target;
-
                 var urlReq = target.url;
-
                 var urlSend = "http://" + urlReq + "/cdniApi/setLists"
-
                 var request = require('request');
 
                 request.post(
@@ -150,20 +140,53 @@ router.post('/createLists', function (req, res, next) {
         })
 });
 
-router.delete('/deleteInterconnection/:targetID', function (req, res, next) {
+router.delete('/initialDeleteInterconnection/:targetID', function (req, res, next) {
     var id = req.params.targetID;
     db.getOwnInterface()
         .then(function (ownInterface) {
             db.db.any('SELECT * FROM cdn_interface WHERE id = ($1)', id)
                 .then(function (foundRemoteInterface) {
-                    console.log();
+                    if (foundRemoteInterface.length != 0) {
+                        var offerStatus = foundRemoteInterface[0].offer_status;
+                        if (offerStatus === "6") {
+
+                        }
+                        else if (offerStatus === "1") {
+
+                        }
+                        else {
+                            var obj = {
+                                status: 'Failed',
+                                data: "FAILED REMOTE INTERFACE IS NOT OFFERED YET",
+                                message: "FAILED REMOTE INTERFACE IS NOT OFFERED YET"
+                            }
+                            res.status(404)
+                                .json(obj);
+                        }
+                    }
+                    else {
+                        var obj = {
+                            status: 'Failed',
+                            data: "FAILED REMOTE INTERFACE NOT FOUND",
+                            message: "FAILED REMOTE INTERFACE NOT FOUND"
+                        }
+                        res.status(404)
+                            .json(obj);
+                    }
+
                 })
                 .catch(function (err) {
-                    console.log(err);
+                    var obj = {
+                        status: 'Failed',
+                        data: err.message,
+                        message: "FAILED DURING RETRIEVING SPECIFIC INTERFACE: " + err.message
+                    }
+                    res.status(404)
+                        .json(obj);
                 })
         })
         .catch(function (err) {
-            console.log(err);
+            res.json(err);
         })
 });
 
@@ -249,6 +272,8 @@ router.post('/setLists', function (req, res, next) {
                                                             .then(function (listInterfaces) {
                                                                 db.db.any('UPDATE cdn_interface SET sync = true where id = ($1)', [remoteEndpointId])
                                                                     .then(function (updated) {
+                                                                        //add to response our local ID of remote upstream interface from which was received request
+                                                                        listInterfaces["remoteEndpointId"] = remoteEndpointId;
                                                                         res.status(200)
                                                                             .json({
                                                                                 status: 'Success',

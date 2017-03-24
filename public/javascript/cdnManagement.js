@@ -157,7 +157,7 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
         }
         console.log(req.target.id);
         waitingDialog.show();
-        $http.delete('http://localhost:8080/cdniApi/deleteInterconnection/' + req.target.id)
+        $http.delete('http://localhost:8080/cdniApi/initialDeleteInterconnection/' + req.target.id)
             .success(function (data) {
                 console.log(data);
                 $scope.cdniData = data.data;
