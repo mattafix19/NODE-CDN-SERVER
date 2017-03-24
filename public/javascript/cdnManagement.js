@@ -185,7 +185,7 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
                 console.log(data);
             })
             .error(function (error) {
-                console.log('Error: ' + error);
+                $window.alert(error.message);
             });
     };
 
@@ -203,7 +203,7 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
             $scope.getContentOrigins();
         })
         .error(function (error) {
-            console.log('Error: ' + error);
+            $window.alert(error.message);
         });
 
     //DELETE CDN
@@ -215,7 +215,7 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
                 console.log(data);
             })
             .error(function (data) {
-                console.log('Error: ' + data);
+                $window.alert(error.message);
             });
     };
     //---------------------------------------------------------------------------------------------------------------------------------------------------
@@ -238,7 +238,7 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
             $scope.footprintData = arr;
         })
         .error(function (error) {
-            console.log('Error: ' + error);
+            $window.alert(error.message);
         });
 
     $scope.deleteFootprint = function (footId) {
@@ -250,7 +250,8 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
                 console.log(data);
             })
             .error(function (error) {
-                console.log('Error: ' + error);
+                $window.alert(error.message);
+                waitingDialog.hide();
             });
     }
 
@@ -270,7 +271,7 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
 
                 })
                 .error(function (error) {
-                    console.log('Error: ' + error);
+                    $window.alert(error.message);
                 });
         }
     };

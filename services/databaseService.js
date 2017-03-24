@@ -1,19 +1,10 @@
-//class which contains working with postgre database
-var promise = require('bluebird');
+
+var database = require('../models/database');
+var db = database.db;
+
 var ipUtils = require('ip2long');
 var ip2long = ipUtils.ip2long;
 var long2ip = ipUtils.long2ip;
-
-var options = {
-  // Initialization Options
-  promiseLib: promise
-};
-
-
-var pgp = require('pg-promise')(options);
-var connectionString = 'postgres://localhost:5432/Martin';
-var db = pgp(connectionString);
-
 
 //get data from table cdn_interface with join on foreingn keys
 function getData(req, res, next) {
@@ -31,7 +22,13 @@ function getData(req, res, next) {
         });
     })
     .catch(function (err) {
-      return next(err);
+      var obj = {
+        status: 'Failed',
+        data: err.message,
+        message: "FAILED DURING RETRIEVING ALL INTERFACES: " + err.message
+      }
+      res.status(404)
+        .json(obj);
     });
 }
 
@@ -51,42 +48,63 @@ function getFootprints(req, res, next) {
         });
     })
     .catch(function (err) {
-      return next(err);
+      var obj = {
+        status: 'Failed',
+        data: err.message,
+        message: "FAILED DURING RETRIEVING ALL FOOTPRINTS: " + err.message
+      }
+      res.status(404)
+        .json(obj);
     });
 }
 
-function deleteFootprints (req ,res, next){
+function deleteFootprints(req, res, next) {
   var id = req.params.footId;
   db.any('DELETE FROM footprint where id = ($1)', [id])
-  .then(function(deleteResult){
-    db.any('SELECT * FROM footprint')
-    .then(function(selectAllFootRes){
-      var redisService = require("../services/redisService");
-      var footprints = redisService.addFootprintsRedis(selectAllFootRes);
-      res.json(footprints);
+    .then(function (deleteResult) {
+      db.any('SELECT * FROM footprint')
+        .then(function (selectAllFootRes) {
+          var redisService = require("../services/redisService");
+          var footprints = redisService.addFootprintsRedis(selectAllFootRes);
+          res.json(footprints);
+        })
+        .catch(function (err) {
+          var obj = {
+            status: 'Failed',
+            data: err.message,
+            message: "FAILED DURING RETRIEVING ALL FOOTPRINTS, DELETE SUCCESS: " + err.message
+          }
+          res.status(404)
+            .json(obj);
+        })
     })
-  })
-  .catch(function(err){
-    res.json(err);
-  })
+    .catch(function (err) {
+      var obj = {
+        status: 'Failed',
+        data: err.message,
+        message: "FAILED DURING DELETION, NO CHANGES APPLIED: " + err.message
+      }
+      res.status(404)
+        .json(obj);
+    })
 }
 
 function addFootprints(req, res, next) {
-  
+
   var cidr = require('cidr.rb');
-  
+
   var data = {
     endpoint: req.body.endpoint,
     subnetIp: req.body.subnetIp,
     prefix: req.body.prefix
   };
 
-  var network = new cidr.Net(data.subnetIp + "/"+ data.prefix);
+  var network = new cidr.Net(data.subnetIp + "/" + data.prefix);
   var netAddressLong = network.netaddr();
   var netAddress = long2ip(netAddressLong.addr);
 
   var subnetNum = netAddressLong.addr;
-  var maskNum =  network.mask.addr;
+  var maskNum = network.mask.addr;
 
 
   db.any('INSERT INTO footprint (endpoint_id,subnet_num,mask_num,subnet_ip,prefix) VALUES ($1,$2,$3,$4,$5)', [data.endpoint, subnetNum, maskNum, netAddress, data.prefix])
@@ -106,11 +124,23 @@ function addFootprints(req, res, next) {
             });
         })
         .catch(function (err) {
-          return next(err);
+          var obj = {
+            status: 'Failed',
+            data: err.message,
+            message: "FAILED DURING RETRIEVING ALL FOOTPRINTS INSERTION SUCCESS " + err.message
+          }
+          res.status(404)
+            .json(obj);
         });
     })
     .catch(function (err) {
-      return next(err);
+      var obj = {
+        status: 'Failed',
+        data: err.message,
+        message: "FAILED DURING INSERTION, NO CHANGES APPLIED: " + err.message
+      }
+      res.status(404)
+        .json(obj);
     });
 }
 
@@ -144,11 +174,23 @@ function addCdn(req, res, next) {
             });
         })
         .catch(function (err) {
-          return next(err);
+          var obj = {
+            status: 'Failed',
+            data: err.message,
+            message: "FAILED DURING RETRIEVING ALL INTERFACES: " + err.message
+          }
+          res.status(404)
+            .json(obj);
         });
     })
     .catch(function (err) {
-      return next(err);
+      var obj = {
+        status: 'Failed',
+        data: err.message,
+        message: "FAILED DURING INSERTION, NO CHANGES APPLIED: " + err.message
+      }
+      res.status(404)
+        .json(obj);
     });
 }
 
@@ -171,11 +213,23 @@ function deleteCDNinterface(req, res, next) {
             });
         })
         .catch(function (err) {
-          return next(err);
+          var obj = {
+            status: 'Failed',
+            data: err.message,
+            message: "FAILED DURING RETRIEVING ALL INTERFACES: " + err.message
+          }
+          res.status(404)
+            .json(obj);
         });
     })
     .catch(function (err) {
-      return next(err);
+      var obj = {
+        status: 'Failed',
+        data: err.message,
+        message: "FAILED DURING DELETION OF CDN INTERFACE, NO CHANGES APPLIED: " + err.message
+      }
+      res.status(404)
+        .json(obj);
     });
 }
 
@@ -200,11 +254,17 @@ function loginUser(req, res, next) {
         .json({
           status: 'success',
           data: users,
-          message: 'Retrieved ALL Footprints'
+          message: 'Retrieved user'
         });
     })
     .catch(function (err) {
-      return next(err);
+      var obj = {
+        status: 'Failed',
+        data: err.message,
+        message: "FAILED DURING LOGGING OR NO USER FOUND: " + err.message
+      }
+      res.status(404)
+        .json(obj);
     });
 }
 
@@ -227,7 +287,13 @@ function registerOffer(req, res, next) {
               });
           })
           .catch(function (err) {
-            return next(err);
+            var obj = {
+              status: 'Failed',
+              data: err.message,
+              message: "FAILED DURING UPDATING NEW INTERFACE ON REMOTE SIDE: " + err.message
+            }
+            res.status(404)
+              .json(obj);
           });
       }
       //else create record with status 5 and type remote endpoint_type = 2 and respond with 200
@@ -249,16 +315,34 @@ function registerOffer(req, res, next) {
                   });
               })
               .catch(function (err) {
-                return next(err);
+                var obj = {
+                  status: 'Failed',
+                  data: err.message,
+                  message: "FAILED DURING RETREIVING ALL INTERFACES ON REMOTE SIDE, CREATING SUCCESSFULL: " + err.message
+                }
+                res.status(404)
+                  .json(obj);
               })
           })
           .catch(function (err) {
-            return next(err);
+            var obj = {
+              status: 'Failed',
+              data: err.message,
+              message: "FAILED DURING CREATION OF NEW INTERFACE ON REMOTE SIDE: " + err.message
+            }
+            res.status(404)
+              .json(obj);
           });
       }
     })
     .catch(function (err) {
-      return next(err);
+      var obj = {
+        status: 'Failed',
+        data: err.message,
+        message: "FAILED DURING SEARCHING ENDPOINT ON REMOTE SIDE, NO CHANGES APPLIED: " + err.message
+      }
+      res.status(404)
+        .json(obj);
     });
 }
 
@@ -281,11 +365,23 @@ function notifyOffer(req, res, next) {
             });
         })
         .catch(function (err) {
-          return next(err);
+          var obj = {
+            status: 'Failed',
+            data: err.message,
+            message: "FAILED DURING RETRIEVING ALL INTERFACES ON LOCAL SIDE, UPDATE SUCCESS: " + err.message
+          }
+          res.status(404)
+            .json(obj);
         });
     })
     .catch(function (err) {
-      return next(err);
+      var obj = {
+        status: 'Failed',
+        data: err.message,
+        message: "FAILED DURING UPDATING INTERFACE ON LOCAL SIDE AFTER RECEIVING RESPONSE FROM REMOTE INTERFACE: " + err.message
+      }
+      res.status(404)
+        .json(obj);
     });
 }
 
@@ -308,7 +404,13 @@ function acceptOffer(req, res, next) {
               });
           })
           .catch(function (err) {
-            return next(err);
+            var obj = {
+              status: 'Failed',
+              data: err.message,
+              message: "FAILED DURING UPDATING OFFER STATUS ON REMOTE INTERFACE: " + err.message
+            }
+            res.status(404)
+              .json(obj);
           });
       }
 
@@ -322,14 +424,20 @@ function acceptOffer(req, res, next) {
       }
     })
     .catch(function (err) {
-      return next(err);
+      var obj = {
+        status: 'Failed',
+        data: err.message,
+        message: "FAILED DURING SEARCHING REMOTE INTERFACE ON LOCAL SIDE, NO CHANGES APPLIED: " + err.message
+      }
+      res.status(404)
+        .json(obj);
     });
 }
 
 //mark valid offer after response of accept
 function markValidOffer(req, res, next) {
   var id = req.id;
-  //set up offer status 6 which is accepted downstream
+  //set up offer status 1 which is accepted UPSTREAM
   //save it to redis because during translation we want to translate to only those interfaces
   db.any('UPDATE public.cdn_interface SET offer_status=($1) WHERE id=($2)', [1, id])
     .then(function (result) {
@@ -347,11 +455,23 @@ function markValidOffer(req, res, next) {
             });
         })
         .catch(function (err) {
-          return next(err);
+          var obj = {
+            status: 'Failed',
+            data: err.message,
+            message: "FAILED DURING RETRIEVING ALL INTERFACES AFTER UPDATE ON LOCAL SIDE AFTER RESPONSE FROM REMOTE SIDE: " + err.message
+          }
+          res.status(404)
+            .json(obj);
         });
     })
     .catch(function (err) {
-      return next(err);
+      var obj = {
+        status: 'Failed',
+        data: err.message,
+        message: "FAILED DURING UPDATE LOCAL INTERFACE AFTER RESPONSE FROM REMOTE SIDE: " + err.message
+      }
+      res.status(404)
+        .json(obj);
     });
 }
 
@@ -368,7 +488,13 @@ function getFootprintsList(req) {
 
       })
       .catch(function (err) {
-        reject(err);
+        var obj = {
+          status: 'Failed',
+          data: err.message,
+          message: "FAILED DURING RETRIEVING ALL FOOTPRINTS ON SPECIFIC ID: " + err.message
+        }
+        res.status(404)
+          .json(obj);
       });
   });
 }
@@ -381,7 +507,13 @@ function getOwnInterface() {
         resolve(result);
       })
       .catch(function (err) {
-        reject(err);
+        var obj = {
+          status: 'Failed',
+          data: err.message,
+          message: "FAILED DURING RETRIEVING OWN INTERFACE: " + err.message
+        }
+        res.status(404)
+          .json(obj);
       })
   });
 };
@@ -390,7 +522,7 @@ module.exports = {
   db: db,
   getData: getData,
   getFootprints: getFootprints,
-  deleteFootprints:deleteFootprints,
+  deleteFootprints: deleteFootprints,
   addFootprints: addFootprints,
   addCdn: addCdn,
   deleteCDNinterface: deleteCDNinterface,

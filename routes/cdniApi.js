@@ -96,7 +96,7 @@ router.post('/createLists', function (req, res, next) {
     var target = req.body.target;
 
     // first find all related data for creating interconnection, get content origins, footrpints and sender
-    var createListst = require("../routes/createLists");
+    var createListst = require("../helpers/createLists");
     createListst.getInterface()
         .then(function (result) {
             //then send data to target
@@ -122,7 +122,7 @@ router.post('/createLists', function (req, res, next) {
                     function (error, response, body) {
                         if (response.body != null) {
                             if (body.status === "Success") {
-                                var processList = require('../routes/processRespList');
+                                var processList = require('../helpers/processRespList');
                                 processList.processResponse(body.data)
                                     .then(function (result) {
 
@@ -239,12 +239,12 @@ router.post('/setLists', function (req, res, next) {
                                             callbackCounter = 0;
                                             console.log();
                                             //class which is used to setCDSM with promises
-                                            var cdsm = require('../routes/setCdsm');
+                                            var cdsm = require('../helpers/setCdsm');
                                             //set content origins on our CDSM
                                             cdsm.setContentOrigins(req.body.ContentOrigins, localInterface[0].url_cdn, rfqdn, remoteEndpointId, remoteEndpointUrl)
                                                 .then(function (result) {
                                                     if (result === "Success") {
-                                                        var createLists = require('../routes/createLists');
+                                                        var createLists = require('../helpers/createLists');
                                                         createLists.getInterface()
                                                             .then(function (listInterfaces) {
                                                                 db.db.any('UPDATE cdn_interface SET sync = true where id = ($1)', [remoteEndpointId])
