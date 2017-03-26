@@ -4,7 +4,7 @@ var client = redisClient.client;
 var deleteItemAsync = function (key) {
     return new Promise(function (resolve, reject) {
         client.del(key, function (err, res) {
-            if (err === undefined){
+            if (err === undefined) {
                 reject(err);
             }
             if (res === 0 || res === 1) {
@@ -129,9 +129,24 @@ var listRangeAsync = function (key, start, stop) {
     });
 }
 
-var listRange = function(key,start,stop){
+var listRange = function (key, start, stop) {
     client.lrange(key, start, stop, function (err, res) {
         if (err === undefined) {
+            reject(err);
+        }
+        if (res.length != 0) {
+            resolve(res);
+        }
+        else {
+            reject(err)
+        }
+    });
+}
+
+var listRemAsync = function (key,number, index) {
+    return new Promise(function (resolve, reject) {
+        client.lrem(key, number, index, function (err, res) {
+            if (err === undefined) {
                 reject(err);
             }
             if (res.length != 0) {
@@ -140,9 +155,9 @@ var listRange = function(key,start,stop){
             else {
                 reject(err)
             }
+        });
     });
 }
-
 
 
 module.exports = {
@@ -155,5 +170,6 @@ module.exports = {
     existAsync: existAsync,
     addRemoteInterface: addRemoteInterface,
     addFootprintsRedis: addFootprintsRedis,
-    listRangeAsync: listRangeAsync
+    listRangeAsync: listRangeAsync,
+    listRemAsync:listRemAsync
 }

@@ -44,10 +44,13 @@ var setContentOrigins = function (data, cdsmUrl, rfqdn, endpointId, endpointUrl)
                                                     callbackCounter++;
                                                     //after successfull setting of all content origins save them in redis as remoteEndpoint:{{ID}}
                                                     if (callbackCounter === recordsCount) {
-
+                                                        redisService.deleteItem("remoteEndpointDownstreamDelSer:" + endpointId);
                                                         redisService.deleteItemAsync("remoteEndpointDownstream:" + endpointId)
                                                             .then(function (found) {
                                                                 callbackRedisCounter = 0;
+                                                                for (var j = 0; j < createdDeliveryService.length; j++) {
+                                                                    redisService.rightPush("remoteEndpointDownstreamDelSer:" + endpointId, createdDeliveryService[j]);
+                                                                }
                                                                 //for now insert new created services to redis according to ID
                                                                 for (var i = 0; i < createdContentOrigins.length; i++) {
                                                                     var obj = createdContentOrigins[i];
