@@ -663,6 +663,105 @@ var unassignServiceEngine = function (req, res, next) {
     );
 }
 
+var deleteDeliveryServiceFunction = function (id) {
+    return new Promise(function (resolve, reject) {
+        username = "admin",
+            password = "CdnLab_123",
+            url = "https://cdsm.cdn.ab.sk:8443/servlet/com.cisco.unicorn.ui.ChannelApiServlet?action=deleteDeliveryServices&deliveryService=" + id,
+            //console.log(url);
+            auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
+
+        request(
+            {
+                url: url,
+                headers: {
+                    "Authorization": auth
+                }
+            },
+            function (error, response, body) {
+                var parseString = require('xml2js').parseString;
+
+                if (error) {
+                    var obj = {
+                        status: 'Failed',
+                        data: error,
+                        message: 'Delete delivery service failed'
+                    }
+                    reject(obj);
+                }
+                parseString(response.body, function (err, result) {
+                    if (result.deliveryserviceProvisioning.message[0].$.status === "fail") {
+                        var obj = {
+                            status: 'Failed',
+                            data: result.deliveryserviceProvisioning.error[0].$.message,
+                            message: result.deliveryserviceProvisioning.error[0].$.message
+                        }
+                        reject(obj);
+                    }
+                    else {
+                        var obj = {
+                            status: 'Success',
+                            data: result.deliveryserviceProvisioning,
+                            message: 'Delete delivery service success'
+                        }
+                        resolve(obj);
+                    }
+                });
+            }
+        );
+    });
+}
+
+var deleteContentOriginFunction = function (id) {
+    return new Promise(function (resolve, reject) {
+        username = "admin",
+            password = "CdnLab_123",
+            url = "https://cdsm.cdn.ab.sk:8443/servlet/com.cisco.unicorn.ui.ChannelApiServlet?action=deleteContentOrigins&contentOrigin=" + id,
+            //console.log(url);
+            auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
+
+        request(
+            {
+                url: url,
+                headers: {
+                    "Authorization": auth
+                }
+            },
+            function (error, response, body) {
+                var parseString = require('xml2js').parseString;
+
+                if (error) {
+                    var obj = {
+                        status: 'Failed',
+                        data: error,
+                        message: 'Delete content origin success'
+                    }
+                    reject(obj);
+                }
+                parseString(response.body, function (err, result) {
+                    if (result.deliveryserviceProvisioning.message[0].$.status === "fail") {
+                        var obj = {
+                            status: 'Failed',
+                            data: result.deliveryserviceProvisioning.error[0].$.message,
+                            message: result.deliveryserviceProvisioning.error[0].$.message
+                        }
+                        reject(obj);
+                    }
+                    else {
+                        var obj = {
+                            status: 'Success',
+                            data: result.deliveryserviceProvisioning,
+                            message: 'Delete content origin success'
+                        }
+                        resolve(obj);
+                    }
+                });
+            }
+        );
+    });
+}
+
+
 
 module.exports = {
     createContentOrigin: createContentOrigin,
@@ -679,5 +778,7 @@ module.exports = {
     createDeliveryServiceRouter: createDeliveryServiceRouter,
     deleteDeliveryService: deleteDeliveryService,
     assignServiceEngineRouter: assignServiceEngineRouter,
-    unassignServiceEngine: unassignServiceEngine
+    unassignServiceEngine: unassignServiceEngine,
+    deleteDeliveryServiceFunction: deleteDeliveryServiceFunction,
+    deleteContentOriginFunction:deleteContentOriginFunction
 }

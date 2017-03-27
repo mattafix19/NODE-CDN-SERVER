@@ -140,8 +140,9 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
         $http.post('http://localhost:8080/cdniApi/createLists', req)
             .success(function (data) {
                 console.log(data);
-                $scope.cdniData = data.data;
                 waitingDialog.hide();
+                $window.alert(data.message);
+                $window.location.reload();
             })
             .error(function (error) {
                 waitingDialog.hide();
@@ -159,9 +160,13 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
         waitingDialog.show();
         $http.delete('http://localhost:8080/cdniApi/initialDeleteInterconnection/' + req.target.id)
             .success(function (data) {
-                console.log(data);
-                $scope.cdniData = data.data;
+
                 waitingDialog.hide();
+                if (data === 'Received') {
+                    $window.alert('Deletion finished');
+                    $window.location.reload();
+                }
+
             })
             .error(function (error) {
                 waitingDialog.hide();
@@ -420,7 +425,7 @@ app.controller('MainController', ['$location', '$cookieStore', '$scope', '$http'
     // GET ALL DELIVERY SERVICES
     $http.get('/cdsmApi/getDeliveryServices')
         .success(function (data) {
-            
+
             $scope.deliveryServicesData = data.data;
             //this is check if response come first from get Service engines or get delivery services
             deliveryServicesReceived = 1;

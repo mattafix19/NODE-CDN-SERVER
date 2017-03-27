@@ -296,8 +296,11 @@
                         <td>
                             <button type="button" class="btn btn-danger" ng-click="deleteInterconnection(cdni)">Delete</button>
                         </td>
-                        <td>
-                            {{cdni.sync}}
+                        <td align="center" ng-if="cdni.sync === true">
+                            <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                        </td>
+                        <td align="center" ng-if="cdni.sync === false">
+                            <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
                         </td>
 
                     </tr>
@@ -370,6 +373,36 @@
                         <td>{{cdni.endpoint_type}}</td>
                         <td>{{cdni.status}}</td>
 
+                    </tr>
+                </tr>
+            </table>
+            <table class="table table-bordered table-striped">
+                <h3>Initiated Delete</h3>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>URL</th>
+                    <th>URL Translator</th>
+                    <th>URL CDN</th>
+                    <th>Port CDN</th>
+                    <th>Login</th>
+                    <th>Priority</th>
+                    <th>Endpoint gateway type</th>
+                    <th>Endpoint Type</th>
+                    <th>Offer Status</th>
+
+                    <tr ng-repeat="cdni in cdniData" ng-if="(cdni.offer_status === '7') && (cdni.id != '1')">
+                        <td>{{cdni.id}}</td>
+                        <td>{{cdni.name}}</td>
+                        <td>{{cdni.url}}</td>
+                        <td>{{cdni.url_translator}}</td>
+                        <td>{{cdni.url_cdn}}</td>
+                        <td>{{cdni.port_cdn}}</td>
+                        <td>{{cdni.login}}</td>
+                        <td>{{cdni.priority}}</td>
+                        <td>{{cdni.endpoint_gateway_type}}</td>
+                        <td>{{cdni.endpoint_type}}</td>
+                        <td>{{cdni.status}}</td>
                     </tr>
                 </tr>
             </table>
