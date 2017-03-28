@@ -293,8 +293,11 @@
                             <button ng-if="cdni.sync === false" type="button" class="btn btn-success" ng-click="syncCdni(cdni)">Sync</button>
                             <button ng-if="cdni.sync === true" type="button" class="btn btn-success" ng-click="syncCdni(cdni)">Re-sync</button>
                         </td>
-                        <td>
+                        <td ng-if="cdni.sync === true">
                             <button type="button" class="btn btn-danger" ng-click="deleteInterconnection(cdni)">Delete</button>
+                        </td>
+                        <td ng-if="cdni.sync === false">
+                            Interconnection must be synched before deleting
                         </td>
                         <td align="center" ng-if="cdni.sync === true">
                             <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>

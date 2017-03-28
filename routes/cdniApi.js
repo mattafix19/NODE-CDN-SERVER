@@ -41,6 +41,9 @@ router.delete('/initialDeleteInterconnection/:targetID', interconnectionService.
 //delete Interconnection SERVER communication
 router.delete('/deleteInterconnection/:interfaceId', interconnectionService.deleteInterconnection);
 
+//delete Interconnection SERVER from downstream side of endpoint
+router.delete('/deleteInterconnectionDownstream/:interfaceId', interconnectionService.deleteInterconnectionDownstream);
+
 //delete interconnection accept
 router.delete('/deleteInterconnectionAccept/:interfaceId', interconnectionService.deleteInterconnectionAccept);
 

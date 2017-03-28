@@ -267,8 +267,9 @@ var initialDeleteInterconnection = function (req, res, next) {
                 .then(function (foundRemoteInterface) {
                     if (foundRemoteInterface.length != 0) {
                         var offerStatus = foundRemoteInterface[0].offer_status;
+                        var redisService = require('../services/redisService');
                         if (offerStatus === "6") {
-                            var redisService = require('../services/redisService');
+                            
                             //delete item from list in remoteEndpointLocalIds so this will stop redirecting
                             redisService.listRemAsync("remoteEndpointLocalIds", 1, foundRemoteInterface[0].id)
                                 .then(function (resultDelete) {
@@ -284,29 +285,36 @@ var initialDeleteInterconnection = function (req, res, next) {
                                                             //found id interface on other side
                                                             redisService.listRangeAsync("remoteEndpointIds:" + foundRemoteInterface[0].id, 0, -1)
                                                                 .then(function (foundRemoteId) {
-                                                                    //send request to delete to other side 
-                                                                    var urlSend = "http://" + foundRemoteInterface[0].url + "/cdniApi/deleteInterconnection/" + foundRemoteId
-                                                                    var request = require('request');
+                                                                    //deleteItem ID
+                                                                    redisService.deleteItemAsync("remoteEndpointIds:" + foundRemoteInterface[0].id)
+                                                                        .then(function (removeResult) {
+                                                                            //send request to delete to other side 
+                                                                            var urlSend = "http://" + foundRemoteInterface[0].url + "/cdniApi/deleteInterconnection/" + foundRemoteId
+                                                                            var request = require('request');
 
-                                                                    request.delete(
-                                                                        urlSend,
-                                                                        function (error, response, body) {
-                                                                            if (response.body != null) {
-                                                                                if (body === "ACK") {
-                                                                                    res.status(200).send("Received");
+                                                                            request.delete(
+                                                                                urlSend,
+                                                                                function (error, response, body) {
+                                                                                    if (response.body != null) {
+                                                                                        if (body === "ACK") {
+                                                                                            res.status(200).send("Received");
+                                                                                        }
+                                                                                    }
+                                                                                    else if (!error && response.statusCode == 200 && response.statusCode != 404) {
+                                                                                        console.log(body)
+                                                                                    }
+                                                                                    else if (response.statusCode === 404) {
+                                                                                        res.send(response);
+                                                                                    }
+                                                                                    else if (response.statusCode === 500) {
+                                                                                        res.send(response);
+                                                                                    }
                                                                                 }
-                                                                            }
-                                                                            else if (!error && response.statusCode == 200 && response.statusCode != 404) {
-                                                                                console.log(body)
-                                                                            }
-                                                                            else if (response.statusCode === 404) {
-                                                                                res.send(response);
-                                                                            }
-                                                                            else if (response.statusCode === 500) {
-                                                                                res.send(response);
-                                                                            }
-                                                                        }
-                                                                    );
+                                                                            );
+                                                                        })
+                                                                        .catch(function (err) {
+
+                                                                        })
                                                                 })
                                                                 .catch(function (err) {
                                                                     console.log(err);
@@ -329,29 +337,67 @@ var initialDeleteInterconnection = function (req, res, next) {
                                 })
                         }
                         else if (offerStatus === "1") {
-                            //send request to delete to other side 
-                            var urlSend = "http://" + foundRemoteInterface[0].url + "/cdniApi/deleteInterconnection/" + foundRemoteId
-                            var request = require('request');
+                            redisService.listRangeAsync("remoteEndpointDownstreamIds:" + foundRemoteInterface[0].id, 0, -1)
+                                .then(function (foundRemoteId) {
+                                    //send request to delete to other side 
+                                    var urlSend = "http://" + foundRemoteInterface[0].url + "/cdniApi/deleteInterconnectionDownstream/" + foundRemoteId
+                                    var request = require('request');
 
-                            request.delete(
-                                urlSend,
-                                function (error, response, body) {
-                                    if (response.body != null) {
-                                        if (body === "ACK") {
-                                            res.status(200).send("Received");
+                                    request.delete(
+                                        urlSend,
+                                        function (error, response, body) {
+                                            if (response.body != null) {
+                                                if (body === "ACK") {
+                                                    deleteInterconnectionFunction(foundRemoteInterface[0].id)
+                                                        .then(function (resultDelete) {
+
+                                                            var foundRemoteInterface = resultDelete.interfaceToSend;
+                                                            var foundRemoteId = resultDelete.remoteId;
+
+                                                            //send request to remote endpoint
+                                                            var urlSend = "http://" + foundRemoteInterface[0].url + "/cdniApi/deleteInterconnectionAccept/" + foundRemoteId
+                                                            var request = require('request');
+
+                                                            request.delete(
+                                                                urlSend,
+                                                                function (error, response, body) {
+                                                                    if (response.body != null) {
+                                                                        if (body === "ACK") {
+                                                                            res.status(200).send("Received");
+                                                                        }
+                                                                    }
+                                                                    else if (!error && response.statusCode == 200 && response.statusCode != 404) {
+                                                                        console.log(body)
+                                                                    }
+                                                                    else if (response.statusCode === 404) {
+                                                                        res.send(response);
+                                                                    }
+                                                                    else if (response.statusCode === 500) {
+                                                                        res.send(response);
+                                                                    }
+                                                                }
+                                                            );
+                                                        })
+                                                        .catch(function (err) {
+
+                                                        })
+                                                }
+                                            }
+                                            else if (!error && response.statusCode == 200 && response.statusCode != 404) {
+                                                console.log(body)
+                                            }
+                                            else if (response.statusCode === 404) {
+                                                res.send(response);
+                                            }
+                                            else if (response.statusCode === 500) {
+                                                res.send(response);
+                                            }
                                         }
-                                    }
-                                    else if (!error && response.statusCode == 200 && response.statusCode != 404) {
-                                        console.log(body)
-                                    }
-                                    else if (response.statusCode === 404) {
-                                        res.send(response);
-                                    }
-                                    else if (response.statusCode === 500) {
-                                        res.send(response);
-                                    }
-                                }
-                            );
+                                    );
+                                })
+                                .catch(function (err) {
+                                    console.log(err);
+                                })
                         }
                         else {
                             var obj = {
@@ -389,118 +435,217 @@ var initialDeleteInterconnection = function (req, res, next) {
         })
 };
 
-var deleteInterconnection = function (req, res, next) {
-    var cdsm = require('../services/ciscoCdsService');
+var deleteInterconnectionDownstream = function (req, res, next) {
     var localEndpointId = req.params.interfaceId;
-
-    var redisService = require('../services/redisService');
-    //delete footprints from redis
-    redisService.deleteItemAsync("footprints:" + localEndpointId)
-        .then(function (deleteResult) {
-            //delete footprints from database
-            db.db.any("DELETE FROM footprint WHERE endpoint_id = ($1)", [localEndpointId])
-                .then(function (resultDelete) {
-                    //get ids of created delivery services
-                    redisService.listRangeAsync("remoteEndpointDownstreamDelSer:" + localEndpointId, 0, -1)
-                        .then(function (foundDeliveryServices) {
-                            var callBackCounter = 0;
-                            for (var i = 0; i < foundDeliveryServices.length; i++) {
-                                //foreach delete delivery service according to ID
-                                cdsm.deleteDeliveryServiceFunction(foundDeliveryServices[i])
-                                    .then(function (resultDelete) {
-                                        callBackCounter++;
-                                        if (callBackCounter === foundDeliveryServices.length) {
-                                            //get content origins
-                                            redisService.listRangeAsync("remoteEndpointDownstream:" + localEndpointId, 0, -1)
-                                                .then(function (foundContentOrigins) {
-                                                    var callbackContentOrigins = 0;
-
-                                                    for (var j = 0; j < foundContentOrigins.length; j++) {
-                                                        var parsed = JSON.parse(foundContentOrigins[j]);
-                                                        //foreach delete content origin
-                                                        cdsm.deleteContentOriginFunction(parsed.id)
-                                                            .then(function (deleteResult) {
-                                                                callbackContentOrigins++;
-                                                                if (callbackContentOrigins === foundContentOrigins.length) {
-                                                                    //delete delivery services and content origins from redis
-                                                                    redisService.deleteItem("remoteEndpointDownstreamDelSer:" + localEndpointId);
-                                                                    redisService.deleteItem("remoteEndpointDownstream:" + localEndpointId);
-                                                                    //find id of remote interface and send request to other side
-                                                                    redisService.listRangeAsync("remoteEndpointDownstreamIds:" + localEndpointId, 0, -1)
-                                                                        .then(function (foundRemoteId) {
-                                                                            //delete ID from redis
-                                                                            redisService.deleteItem("remoteEndpointDownstreamIds:" + localEndpointId);
-                                                                            //update status to not offered {4}
-                                                                            db.db.any("UPDATE cdn_interface SET offer_status = 4, sync = false WHERE id = ($1)", [localEndpointId])
-                                                                                .then(function (resultUpdate) {
-                                                                                    //find record in database according to received ID
-                                                                                    db.db.any("SELECT * FROM cdn_interface WHERE id = ($1)", [localEndpointId])
-                                                                                        .then(function (foundRemoteInterface) {
-                                                                                            //send request to remote endpoint
-                                                                                            var urlSend = "http://" + foundRemoteInterface[0].url + "/cdniApi/deleteInterconnectionAccept/" + foundRemoteId
-                                                                                            var request = require('request');
-
-                                                                                            request.delete(
-                                                                                                urlSend,
-                                                                                                function (error, response, body) {
-                                                                                                    if (response.body != null) {
-                                                                                                        if (body === "ACK") {
-                                                                                                            res.status(200)
-                                                                                                                .send("ACK");
-                                                                                                        }
-                                                                                                    }
-                                                                                                    else if (!error && response.statusCode == 200 && response.statusCode != 404) {
-                                                                                                        console.log(body)
-                                                                                                    }
-                                                                                                    else if (response.statusCode === 404) {
-                                                                                                        res.send(response);
-                                                                                                    }
-                                                                                                    else if (response.statusCode === 500) {
-                                                                                                        res.send(response);
-                                                                                                    }
-                                                                                                }
-                                                                                            );
-                                                                                        })
-                                                                                        .catch(function (err) {
-                                                                                            console.log(err);
-                                                                                        })
-                                                                                })
-                                                                                .catch(function (err) {
-                                                                                    console.log(err);
-                                                                                });
-                                                                        })
-                                                                        .catch(function (err) {
-                                                                            console.log(err);
-                                                                        })
-                                                                }
+    db.getOwnInterface()
+        .then(function (ownInterface) {
+            db.db.any('SELECT * FROM cdn_interface WHERE id = ($1)', localEndpointId)
+                .then(function (foundRemoteInterface) {
+                    if (foundRemoteInterface.length != 0) {
+                        var offerStatus = foundRemoteInterface[0].offer_status;
+                        var redisService = require('../services/redisService');
+                        //delete item from list in remoteEndpointLocalIds so this will stop redirecting
+                        redisService.listRemAsync("remoteEndpointLocalIds", 1, foundRemoteInterface[0].id)
+                            .then(function (resultDelete) {
+                                console.log(resultDelete);
+                                //delete remoteEndpointOrigins
+                                redisService.deleteItemAsync("remoteEndpointOrigins:" + foundRemoteInterface[0].id)
+                                    .then(function (resultDelete2) {
+                                        //delete interface footprints
+                                        db.db.any('DELETE FROM footprint WHERE endpoint_id = ($1)', [foundRemoteInterface[0].id])
+                                            .then(function (removedFootprint) {
+                                                redisService.deleteItemAsync("footprints:" + foundRemoteInterface[0].id)
+                                                    .then(function (removedFootprintRedis) {
+                                                        //found id interface on other side
+                                                        redisService.listRangeAsync("remoteEndpointIds:" + foundRemoteInterface[0].id, 0, -1)
+                                                            .then(function (foundRemoteId) {
+                                                                redisService.deleteItemAsync("remoteEndpointIds:" + foundRemoteInterface[0].id)
+                                                                    .then(function (resultDelete) {
+                                                                        //send response
+                                                                        res.send("ACK");
+                                                                    })
+                                                                    .catch(function (err) {
+                                                                        console.log(err);
+                                                                    })
                                                             })
                                                             .catch(function (err) {
                                                                 console.log(err);
-                                                            });
-                                                    }
-                                                })
-                                                .catch(function (err) {
-                                                    console.log(err);
-                                                })
-                                        }
+                                                            })
+                                                    })
+                                                    .catch(function (err) {
+                                                        console.log(err);
+                                                    })
+                                            })
+                                            .catch(function (err) {
+                                                console.log(err);
+                                            })
                                     })
                                     .catch(function (err) {
                                         console.log(err);
                                     })
-                            }
-                        })
-                        .catch(function (err) {
-                            console.log(err)
-                        })
+                            })
+                            .catch(function (err) {
+                                cinsole.log(err);
+                            })
+
+
+                    }
+                    else {
+                        var obj = {
+                            status: 'Failed',
+                            data: "FAILED REMOTE INTERFACE NOT FOUND",
+                            message: "FAILED REMOTE INTERFACE NOT FOUND"
+                        }
+                        res.status(404)
+                            .json(obj);
+                    }
+
                 })
                 .catch(function (err) {
-                    console.log(err);
+                    var obj = {
+                        status: 'Failed',
+                        data: err.message,
+                        message: "FAILED DURING RETRIEVING SPECIFIC INTERFACE: " + err.message
+                    }
+                    res.status(404)
+                        .json(obj);
                 })
+        })
+        .catch(function (err) {
+            res.json(err);
+        })
+}
+
+var deleteInterconnection = function (req, res, next) {
+
+    var localEndpointId = req.params.interfaceId;
+    deleteInterconnectionFunction(localEndpointId)
+        .then(function (resultDelete) {
+            var foundRemoteInterface = resultDelete.interfaceToSend;
+            var foundRemoteId = resultDelete.remoteId;
+            //send request to remote endpoint
+            var urlSend = "http://" + foundRemoteInterface[0].url + "/cdniApi/deleteInterconnectionAccept/" + foundRemoteId
+            var request = require('request');
+
+            request.delete(
+                urlSend,
+                function (error, response, body) {
+                    if (response.body != null) {
+                        if (body === "ACK") {
+                            res.status(200)
+                                .send("ACK");
+                        }
+                    }
+                    else if (!error && response.statusCode == 200 && response.statusCode != 404) {
+                        console.log(body)
+                    }
+                    else if (response.statusCode === 404) {
+                        res.send(response);
+                    }
+                    else if (response.statusCode === 500) {
+                        res.send(response);
+                    }
+                }
+            );
         })
         .catch(function (err) {
             console.log(err);
         })
 };
+
+var deleteInterconnectionFunction = function (localEndpointId) {
+    return new Promise(function (resolve, reject) {
+        var cdsm = require('../services/ciscoCdsService');
+        var redisService = require('../services/redisService');
+        //delete footprints from redis
+        redisService.deleteItemAsync("footprints:" + localEndpointId)
+            .then(function (deleteResult) {
+                //delete footprints from database
+                db.db.any("DELETE FROM footprint WHERE endpoint_id = ($1)", [localEndpointId])
+                    .then(function (resultDelete) {
+                        //get ids of created delivery services
+                        redisService.listRangeAsync("remoteEndpointDownstreamDelSer:" + localEndpointId, 0, -1)
+                            .then(function (foundDeliveryServices) {
+                                var callBackCounter = 0;
+                                for (var i = 0; i < foundDeliveryServices.length; i++) {
+                                    //foreach delete delivery service according to ID
+                                    cdsm.deleteDeliveryServiceFunction(foundDeliveryServices[i])
+                                        .then(function (resultDelete) {
+                                            callBackCounter++;
+                                            if (callBackCounter === foundDeliveryServices.length) {
+                                                //get content origins
+                                                redisService.listRangeAsync("remoteEndpointDownstream:" + localEndpointId, 0, -1)
+                                                    .then(function (foundContentOrigins) {
+                                                        var callbackContentOrigins = 0;
+
+                                                        for (var j = 0; j < foundContentOrigins.length; j++) {
+                                                            var parsed = JSON.parse(foundContentOrigins[j]);
+                                                            //foreach delete content origin
+                                                            cdsm.deleteContentOriginFunction(parsed.id)
+                                                                .then(function (deleteResult) {
+                                                                    callbackContentOrigins++;
+                                                                    if (callbackContentOrigins === foundContentOrigins.length) {
+                                                                        //delete delivery services and content origins from redis
+                                                                        redisService.deleteItem("remoteEndpointDownstreamDelSer:" + localEndpointId);
+                                                                        redisService.deleteItem("remoteEndpointDownstream:" + localEndpointId);
+                                                                        //find id of remote interface and send request to other side
+                                                                        redisService.listRangeAsync("remoteEndpointDownstreamIds:" + localEndpointId, 0, -1)
+                                                                            .then(function (foundRemoteId) {
+                                                                                //delete ID from redis
+                                                                                redisService.deleteItem("remoteEndpointDownstreamIds:" + localEndpointId);
+                                                                                //update status to not offered {4}
+                                                                                db.db.any("UPDATE cdn_interface SET offer_status = 4, sync = false WHERE id = ($1)", [localEndpointId])
+                                                                                    .then(function (resultUpdate) {
+                                                                                        //find record in database according to received ID
+                                                                                        db.db.any("SELECT * FROM cdn_interface WHERE id = ($1)", [localEndpointId])
+                                                                                            .then(function (foundRemoteInterface) {
+                                                                                                var obj = {
+                                                                                                    interfaceToSend: foundRemoteInterface,
+                                                                                                    remoteId: foundRemoteId
+                                                                                                }
+                                                                                                resolve(obj);
+                                                                                            })
+                                                                                            .catch(function (err) {
+                                                                                                console.log(err);
+                                                                                            })
+                                                                                    })
+                                                                                    .catch(function (err) {
+                                                                                        console.log(err);
+                                                                                    });
+                                                                            })
+                                                                            .catch(function (err) {
+                                                                                console.log(err);
+                                                                            })
+                                                                    }
+                                                                })
+                                                                .catch(function (err) {
+                                                                    console.log(err);
+                                                                });
+                                                        }
+                                                    })
+                                                    .catch(function (err) {
+                                                        console.log(err);
+                                                    })
+                                            }
+                                        })
+                                        .catch(function (err) {
+                                            console.log(err);
+                                        })
+                                }
+                            })
+                            .catch(function (err) {
+                                console.log(err)
+                            })
+                    })
+                    .catch(function (err) {
+                        console.log(err);
+                    })
+            })
+            .catch(function (err) {
+                console.log(err);
+            })
+    })
+}
 
 var deleteInterconnectionAccept = function (req, res, next) {
     var id = req.params.interfaceId;
@@ -523,6 +668,7 @@ module.exports = {
     setLists: setLists,
     initialDeleteInterconnection: initialDeleteInterconnection,
     deleteInterconnection: deleteInterconnection,
-    deleteInterconnectionAccept:deleteInterconnectionAccept
+    deleteInterconnectionAccept: deleteInterconnectionAccept,
+    deleteInterconnectionDownstream: deleteInterconnectionDownstream
 }
 
