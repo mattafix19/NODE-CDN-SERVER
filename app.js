@@ -11,6 +11,7 @@ var cdsm = require('./routes/cdsmApi');
 
 var redis = require("redis");
 var client = redis.createClient();
+var fs = require("fs");
 
 client.on("error", function (err) {
     console.log("Error " + err);
@@ -26,7 +27,11 @@ app.set('views', path.join(__dirname, 'views'));
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
-app.use(logger('dev'));
+app.use(logger('short', {
+    stream: fs.createWriteStream('./LOGS.log', {flags: 'a'})
+}));
+app.use(logger('common'));
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
