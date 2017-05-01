@@ -184,6 +184,8 @@ router.post('/setLists', function (req, res, next) {
                                 return;
                             }
                             // loop through all received footprints and get specific information, after call INSERT
+
+                            req.body.Footprints.forEach();
                             for (var i = 0; i < req.body.Footprints.length; i++) {
 
                                 var subnetNum = req.body.Footprints[i].subnet_num;
